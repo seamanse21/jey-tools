@@ -17,6 +17,15 @@
 - STL은 바이너리, Y축을 뒤집어(`H - y`) 프린터 좌표로 변환
 - zip은 무압축(store) 방식으로 직접 생성
 - 아티팩트 버전은 `claude.use("downloads")` 를 썼지만, 이 저장소 버전은 일반 브라우저 다운로드(`saveBlob`)로 교체함
+- qrcode-generator 1.4.4(MIT)를 CDN 대신 HTML 안에 통째로 넣음 → 인터넷 없이도 동작.
+  갱신하려면 `npm pack qrcode-generator` 로 받은 `package/qrcode.js` 내용으로 HTML 안의 `<!-- QR 생성 라이브러리 내장 -->` 블록을 교체
+- 글꼴만 Google Fonts에서 불러옴. 오프라인이면 시스템 글꼴로 자동 대체되고 기능에는 영향 없음
+
+## 검증 (2026-11-03, 헤드리스 크롬)
+- SSID `JEY_HOME_5G` / 비밀번호 `p@ss;word,test` 입력 → 생성된 QR을 jsQR로 디코딩
+  결과 `WIFI:T:WPA;S:JEY_HOME_5G;P:p@ss\;word\,test;;` — 세미콜론·쉼표 이스케이프 정상
+- zip 3개 STL 모두 바이너리 헤더·삼각형 수 일치, 치수 100×129mm / 바닥판 0~2.4mm / 돌출 2.4~3.2mm 확인
+- 콘솔 오류 없음, 390px 폭에서도 레이아웃 정상
 
 ## 남은 아이디어
 - 모서리 라운드 / 받침대(스탠드) 옵션
