@@ -5,39 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jey Tools</title>
 <style>
-  :root { --bg:#fafaf9; --fg:#1c1c1a; --muted:#6b6b66; --card:#fff; --line:#e5e4e1; }
+  :root { --bg:#fafaf9; --fg:#1c1c1a; --muted:#6b6b66; --card:#fff; --line:#e5e4e1; --accent:#c4145b; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg:#191918; --fg:#f0efec; --muted:#9a9995; --card:#222221; --line:#333331; }
+    :root:not([data-theme="light"]) { --bg:#191918; --fg:#f0efec; --muted:#9a9995; --card:#222221; --line:#333331; --accent:#ec3d82; }
   }
   * { box-sizing:border-box; }
-  body { margin:0; padding:48px 16px; background:var(--bg); color:var(--fg);
+  body { margin:0; padding:48px 16px 64px; background:var(--bg); color:var(--fg);
          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
   .wrap { max-width:640px; margin:0 auto; }
   h1 { font-size:1.6rem; margin:0 0 6px; letter-spacing:-.02em; }
-  p.sub { color:var(--muted); margin:0 0 32px; font-size:.92rem; }
+  p.sub { color:var(--muted); margin:0 0 36px; font-size:.92rem; }
+  section { margin-bottom:34px; }
+  h2 { font-size:.74rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+       color:var(--muted); margin:0 0 12px; display:flex; align-items:center; gap:9px; }
+  h2::after { content:""; flex:1; height:1px; background:var(--line); }
   ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
   a.card { display:block; padding:16px 18px; background:var(--card); border:1px solid var(--line);
            border-radius:12px; text-decoration:none; color:inherit; }
   a.card:hover { border-color:var(--muted); }
+  a.card:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
   .name { font-weight:600; }
-  .desc { color:var(--muted); font-size:.86rem; margin-top:3px; }
-  .empty { color:var(--muted); font-size:.9rem; padding:18px; border:1px dashed var(--line); border-radius:12px; }
+  .desc { color:var(--muted); font-size:.86rem; margin-top:3px; line-height:1.5; }
+  .empty { color:var(--muted); font-size:.86rem; padding:18px; border:1px dashed var(--line);
+           border-radius:12px; line-height:1.6; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Jey Tools</h1>
-  <p class="sub">일상용 도구 모음</p>
-  <ul>
-    <li><a class="card" href="./wifi-qr-plate.html">
-      <div class="name">와이파이 QR 액자</div>
-      <div class="desc">와이파이 정보를 넣으면 폰으로 찍어 바로 접속되는 QR 명판을 3D 프린터용 STL로 만들어 줍니다.</div>
-    </a></li>
-    <li><a class="card" href="./3d-namecard.html">
-      <div class="name">3D 명함 생성기</div>
-      <div class="desc">이름·연락처를 넣으면 QR이 박힌 3D 프린터용 명함 STL을 만들어 줍니다. 여러 명을 한 번에 넣어 일괄 출력할 수 있어요.</div>
-    </a></li>
-  </ul>
+  <p class="sub">만들어 두고 계속 쓰는 도구들</p>
+
+  <section>
+    <h2>일상 도구</h2>
+    <ul>
+      <li><a class="card" href="./wifi-qr-plate.html">
+        <div class="name">와이파이 QR 액자</div>
+        <div class="desc">와이파이 정보를 넣으면 폰으로 찍어 바로 접속되는 QR 명판을 3D 프린터용 STL로 만들어 줍니다.</div>
+      </a></li>
+      <li><a class="card" href="./3d-namecard.html">
+        <div class="name">3D 명함 생성기</div>
+        <div class="desc">이름·연락처를 넣으면 QR이 박힌 3D 프린터용 명함 STL을 만들어 줍니다. 여러 명을 한 번에 넣어 일괄 출력할 수 있어요.</div>
+      </a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>With HwiMin</h2>
+    <ul>
+    </ul>
+    <p class="empty">아직 비어 있습니다. 영단어 퀴즈를 여기에 넣을 예정이에요.</p>
+  </section>
 </div>
 </body>
 </html>
