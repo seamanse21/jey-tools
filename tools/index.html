@@ -12,11 +12,13 @@
   * { box-sizing:border-box; }
   body { margin:0; padding:48px 16px 64px; background:var(--bg); color:var(--fg);
          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
-  .wrap { max-width:640px; margin:0 auto; }
+  .wrap { max-width:960px; margin:0 auto; }
+  .cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 28px; align-items:start; }
+  @media (max-width:720px) { .cols { grid-template-columns:minmax(0,1fr); gap:0; } }
   h1 { font-size:1.6rem; margin:0 0 6px; letter-spacing:-.02em; }
   p.sub { color:var(--muted); margin:0 0 36px; font-size:.92rem; }
-  section { margin-bottom:34px; }
-  h2 { font-size:.74rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  section { margin-bottom:34px; min-width:0; }
+  h2 { font-size:.8rem; font-weight:700; letter-spacing:.04em;
        color:var(--muted); margin:0 0 12px; display:flex; align-items:center; gap:9px; }
   h2::after { content:""; flex:1; height:1px; background:var(--line); }
   ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
@@ -35,6 +37,7 @@
   <h1>Jey Tools</h1>
   <p class="sub">만들어 두고 계속 쓰는 도구들</p>
 
+  <div class="cols">
   <section>
     <h2>일상 도구</h2>
     <ul>
@@ -56,8 +59,13 @@
         <div class="name">영단어 퀴즈</div>
         <div class="desc">학년·주제별로 영단어를 맞히는 퀴즈. 발음을 읽어 주고 틀린 단어는 다시 나옵니다.</div>
       </a></li>
+      <li><a class="card" href="./hanja-quiz.html">
+        <div class="name">한자 급수 퀴즈</div>
+        <div class="desc">8급부터 1급까지 한자와 사자성어를 맞히는 퀴즈. 훈음을 읽어 주고 점수판으로 여럿이 같이 할 수 있어요.</div>
+      </a></li>
     </ul>
   </section>
+  </div>
 </div>
 </body>
 </html>

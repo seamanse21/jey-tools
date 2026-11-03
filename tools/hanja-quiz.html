@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>漢</text></svg>" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>한자 급수 퀴즈</title>
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Trebuchet MS", system-ui, sans-serif;
+  background: linear-gradient(160deg, #dbeafe 0%, #bfdbfe 45%, #93c5fd 100%);
+  min-height: 100vh;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 40px;
+}
+
+/* ---------- 급수 · 카테고리 선택 ---------- */
+.top-controls {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+}
+
+.level-select {
+  position: relative;
+}
+
+.level-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 3px solid #2f6fd1;
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d4ed8;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #2f6fd1;
+}
+
+.level-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #2f6fd1;
+}
+
+.category-btn {
+  border-color: #0ea5b8;
+  color: #0e7490;
+  box-shadow: 0 4px 0 #0ea5b8;
+}
+
+.category-btn:active {
+  box-shadow: 0 2px 0 #0ea5b8;
+}
+
+.level-arrow {
+  font-size: 14px;
+}
+
+.level-menu {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 6px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.2);
+  width: 250px;
+  overflow: hidden;
+}
+
+.level-menu.hidden {
+  display: none;
+}
+
+.level-menu li {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+}
+
+.level-menu li:hover,
+.level-menu li.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* ---------- 타이틀 ---------- */
+.app-title {
+  margin: 96px 0 8px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #2c3e57;
+  text-align: center;
+}
+
+@media (min-width: 560px) {
+  .app-title { margin-top: 56px; }
+}
+
+/* ---------- 퀴즈 영역 ---------- */
+.quiz-area {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progress-label {
+  font-size: 14px;
+  color: #5b7aa8;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.word-card {
+  width: 100%;
+  min-height: 340px;
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 10px 0 #e0ebfa, 0 14px 30px rgba(30, 64, 140, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.08s ease;
+}
+
+.word-card:active {
+  transform: scale(0.98);
+}
+
+.idiom-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #7b7fe0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.idiom-badge.hidden {
+  display: none;
+}
+
+.word-text {
+  font-size: 96px;
+  font-weight: 800;
+  color: #1f2937;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.reveal-area {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.reveal-area.hidden {
+  display: none;
+}
+
+.ipa-text {
+  font-size: 26px;
+  color: #0e9aa8;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.meaning-text {
+  font-size: 40px;
+  color: #1d4ed8;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+.example-area {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 2px dashed #bfdbfe;
+}
+
+.example-area.hidden {
+  display: none;
+}
+
+.example-en {
+  font-size: 22px;
+  font-style: italic;
+  font-weight: 600;
+  color: #555;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+}
+
+.example-ko {
+  font-size: 18px;
+  color: #999;
+  font-weight: 600;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.tap-hint {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #b7c6e0;
+  font-weight: 600;
+}
+
+/* ---------- 컨트롤 버튼 ---------- */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.round-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #7dd3fc;
+  font-size: 24px;
+  box-shadow: 0 4px 0 #38bdf8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.round-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #38bdf8;
+}
+
+.next-btn {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: 18px;
+  background: #2f6fd1;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #1e4fa8;
+  cursor: pointer;
+}
+
+.next-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1e4fa8;
+}
+
+/* ---------- 점수판 ---------- */
+.scoreboard {
+  width: 100%;
+  max-width: 480px;
+  margin-top: 32px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(30, 64, 140, 0.12);
+}
+
+.scoreboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: #2c3e57;
+  margin-bottom: 12px;
+}
+
+.mini-btn {
+  border: none;
+  background: #eef2f9;
+  color: #6b7fa3;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.team-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.team-row {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #f5f8fd;
+  border-radius: 18px;
+  padding: 18px 12px 14px;
+}
+
+.team-name {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+  padding: 6px;
+  min-width: 0;
+  text-align: center;
+}
+
+.team-name:focus {
+  outline: 2px solid #7dd3fc;
+  border-radius: 8px;
+}
+
+.team-score-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-score-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.team-score-minus {
+  background: #ffe3e3;
+  color: #e3595a;
+}
+
+.team-score-plus {
+  background: #dff5e0;
+  color: #3fa15a;
+}
+
+.team-score {
+  width: 64px;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 800;
+  color: #333;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.team-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.add-team-btn {
+  margin-top: 12px;
+  width: 100%;
+  height: 46px;
+  border: 2px dashed #93c5fd;
+  border-radius: 14px;
+  background: transparent;
+  color: #1d4ed8;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 380px) {
+  .word-text { font-size: 60px; }
+  .ipa-text { font-size: 20px; }
+  .meaning-text { font-size: 28px; }
+  .app-title { font-size: 22px; }
+}
+
+
+/* 도구 모음으로 돌아가기 (jey-tools) */
+.jey-back{position:fixed;left:12px;bottom:12px;z-index:9999;font-size:12px;opacity:.5;
+  text-decoration:none;color:inherit;padding:6px 10px;border-radius:8px;
+  background:rgba(128,128,128,.14);backdrop-filter:blur(4px)}
+.jey-back:hover,.jey-back:focus-visible{opacity:1}
+@media print{.jey-back{display:none}}
+</style>
+</head>
+<body>
+
+  <a class="jey-back" href="./index.html">← Jey Tools</a>
+
+  <!-- 좌측 상단 급수 · 카테고리 선택 -->
+  <div class="top-controls">
+    <div class="level-select">
+      <button id="levelBtn" class="level-btn">
+        <span id="levelLabel">8급</span>
+        <span class="level-arrow">▾</span>
+      </button>
+      <ul id="levelMenu" class="level-menu hidden">
+        <li data-level="8">8급</li>
+        <li data-level="7">7급</li>
+        <li data-level="6">6급</li>
+        <li data-level="5">5급</li>
+        <li data-level="4">4급</li>
+        <li data-level="3">3급</li>
+        <li data-level="2">2급</li>
+        <li data-level="1">1급</li>
+      </ul>
+    </div>
+
+    <div class="level-select" id="categorySelect">
+      <button id="categoryBtn" class="level-btn category-btn">
+        <span id="categoryLabel">전체</span>
+        <span class="level-arrow">▾</span>
+      </button>
+      <ul id="categoryMenu" class="level-menu hidden"></ul>
+    </div>
+  </div>
+
+  <h1 class="app-title">한자 급수 퀴즈</h1>
+
+  <main class="quiz-area">
+    <div id="progress" class="progress-label"></div>
+
+    <div id="wordCard" class="word-card">
+      <div class="idiom-badge hidden" id="idiomBadge">사자성어</div>
+      <div id="wordText" class="word-text">學</div>
+      <div id="revealArea" class="reveal-area hidden">
+        <div id="ipaText" class="ipa-text"></div>
+        <div id="meaningText" class="meaning-text"></div>
+        <div id="exampleArea" class="example-area hidden">
+          <div id="exampleEn" class="example-en"></div>
+          <div id="exampleKo" class="example-ko"></div>
+        </div>
+      </div>
+      <div class="tap-hint" id="tapHint">화면을 터치해서 훈음 보기 👆</div>
+    </div>
+
+    <div class="controls">
+      <button id="soundBtn" class="round-btn" title="발음 듣기">🔊</button>
+      <button id="nextBtn" class="next-btn">다음 한자 ➜</button>
+    </div>
+  </main>
+
+  <!-- 점수판 -->
+  <section class="scoreboard" id="scoreboard">
+    <div class="scoreboard-header">
+      <span>점수판</span>
+      <button id="resetScoreBtn" class="mini-btn" title="점수 초기화">↺ 초기화</button>
+    </div>
+    <div id="teamList" class="team-list"></div>
+    <button id="addTeamBtn" class="add-team-btn">+ 참가자 추가</button>
+  </section>
+
+  <script>
+// 한자 급수(8급~1급) 학습 데이터
+// type: "hanja" (개별 한자) | "idiom" (사자성어)
+// hanja: en=한자, ko=훈음("뜻 음" 형태)
+// idiom: en=사자성어(한자), ipa=독음(한글), ko=뜻풀이
+// 주의: 한국어문회 공식 배정한자 전체 목록이 아닌, 급수별 난이도에 맞춰 정리한 학습용 축약 세트입니다.
+//       필요하면 이 파일에 항목을 자유롭게 추가/수정하세요.
+
+const WORD_DATA = {
+  8: [
+    { en: "敎", ko: "가르칠 교", type: "hanja" },
+    { en: "校", ko: "학교 교", type: "hanja" },
+    { en: "九", ko: "아홉 구", type: "hanja" },
+    { en: "國", ko: "나라 국", type: "hanja" },
+    { en: "軍", ko: "군사 군", type: "hanja" },
+    { en: "金", ko: "쇠 금 / 성 김", type: "hanja" },
+    { en: "南", ko: "남녘 남", type: "hanja" },
+    { en: "女", ko: "여자 녀", type: "hanja" },
+    { en: "年", ko: "해 년", type: "hanja" },
+    { en: "大", ko: "큰 대", type: "hanja" },
+    { en: "東", ko: "동녘 동", type: "hanja" },
+    { en: "六", ko: "여섯 륙", type: "hanja" },
+    { en: "萬", ko: "일만 만", type: "hanja" },
+    { en: "母", ko: "어미 모", type: "hanja" },
+    { en: "木", ko: "나무 목", type: "hanja" },
+    { en: "門", ko: "문 문", type: "hanja" },
+    { en: "民", ko: "백성 민", type: "hanja" },
+    { en: "白", ko: "흰 백", type: "hanja" },
+    { en: "父", ko: "아비 부", type: "hanja" },
+    { en: "北", ko: "북녘 북 / 달아날 배", type: "hanja" },
+    { en: "四", ko: "넉 사", type: "hanja" },
+    { en: "山", ko: "메 산", type: "hanja" },
+    { en: "三", ko: "석 삼", type: "hanja" },
+    { en: "生", ko: "날 생", type: "hanja" },
+    { en: "西", ko: "서녘 서", type: "hanja" },
+    { en: "先", ko: "먼저 선", type: "hanja" },
+    { en: "小", ko: "작을 소", type: "hanja" },
+    { en: "水", ko: "물 수", type: "hanja" },
+    { en: "室", ko: "집 실", type: "hanja" },
+    { en: "十", ko: "열 십", type: "hanja" },
+    { en: "五", ko: "다섯 오", type: "hanja" },
+    { en: "王", ko: "임금 왕", type: "hanja" },
+    { en: "外", ko: "바깥 외", type: "hanja" },
+    { en: "月", ko: "달 월", type: "hanja" },
+    { en: "二", ko: "두 이", type: "hanja" },
+    { en: "人", ko: "사람 인", type: "hanja" },
+    { en: "一", ko: "한 일", type: "hanja" },
+    { en: "日", ko: "날 일", type: "hanja" },
+    { en: "長", ko: "긴 장", type: "hanja" },
+    { en: "弟", ko: "아우 제", type: "hanja" },
+    { en: "中", ko: "가운데 중", type: "hanja" },
+    { en: "靑", ko: "푸를 청", type: "hanja" },
+    { en: "寸", ko: "마디 촌", type: "hanja" },
+    { en: "七", ko: "일곱 칠", type: "hanja" },
+    { en: "土", ko: "흙 토", type: "hanja" },
+    { en: "八", ko: "여덟 팔", type: "hanja" },
+    { en: "學", ko: "배울 학", type: "hanja" },
+    { en: "韓", ko: "나라이름 한", type: "hanja" },
+    { en: "兄", ko: "형 형", type: "hanja" },
+    { en: "火", ko: "불 화", type: "hanja" },
+  ],
+
+  7: [
+    { en: "家", ko: "집 가", type: "hanja" },
+    { en: "歌", ko: "노래 가", type: "hanja" },
+    { en: "間", ko: "사이 간", type: "hanja" },
+    { en: "江", ko: "강 강", type: "hanja" },
+    { en: "車", ko: "수레 거 / 수레 차", type: "hanja" },
+    { en: "空", ko: "빌 공", type: "hanja" },
+    { en: "工", ko: "장인 공", type: "hanja" },
+    { en: "記", ko: "기록할 기", type: "hanja" },
+    { en: "氣", ko: "기운 기", type: "hanja" },
+    { en: "旗", ko: "기 기", type: "hanja" },
+    { en: "內", ko: "안 내", type: "hanja" },
+    { en: "農", ko: "농사 농", type: "hanja" },
+    { en: "答", ko: "대답 답", type: "hanja" },
+    { en: "道", ko: "길 도", type: "hanja" },
+    { en: "動", ko: "움직일 동", type: "hanja" },
+    { en: "力", ko: "힘 력", type: "hanja" },
+    { en: "老", ko: "늙을 로", type: "hanja" },
+    { en: "里", ko: "마을 리", type: "hanja" },
+    { en: "林", ko: "수풀 림", type: "hanja" },
+    { en: "立", ko: "설 립", type: "hanja" },
+    { en: "每", ko: "매양 매", type: "hanja" },
+    { en: "面", ko: "낯 면", type: "hanja" },
+    { en: "命", ko: "목숨 명", type: "hanja" },
+    { en: "名", ko: "이름 명", type: "hanja" },
+    { en: "文", ko: "글월 문", type: "hanja" },
+    { en: "問", ko: "물을 문", type: "hanja" },
+    { en: "物", ko: "물건 물", type: "hanja" },
+    { en: "方", ko: "모 방", type: "hanja" },
+    { en: "百", ko: "일백 백", type: "hanja" },
+    { en: "夫", ko: "지아비 부", type: "hanja" },
+    { en: "不", ko: "아닐 불 / 아닐 부", type: "hanja" },
+    { en: "事", ko: "일 사", type: "hanja" },
+    { en: "上", ko: "윗 상", type: "hanja" },
+    { en: "姓", ko: "성 성", type: "hanja" },
+    { en: "世", ko: "인간 세", type: "hanja" },
+    { en: "少", ko: "적을 소", type: "hanja" },
+    { en: "所", ko: "바 소", type: "hanja" },
+    { en: "手", ko: "손 수", type: "hanja" },
+    { en: "時", ko: "때 시", type: "hanja" },
+    { en: "市", ko: "저자 시", type: "hanja" },
+    { en: "食", ko: "밥 식", type: "hanja" },
+    { en: "植", ko: "심을 식", type: "hanja" },
+    { en: "心", ko: "마음 심", type: "hanja" },
+    { en: "安", ko: "편안 안", type: "hanja" },
+    { en: "語", ko: "말씀 어", type: "hanja" },
+  ],
+
+  6: [
+    { en: "各", ko: "각각 각", type: "hanja" },
+    { en: "角", ko: "뿔 각", type: "hanja" },
+    { en: "感", ko: "느낄 감", type: "hanja" },
+    { en: "強", ko: "강할 강", type: "hanja" },
+    { en: "開", ko: "열 개", type: "hanja" },
+    { en: "京", ko: "서울 경", type: "hanja" },
+    { en: "界", ko: "지경 계", type: "hanja" },
+    { en: "計", ko: "셀 계", type: "hanja" },
+    { en: "高", ko: "높을 고", type: "hanja" },
+    { en: "古", ko: "예 고", type: "hanja" },
+    { en: "苦", ko: "쓸 고", type: "hanja" },
+    { en: "公", ko: "공평할 공", type: "hanja" },
+    { en: "共", ko: "한가지 공", type: "hanja" },
+    { en: "果", ko: "실과 과", type: "hanja" },
+    { en: "科", ko: "과목 과", type: "hanja" },
+    { en: "光", ko: "빛 광", type: "hanja" },
+    { en: "交", ko: "사귈 교", type: "hanja" },
+    { en: "區", ko: "구분할 구", type: "hanja" },
+    { en: "郡", ko: "고을 군", type: "hanja" },
+    { en: "近", ko: "가까울 근", type: "hanja" },
+    { en: "根", ko: "뿌리 근", type: "hanja" },
+    { en: "今", ko: "이제 금", type: "hanja" },
+    { en: "級", ko: "등급 급", type: "hanja" },
+    { en: "己", ko: "몸 기", type: "hanja" },
+    { en: "多", ko: "많을 다", type: "hanja" },
+    { en: "短", ko: "짧을 단", type: "hanja" },
+    { en: "堂", ko: "집 당", type: "hanja" },
+    { en: "代", ko: "대신할 대", type: "hanja" },
+    { en: "對", ko: "대할 대", type: "hanja" },
+    { en: "圖", ko: "그림 도", type: "hanja" },
+    { en: "讀", ko: "읽을 독 / 구절 두", type: "hanja" },
+    { en: "童", ko: "아이 동", type: "hanja" },
+    { en: "頭", ko: "머리 두", type: "hanja" },
+    { en: "等", ko: "무리 등", type: "hanja" },
+    { en: "樂", ko: "즐길 락 / 노래 악", type: "hanja" },
+    { en: "例", ko: "법식 례", type: "hanja" },
+    { en: "禮", ko: "예도 례", type: "hanja" },
+    { en: "路", ko: "길 로", type: "hanja" },
+    { en: "綠", ko: "푸를 록", type: "hanja" },
+    { en: "理", ko: "다스릴 리", type: "hanja" },
+    { en: "明", ko: "밝을 명", type: "hanja" },
+    { en: "目", ko: "눈 목", type: "hanja" },
+    { en: "聞", ko: "들을 문", type: "hanja" },
+    { en: "米", ko: "쌀 미", type: "hanja" },
+    { en: "朴", ko: "성 박", type: "hanja" },
+  ],
+
+  5: [
+    { en: "班", ko: "나눌 반", type: "hanja" },
+    { en: "反", ko: "돌이킬 반", type: "hanja" },
+    { en: "半", ko: "반 반", type: "hanja" },
+    { en: "發", ko: "필 발", type: "hanja" },
+    { en: "放", ko: "놓을 방", type: "hanja" },
+    { en: "番", ko: "차례 번", type: "hanja" },
+    { en: "別", ko: "다를 별 / 나눌 별", type: "hanja" },
+    { en: "病", ko: "병 병", type: "hanja" },
+    { en: "服", ko: "옷 복", type: "hanja" },
+    { en: "本", ko: "근본 본", type: "hanja" },
+    { en: "部", ko: "떼 부", type: "hanja" },
+    { en: "分", ko: "나눌 분", type: "hanja" },
+    { en: "社", ko: "모일 사", type: "hanja" },
+    { en: "死", ko: "죽을 사", type: "hanja" },
+    { en: "使", ko: "하여금 사 / 부릴 사", type: "hanja" },
+    { en: "產", ko: "낳을 산", type: "hanja" },
+    { en: "相", ko: "서로 상", type: "hanja" },
+    { en: "商", ko: "장사 상", type: "hanja" },
+    { en: "賞", ko: "상줄 상", type: "hanja" },
+    { en: "色", ko: "빛 색", type: "hanja" },
+    { en: "序", ko: "차례 서", type: "hanja" },
+    { en: "線", ko: "줄 선", type: "hanja" },
+    { en: "雪", ko: "눈 설", type: "hanja" },
+    { en: "省", ko: "살필 성 / 덜 생", type: "hanja" },
+    { en: "成", ko: "이룰 성", type: "hanja" },
+    { en: "消", ko: "사라질 소", type: "hanja" },
+    { en: "速", ko: "빠를 속", type: "hanja" },
+    { en: "孫", ko: "손자 손", type: "hanja" },
+    { en: "樹", ko: "나무 수", type: "hanja" },
+    { en: "術", ko: "재주 술", type: "hanja" },
+    { en: "習", ko: "익힐 습", type: "hanja" },
+    { en: "勝", ko: "이길 승", type: "hanja" },
+    { en: "始", ko: "비로소 시", type: "hanja" },
+    { en: "式", ko: "법 식", type: "hanja" },
+    { en: "神", ko: "귀신 신", type: "hanja" },
+    { en: "身", ko: "몸 신", type: "hanja" },
+    { en: "信", ko: "믿을 신", type: "hanja" },
+    { en: "新", ko: "새 신", type: "hanja" },
+    { en: "失", ko: "잃을 실", type: "hanja" },
+    { en: "愛", ko: "사랑 애", type: "hanja" },
+  ],
+
+  4: [
+    { en: "陽", ko: "볕 양", type: "hanja" },
+    { en: "洋", ko: "큰바다 양", type: "hanja" },
+    { en: "業", ko: "업 업", type: "hanja" },
+    { en: "永", ko: "길 영", type: "hanja" },
+    { en: "英", ko: "꽃부리 영", type: "hanja" },
+    { en: "藝", ko: "재주 예", type: "hanja" },
+    { en: "屋", ko: "집 옥", type: "hanja" },
+    { en: "溫", ko: "따뜻할 온", type: "hanja" },
+    { en: "用", ko: "쓸 용", type: "hanja" },
+    { en: "勇", ko: "날랠 용", type: "hanja" },
+    { en: "運", ko: "옮길 운", type: "hanja" },
+    { en: "園", ko: "동산 원", type: "hanja" },
+    { en: "遠", ko: "멀 원", type: "hanja" },
+    { en: "元", ko: "으뜸 원", type: "hanja" },
+    { en: "院", ko: "집 원", type: "hanja" },
+    { en: "由", ko: "말미암을 유", type: "hanja" },
+    { en: "油", ko: "기름 유", type: "hanja" },
+    { en: "銀", ko: "은 은", type: "hanja" },
+    { en: "音", ko: "소리 음", type: "hanja" },
+    { en: "飮", ko: "마실 음", type: "hanja" },
+    { en: "意", ko: "뜻 의", type: "hanja" },
+    { en: "醫", ko: "의원 의", type: "hanja" },
+    { en: "衣", ko: "옷 의", type: "hanja" },
+    { en: "者", ko: "놈 자", type: "hanja" },
+    { en: "作", ko: "지을 작", type: "hanja" },
+    { en: "章", ko: "글 장", type: "hanja" },
+    { en: "才", ko: "재주 재", type: "hanja" },
+    { en: "在", ko: "있을 재", type: "hanja" },
+    { en: "戰", ko: "싸움 전", type: "hanja" },
+    { en: "田", ko: "밭 전", type: "hanja" },
+    { en: "一石二鳥", ipa: "일석이조", ko: "돌 하나로 새 두 마리를 잡음 — 한 가지 일로 두 가지 이득을 봄", type: "idiom" },
+    { en: "自業自得", ipa: "자업자득", ko: "자기가 저지른 일의 결과를 자기가 받음", type: "idiom" },
+    { en: "見物生心", ipa: "견물생심", ko: "물건을 보면 갖고 싶은 마음이 생김", type: "idiom" },
+    { en: "作心三日", ipa: "작심삼일", ko: "단단히 먹은 마음이 사흘을 못 감", type: "idiom" },
+    { en: "多情多感", ipa: "다정다감", ko: "정이 많고 감정이 풍부함", type: "idiom" },
+    { en: "自初至終", ipa: "자초지종", ko: "처음부터 끝까지의 과정", type: "idiom" },
+    { en: "十中八九", ipa: "십중팔구", ko: "열에 여덟이나 아홉 — 거의 대부분", type: "idiom" },
+    { en: "樂山樂水", ipa: "요산요수", ko: "산과 물을 좋아함 — 자연을 즐김", type: "idiom" },
+  ],
+
+  3: [
+    { en: "情", ko: "뜻 정", type: "hanja" },
+    { en: "定", ko: "정할 정", type: "hanja" },
+    { en: "正", ko: "바를 정", type: "hanja" },
+    { en: "題", ko: "제목 제", type: "hanja" },
+    { en: "第", ko: "차례 제", type: "hanja" },
+    { en: "祖", ko: "할아비 조", type: "hanja" },
+    { en: "朝", ko: "아침 조", type: "hanja" },
+    { en: "族", ko: "겨레 족", type: "hanja" },
+    { en: "注", ko: "부을 주", type: "hanja" },
+    { en: "晝", ko: "낮 주", type: "hanja" },
+    { en: "集", ko: "모을 집", type: "hanja" },
+    { en: "窓", ko: "창 창", type: "hanja" },
+    { en: "淸", ko: "맑을 청", type: "hanja" },
+    { en: "體", ko: "몸 체", type: "hanja" },
+    { en: "表", ko: "겉 표", type: "hanja" },
+    { en: "品", ko: "물건 품", type: "hanja" },
+    { en: "風", ko: "바람 풍", type: "hanja" },
+    { en: "何", ko: "어찌 하", type: "hanja" },
+    { en: "寒", ko: "찰 한", type: "hanja" },
+    { en: "害", ko: "해할 해", type: "hanja" },
+    { en: "幸", ko: "다행 행", type: "hanja" },
+    { en: "現", ko: "나타날 현", type: "hanja" },
+    { en: "形", ko: "모양 형", type: "hanja" },
+    { en: "號", ko: "이름 호", type: "hanja" },
+    { en: "化", ko: "될 화", type: "hanja" },
+    { en: "苦盡甘來", ipa: "고진감래", ko: "쓴 것이 다하면 단 것이 옴 — 고생 끝에 낙이 옴", type: "idiom" },
+    { en: "因果應報", ipa: "인과응보", ko: "원인과 결과는 서로 물고 물림", type: "idiom" },
+    { en: "大器晩成", ipa: "대기만성", ko: "큰 그릇은 늦게 이루어짐 — 크게 될 사람은 늦게 성공함", type: "idiom" },
+    { en: "有備無患", ipa: "유비무환", ko: "미리 준비하면 근심이 없음", type: "idiom" },
+    { en: "靑出於藍", ipa: "청출어람", ko: "쪽에서 나온 푸른 물감이 쪽보다 더 푸름 — 제자가 스승보다 나음", type: "idiom" },
+    { en: "溫故知新", ipa: "온고지신", ko: "옛것을 익히고 그것을 미루어 새것을 앎", type: "idiom" },
+    { en: "他山之石", ipa: "타산지석", ko: "다른 산의 하찮은 돌도 옥을 가는 데 쓸 수 있음 — 남의 언행도 나에게 도움이 됨", type: "idiom" },
+    { en: "錦上添花", ipa: "금상첨화", ko: "비단 위에 꽃을 더함 — 좋은 일에 좋은 일이 더해짐", type: "idiom" },
+  ],
+
+  2: [
+    { en: "較", ko: "견줄 교", type: "hanja" },
+    { en: "郊", ko: "들 교", type: "hanja" },
+    { en: "龜", ko: "거북 귀 / 터질 균", type: "hanja" },
+    { en: "糾", ko: "얽힐 규", type: "hanja" },
+    { en: "菌", ko: "버섯 균", type: "hanja" },
+    { en: "克", ko: "이길 극", type: "hanja" },
+    { en: "僅", ko: "겨우 근", type: "hanja" },
+    { en: "那", ko: "어찌 나", type: "hanja" },
+    { en: "諾", ko: "허락할 낙", type: "hanja" },
+    { en: "娘", ko: "계집 낭", type: "hanja" },
+    { en: "乃", ko: "이에 내", type: "hanja" },
+    { en: "奈", ko: "어찌 내", type: "hanja" },
+    { en: "寧", ko: "편안할 녕", type: "hanja" },
+    { en: "奴", ko: "종 노", type: "hanja" },
+    { en: "濃", ko: "짙을 농", type: "hanja" },
+    { en: "泥", ko: "진흙 니", type: "hanja" },
+    { en: "但", ko: "다만 단", type: "hanja" },
+    { en: "旦", ko: "아침 단", type: "hanja" },
+    { en: "淡", ko: "맑을 담", type: "hanja" },
+    { en: "踏", ko: "밟을 답", type: "hanja" },
+    { en: "塞翁之馬", ipa: "새옹지마", ko: "변방 노인의 말 — 인생의 화복은 예측하기 어려움", type: "idiom" },
+    { en: "刻舟求劍", ipa: "각주구검", ko: "배에 표시를 새겨 칼을 찾음 — 융통성 없이 옛 방식만 고집함", type: "idiom" },
+    { en: "表裏不同", ipa: "표리부동", ko: "겉과 속이 다름", type: "idiom" },
+    { en: "桑田碧海", ipa: "상전벽해", ko: "뽕나무밭이 푸른 바다로 변함 — 세상이 몰라볼 정도로 바뀜", type: "idiom" },
+    { en: "走馬看山", ipa: "주마간산", ko: "말을 달리며 산을 봄 — 자세히 살피지 않고 대충 지나침", type: "idiom" },
+    { en: "捲土重來", ipa: "권토중래", ko: "흙먼지를 날리며 다시 옴 — 실패한 뒤 힘을 모아 다시 도전함", type: "idiom" },
+    { en: "刮目相對", ipa: "괄목상대", ko: "눈을 비비고 상대를 다시 봄 — 눈에 띄게 발전함", type: "idiom" },
+    { en: "累卵之危", ipa: "누란지위", ko: "쌓아놓은 알처럼 위태로움", type: "idiom" },
+  ],
+
+  1: [
+    { en: "誇", ko: "자랑할 과", type: "hanja" },
+    { en: "冠", ko: "갓 관", type: "hanja" },
+    { en: "貫", ko: "꿰뚫을 관", type: "hanja" },
+    { en: "狂", ko: "미칠 광", type: "hanja" },
+    { en: "掛", ko: "걸 괘", type: "hanja" },
+    { en: "怪", ko: "괴이할 괴", type: "hanja" },
+    { en: "壞", ko: "무너질 괴", type: "hanja" },
+    { en: "巧", ko: "공교할 교", type: "hanja" },
+    { en: "丘", ko: "언덕 구", type: "hanja" },
+    { en: "拘", ko: "잡을 구", type: "hanja" },
+    { en: "驅", ko: "몰 구", type: "hanja" },
+    { en: "屈", ko: "굽힐 굴", type: "hanja" },
+    { en: "窮", ko: "다할 궁", type: "hanja" },
+    { en: "券", ko: "문서 권", type: "hanja" },
+    { en: "拳", ko: "주먹 권", type: "hanja" },
+    { en: "厥", ko: "그 궐", type: "hanja" },
+    { en: "軌", ko: "바퀴자국 궤", type: "hanja" },
+    { en: "貴", ko: "귀할 귀", type: "hanja" },
+    { en: "叫", ko: "부르짖을 규", type: "hanja" },
+    { en: "均", ko: "고를 균", type: "hanja" },
+    { en: "韋編三絶", ipa: "위편삼절", ko: "책을 묶은 가죽 끈이 세 번 끊어짐 — 책을 매우 열심히 읽음", type: "idiom" },
+    { en: "臥薪嘗膽", ipa: "와신상담", ko: "섶에 눕고 쓸개를 맛봄 — 목표를 위해 온갖 고난을 참고 견딤", type: "idiom" },
+    { en: "兎死狗烹", ipa: "토사구팽", ko: "토끼가 죽으면 사냥개를 삶음 — 쓸모 있을 때 쓰고 필요 없어지면 버림", type: "idiom" },
+    { en: "泰然自若", ipa: "태연자약", ko: "태연하고 침착하여 평소와 다름없음", type: "idiom" },
+    { en: "傍若無人", ipa: "방약무인", ko: "곁에 사람이 없는 듯 함부로 행동함", type: "idiom" },
+    { en: "切磋琢磨", ipa: "절차탁마", ko: "옥이나 돌을 갈고 닦음 — 학문과 인격을 갈고닦음", type: "idiom" },
+    { en: "拔本塞源", ipa: "발본색원", ko: "뿌리를 뽑고 근원을 막음 — 문제의 근본 원인을 없앰", type: "idiom" },
+    { en: "昏定晨省", ipa: "혼정신성", ko: "저녁엔 잠자리를 살피고 아침엔 문안을 여쭘 — 부모를 잘 섬김", type: "idiom" },
+  ],
+};
+
+</script>
+<script>
+(() => {
+  const STORAGE_KEY = "hanjaquiz_state_v1";
+
+  const levelBtn = document.getElementById("levelBtn");
+  const levelLabel = document.getElementById("levelLabel");
+  const levelMenu = document.getElementById("levelMenu");
+  const categorySelect = document.getElementById("categorySelect");
+  const categoryBtn = document.getElementById("categoryBtn");
+  const categoryLabel = document.getElementById("categoryLabel");
+  const categoryMenu = document.getElementById("categoryMenu");
+  const wordCard = document.getElementById("wordCard");
+  const wordText = document.getElementById("wordText");
+  const idiomBadge = document.getElementById("idiomBadge");
+  const revealArea = document.getElementById("revealArea");
+  const ipaText = document.getElementById("ipaText");
+  const meaningText = document.getElementById("meaningText");
+  const exampleArea = document.getElementById("exampleArea");
+  const exampleEn = document.getElementById("exampleEn");
+  const exampleKo = document.getElementById("exampleKo");
+  const tapHint = document.getElementById("tapHint");
+  const soundBtn = document.getElementById("soundBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const progressLabel = document.getElementById("progress");
+  const teamList = document.getElementById("teamList");
+  const addTeamBtn = document.getElementById("addTeamBtn");
+  const resetScoreBtn = document.getElementById("resetScoreBtn");
+
+  const LEVEL_NAMES = {
+    8: "8급",
+    7: "7급",
+    6: "6급",
+    5: "5급",
+    4: "4급",
+    3: "3급",
+    2: "2급",
+    1: "1급",
+  };
+
+  const CATEGORY_META = {
+    hanja: { label: "한자", color: "#4a90d9" },
+    idiom: { label: "사자성어", color: "#7b7fe0" },
+  };
+
+  const BASE_TYPE = "hanja";
+
+  const WORD_SIZE_STEPS = [
+    { max: 1, size: 160 },
+    { max: 2, size: 130 },
+    { max: 4, size: 100 },
+    { max: 8, size: 70 },
+    { max: Infinity, size: 50 },
+  ];
+
+  const MEANING_SIZE_STEPS = [
+    { max: 6, size: 40 },
+    { max: 12, size: 32 },
+    { max: 20, size: 26 },
+    { max: 32, size: 22 },
+    { max: Infinity, size: 18 },
+  ];
+
+  let state = loadState();
+  let currentLevel = String(state.level || "8");
+  let currentCategory = state.category || "all";
+  let currentWord = null;
+  let lastWordEn = null;
+  let revealed = false;
+  let voices = [];
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return {
+      level: "8",
+      category: "all",
+      teams: [
+        { name: "참가자 1", score: 0 },
+        { name: "참가자 2", score: 0 },
+      ],
+    };
+  }
+
+  function saveState() {
+    state.level = currentLevel;
+    state.category = currentCategory;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function scaleFont(el, len, steps) {
+    const step = steps.find((s) => len <= s.max);
+    el.style.fontSize = step.size + "px";
+  }
+
+  if (!state.teams || state.teams.length === 0) {
+    state.teams = [
+      { name: "참가자 1", score: 0 },
+      { name: "참가자 2", score: 0 },
+    ];
+  }
+
+  // ---------- 발음 (TTS) ----------
+  function loadVoices() {
+    voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  }
+  if (window.speechSynthesis) {
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function getSpeechText(word) {
+    if (word.type === "idiom") return word.ipa || word.ko;
+    return word.ko;
+  }
+
+  function speak(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ko-KR";
+    utter.rate = 0.9;
+    utter.pitch = 1.0;
+    const koVoice =
+      voices.find((v) => v.lang === "ko-KR") ||
+      voices.find((v) => v.lang && v.lang.startsWith("ko"));
+    if (koVoice) utter.voice = koVoice;
+    window.speechSynthesis.speak(utter);
+  }
+
+  // ---------- 급수 · 카테고리 선택 ----------
+  function buildCategoryMenu() {
+    const types = Array.from(new Set(WORD_DATA[currentLevel].map((w) => w.type)));
+    categoryMenu.innerHTML = "";
+
+    if (types.length <= 1) {
+      categorySelect.classList.add("hidden");
+      currentCategory = "all";
+      return;
+    }
+
+    categorySelect.classList.remove("hidden");
+    if (!types.includes(currentCategory) && currentCategory !== "all") {
+      currentCategory = "all";
+    }
+
+    const allLi = document.createElement("li");
+    allLi.dataset.category = "all";
+    allLi.textContent = "전체";
+    categoryMenu.appendChild(allLi);
+
+    types.forEach((t) => {
+      const li = document.createElement("li");
+      li.dataset.category = t;
+      li.textContent = CATEGORY_META[t] ? CATEGORY_META[t].label : t;
+      categoryMenu.appendChild(li);
+    });
+  }
+
+  function refreshCategoryLabel() {
+    categoryLabel.textContent =
+      currentCategory === "all" ? "전체" : (CATEGORY_META[currentCategory] ? CATEGORY_META[currentCategory].label : currentCategory);
+    Array.from(categoryMenu.children).forEach((li) => {
+      li.classList.toggle("active", li.dataset.category === currentCategory);
+    });
+  }
+
+  function setLevel(level) {
+    currentLevel = level;
+    levelLabel.textContent = LEVEL_NAMES[level];
+    Array.from(levelMenu.children).forEach((li) => {
+      li.classList.toggle("active", li.dataset.level === level);
+    });
+    buildCategoryMenu();
+    refreshCategoryLabel();
+    saveState();
+    pickNewWord();
+  }
+
+  function setCategory(category) {
+    currentCategory = category;
+    refreshCategoryLabel();
+    saveState();
+    pickNewWord();
+  }
+
+  levelBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    categoryMenu.classList.add("hidden");
+    levelMenu.classList.toggle("hidden");
+  });
+
+  levelMenu.addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-level]");
+    if (!li) return;
+    setLevel(li.dataset.level);
+    levelMenu.classList.add("hidden");
+  });
+
+  categoryBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    levelMenu.classList.add("hidden");
+    categoryMenu.classList.toggle("hidden");
+  });
+
+  categoryMenu.addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-category]");
+    if (!li) return;
+    setCategory(li.dataset.category);
+    categoryMenu.classList.add("hidden");
+  });
+
+  document.addEventListener("click", () => {
+    levelMenu.classList.add("hidden");
+    categoryMenu.classList.add("hidden");
+  });
+
+  // ---------- 한자 카드 ----------
+  function getPool() {
+    const all = WORD_DATA[currentLevel];
+    if (currentCategory === "all") return all;
+    return all.filter((w) => w.type === currentCategory);
+  }
+
+  function pickNewWord() {
+    const pool = getPool();
+    let candidate;
+    if (pool.length === 1) {
+      candidate = pool[0];
+    } else {
+      do {
+        candidate = pool[Math.floor(Math.random() * pool.length)];
+      } while (candidate.en === lastWordEn);
+    }
+    currentWord = candidate;
+    lastWordEn = candidate.en;
+    revealed = false;
+    renderWord();
+  }
+
+  function renderWord() {
+    wordText.textContent = currentWord.en;
+    scaleFont(wordText, currentWord.en.length, WORD_SIZE_STEPS);
+
+    const badgeMeta = CATEGORY_META[currentWord.type];
+    const showBadge = currentWord.type !== BASE_TYPE && badgeMeta;
+    idiomBadge.classList.toggle("hidden", !showBadge);
+    if (showBadge) {
+      idiomBadge.textContent = badgeMeta.label;
+      idiomBadge.style.background = badgeMeta.color;
+    }
+
+    revealArea.classList.add("hidden");
+    tapHint.classList.remove("hidden");
+
+    const levelName = LEVEL_NAMES[currentLevel];
+    const catName = currentCategory === "all" ? "" : ` · ${CATEGORY_META[currentCategory] ? CATEGORY_META[currentCategory].label : currentCategory}`;
+    progressLabel.textContent = `${levelName}${catName}`;
+
+    if (currentWord.ipa) {
+      ipaText.textContent = currentWord.ipa;
+      ipaText.style.display = "block";
+    } else {
+      ipaText.textContent = "";
+      ipaText.style.display = "none";
+    }
+
+    meaningText.textContent = currentWord.ko;
+    scaleFont(meaningText, currentWord.ko.length, MEANING_SIZE_STEPS);
+
+    if (currentWord.example_en) {
+      exampleEn.textContent = currentWord.example_en;
+      exampleKo.textContent = currentWord.example_ko || "";
+      exampleArea.classList.remove("hidden");
+    } else {
+      exampleArea.classList.add("hidden");
+    }
+  }
+
+  function revealWord() {
+    if (revealed) return;
+    revealed = true;
+    revealArea.classList.remove("hidden");
+    tapHint.classList.add("hidden");
+    speak(getSpeechText(currentWord));
+  }
+
+  wordCard.addEventListener("click", revealWord);
+
+  soundBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    speak(getSpeechText(currentWord));
+  });
+
+  nextBtn.addEventListener("click", () => {
+    pickNewWord();
+  });
+
+  // ---------- 점수판 ----------
+  function renderTeams() {
+    teamList.innerHTML = "";
+    state.teams.forEach((team, idx) => {
+      const row = document.createElement("div");
+      row.className = "team-row";
+
+      const nameInput = document.createElement("input");
+      nameInput.className = "team-name";
+      nameInput.value = team.name;
+      nameInput.addEventListener("change", () => {
+        state.teams[idx].name = nameInput.value.trim() || `참가자 ${idx + 1}`;
+        saveState();
+      });
+
+      const minusBtn = document.createElement("button");
+      minusBtn.className = "team-score-btn team-score-minus";
+      minusBtn.textContent = "−";
+      minusBtn.addEventListener("click", () => {
+        state.teams[idx].score -= 1;
+        saveState();
+        renderTeams();
+      });
+
+      const scoreEl = document.createElement("div");
+      scoreEl.className = "team-score";
+      scoreEl.textContent = team.score;
+      scoreEl.title = "클릭하면 점수가 올라가요";
+      scoreEl.addEventListener("click", () => {
+        state.teams[idx].score += 1;
+        saveState();
+        renderTeams();
+      });
+
+      const plusBtn = document.createElement("button");
+      plusBtn.className = "team-score-btn team-score-plus";
+      plusBtn.textContent = "+";
+      plusBtn.addEventListener("click", () => {
+        state.teams[idx].score += 1;
+        saveState();
+        renderTeams();
+      });
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "team-remove";
+      removeBtn.textContent = "✕";
+      removeBtn.style.visibility = state.teams.length > 1 ? "visible" : "hidden";
+      removeBtn.addEventListener("click", () => {
+        state.teams.splice(idx, 1);
+        saveState();
+        renderTeams();
+      });
+
+      const scoreControls = document.createElement("div");
+      scoreControls.className = "team-score-controls";
+      scoreControls.appendChild(minusBtn);
+      scoreControls.appendChild(scoreEl);
+      scoreControls.appendChild(plusBtn);
+
+      row.appendChild(removeBtn);
+      row.appendChild(nameInput);
+      row.appendChild(scoreControls);
+      teamList.appendChild(row);
+    });
+  }
+
+  addTeamBtn.addEventListener("click", () => {
+    state.teams.push({ name: `참가자 ${state.teams.length + 1}`, score: 0 });
+    saveState();
+    renderTeams();
+  });
+
+  resetScoreBtn.addEventListener("click", () => {
+    state.teams.forEach((t) => (t.score = 0));
+    saveState();
+    renderTeams();
+  });
+
+  // ---------- 초기화 ----------
+  setLevel(currentLevel);
+  renderTeams();
+})();
+
+</script>
+</body>
+</html>
