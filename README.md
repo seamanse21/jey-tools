@@ -2,6 +2,9 @@
 
 일상에 필요한 도구들을 만들고 보관하는 저장소.
 
+**도구 바로 쓰기 → https://seamanse21.github.io/jey-tools/tools/**
+(폰 브라우저에서 열고 "홈 화면에 추가" 하면 앱처럼 쓸 수 있음)
+
 ## 폴더 구조
 
 ```
@@ -28,11 +31,13 @@ apps/           실행파일로 만들 파이썬 앱 (앱 하나당 폴더 하�
 
 ## HTML 도구 쓰는 법
 
-`tools/` 안의 `.html` 파일을 더블클릭하면 브라우저에서 바로 열립니다.
-GitHub Pages를 켜면 폰에서도 주소로 접속 가능합니다.
-(Settings → Pages → Source: `main` / root)
+GitHub Pages가 켜져 있어서 `main`에 push하면 1~2분 뒤 자동 반영된다.
 
-주소 형식: `https://seamanse21.github.io/jey-tools/tools/파일이름.html`
+- 도구 목록: https://seamanse21.github.io/jey-tools/tools/
+- 개별 도구: `https://seamanse21.github.io/jey-tools/tools/파일이름.html`
+
+인터넷이 없을 때는 `tools/` 안의 `.html` 파일을 더블클릭해도 똑같이 동작한다.
+(도구는 외부 라이브러리 없이 파일 하나로 완결되게 만든다)
 
 ## 실행파일(.exe / .app) 만드는 법
 
@@ -46,6 +51,12 @@ GitHub Pages를 켜면 폰에서도 주소로 접속 가능합니다.
 
 맥에서 처음 실행할 때 "확인되지 않은 개발자" 경고가 나오면
 앱 아이콘 우클릭 → **열기** → **열기** 를 누르면 됩니다.
+
+## 새 HTML 도구 추가하는 법
+
+1. `tools/도구이름.html` 파일을 만든다
+2. `tools/index.html` 의 `<ul>` 안에 카드 한 줄을 추가한다
+3. push하면 끝. 1~2분 뒤 위 주소에서 보인다
 
 ## 새 앱 추가하는 법
 
