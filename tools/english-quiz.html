@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>영단어 퀴즈</title>
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Trebuchet MS", system-ui, sans-serif;
+  background: linear-gradient(160deg, #fff2cc 0%, #ffe0e9 40%, #d9f2ff 100%);
+  min-height: 100vh;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 40px;
+}
+
+/* ---------- 레벨 · 카테고리 선택 ---------- */
+.top-controls {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+}
+
+.level-select {
+  position: relative;
+}
+
+.level-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 3px solid #ffb84d;
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #d9720a;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #ffb84d;
+}
+
+.level-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #ffb84d;
+}
+
+.category-btn {
+  border-color: #6bc5f8;
+  color: #2f8fd1;
+  box-shadow: 0 4px 0 #6bc5f8;
+}
+
+.category-btn:active {
+  box-shadow: 0 2px 0 #6bc5f8;
+}
+
+.level-arrow {
+  font-size: 14px;
+}
+
+.level-menu {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 6px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  width: 250px;
+  overflow: hidden;
+}
+
+.level-menu.hidden {
+  display: none;
+}
+
+.level-menu li {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+}
+
+.level-menu li:hover,
+.level-menu li.active {
+  background: #ffe8b3;
+  color: #d9720a;
+}
+
+/* ---------- 타이틀 ---------- */
+.app-title {
+  margin: 96px 0 8px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #555;
+  text-align: center;
+}
+
+@media (min-width: 560px) {
+  .app-title { margin-top: 56px; }
+}
+
+/* ---------- 퀴즈 영역 ---------- */
+.quiz-area {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progress-label {
+  font-size: 14px;
+  color: #999;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.word-card {
+  width: 100%;
+  min-height: 340px;
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 10px 0 #e9e9e9, 0 14px 30px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.08s ease;
+}
+
+.word-card:active {
+  transform: scale(0.98);
+}
+
+.idiom-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #7cd6c4;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.idiom-badge.hidden {
+  display: none;
+}
+
+.word-text {
+  font-size: 88px;
+  font-weight: 800;
+  color: #333;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.reveal-area {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.reveal-area.hidden {
+  display: none;
+}
+
+.ipa-text {
+  font-size: 40px;
+  color: #ff8fa3;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.meaning-text {
+  font-size: 44px;
+  color: #4a90d9;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+.example-area {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 2px dashed #ffe0b3;
+}
+
+.example-area.hidden {
+  display: none;
+}
+
+.example-en {
+  font-size: 22px;
+  font-style: italic;
+  font-weight: 600;
+  color: #555;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+}
+
+.example-ko {
+  font-size: 18px;
+  color: #999;
+  font-weight: 600;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.tap-hint {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #bbb;
+  font-weight: 600;
+}
+
+/* ---------- 컨트롤 버튼 ---------- */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.round-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #ffd166;
+  font-size: 24px;
+  box-shadow: 0 4px 0 #e0a934;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.round-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #e0a934;
+}
+
+.next-btn {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: 18px;
+  background: #6bc5f8;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #3fa1da;
+  cursor: pointer;
+}
+
+.next-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #3fa1da;
+}
+
+/* ---------- 점수판 ---------- */
+.scoreboard {
+  width: 100%;
+  max-width: 480px;
+  margin-top: 32px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.scoreboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.mini-btn {
+  border: none;
+  background: #f2f2f2;
+  color: #888;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.team-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.team-row {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #fafafa;
+  border-radius: 18px;
+  padding: 18px 12px 14px;
+}
+
+.team-name {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+  padding: 6px;
+  min-width: 0;
+  text-align: center;
+}
+
+.team-name:focus {
+  outline: 2px solid #ffd166;
+  border-radius: 8px;
+}
+
+.team-score-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-score-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  font-size: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.team-score-minus {
+  background: #ffe3e3;
+  color: #e3595a;
+}
+
+.team-score-plus {
+  background: #dff5e0;
+  color: #3fa15a;
+}
+
+.team-score {
+  width: 64px;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 800;
+  color: #333;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.team-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.add-team-btn {
+  margin-top: 12px;
+  width: 100%;
+  height: 46px;
+  border: 2px dashed #ffd166;
+  border-radius: 14px;
+  background: transparent;
+  color: #d9720a;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 380px) {
+  .word-text { font-size: 56px; }
+  .ipa-text { font-size: 28px; }
+  .meaning-text { font-size: 30px; }
+  .app-title { font-size: 22px; }
+}
+
+
+/* 도구 모음으로 돌아가기 (jey-tools) */
+.jey-back{position:fixed;left:12px;bottom:12px;z-index:9999;font-size:12px;opacity:.5;
+  text-decoration:none;color:inherit;padding:6px 10px;border-radius:8px;
+  background:rgba(128,128,128,.14);backdrop-filter:blur(4px)}
+.jey-back:hover,.jey-back:focus-visible{opacity:1}
+@media print{.jey-back{display:none}}
+</style>
+</head>
+<body>
+
+  <a class="jey-back" href="./index.html">← Jey Tools</a>
+
+  <!-- 좌측 상단 레벨 · 카테고리 선택 -->
+  <div class="top-controls">
+    <div class="level-select">
+      <button id="levelBtn" class="level-btn">
+        <span id="levelLabel">초등 2학년</span>
+        <span class="level-arrow">▾</span>
+      </button>
+      <ul id="levelMenu" class="level-menu hidden">
+        <li data-level="2">초등 2학년</li>
+        <li data-level="3">초등 3학년</li>
+        <li data-level="4">초등 4학년</li>
+        <li data-level="5">초등 5학년</li>
+        <li data-level="6">초등 6학년</li>
+        <li data-level="adult">성인</li>
+      </ul>
+    </div>
+
+    <div class="level-select" id="categorySelect">
+      <button id="categoryBtn" class="level-btn category-btn">
+        <span id="categoryLabel">전체</span>
+        <span class="level-arrow">▾</span>
+      </button>
+      <ul id="categoryMenu" class="level-menu hidden"></ul>
+    </div>
+  </div>
+
+  <h1 class="app-title">영단어 퀴즈</h1>
+
+  <main class="quiz-area">
+    <div id="progress" class="progress-label"></div>
+
+    <div id="wordCard" class="word-card">
+      <div class="idiom-badge hidden" id="idiomBadge">숙어</div>
+      <div id="wordText" class="word-text">apple</div>
+      <div id="revealArea" class="reveal-area hidden">
+        <div id="ipaText" class="ipa-text"></div>
+        <div id="meaningText" class="meaning-text"></div>
+        <div id="exampleArea" class="example-area hidden">
+          <div id="exampleEn" class="example-en"></div>
+          <div id="exampleKo" class="example-ko"></div>
+        </div>
+      </div>
+      <div class="tap-hint" id="tapHint">화면을 터치해서 뜻 보기 👆</div>
+    </div>
+
+    <div class="controls">
+      <button id="soundBtn" class="round-btn" title="발음 듣기">🔊</button>
+      <button id="nextBtn" class="next-btn">다음 단어 ➜</button>
+    </div>
+  </main>
+
+  <!-- 점수판 -->
+  <section class="scoreboard" id="scoreboard">
+    <div class="scoreboard-header">
+      <span>점수판</span>
+      <button id="resetScoreBtn" class="mini-btn" title="점수 초기화">↺ 초기화</button>
+    </div>
+    <div id="teamList" class="team-list"></div>
+    <button id="addTeamBtn" class="add-team-btn">+ 참가자 추가</button>
+  </section>
+
+  <script>
+// 초등학교 2~6학년 + 성인 필수 영단어 · 숙어 · 회화 데이터
+// type: word(단어) | idiom(숙어) | phrasal(구동사) | pattern(회화 패턴) | business(비즈니스 회화)
+// ipa: 발음기호 (슬래시 없이 저장, 화면에는 /.../ 형태로 표시)
+
+const WORD_DATA = {
+  2: [
+    { en: "apple", ipa: "ˈæpl", ko: "사과", type: "word" },
+    { en: "banana", ipa: "bəˈnænə", ko: "바나나", type: "word" },
+    { en: "orange", ipa: "ˈɔːrɪndʒ", ko: "오렌지", type: "word" },
+    { en: "grape", ipa: "ɡreɪp", ko: "포도", type: "word" },
+    { en: "milk", ipa: "mɪlk", ko: "우유", type: "word" },
+    { en: "water", ipa: "ˈwɔːtər", ko: "물", type: "word" },
+    { en: "bread", ipa: "bred", ko: "빵", type: "word" },
+    { en: "egg", ipa: "eɡ", ko: "달걀", type: "word" },
+    { en: "rice", ipa: "raɪs", ko: "쌀, 밥", type: "word" },
+    { en: "cake", ipa: "keɪk", ko: "케이크", type: "word" },
+    { en: "cat", ipa: "kæt", ko: "고양이", type: "word" },
+    { en: "dog", ipa: "dɔːɡ", ko: "개", type: "word" },
+    { en: "bird", ipa: "bɜːrd", ko: "새", type: "word" },
+    { en: "fish", ipa: "fɪʃ", ko: "물고기", type: "word" },
+    { en: "lion", ipa: "ˈlaɪən", ko: "사자", type: "word" },
+    { en: "tiger", ipa: "ˈtaɪɡər", ko: "호랑이", type: "word" },
+    { en: "bear", ipa: "ber", ko: "곰", type: "word" },
+    { en: "rabbit", ipa: "ˈræbɪt", ko: "토끼", type: "word" },
+    { en: "duck", ipa: "dʌk", ko: "오리", type: "word" },
+    { en: "pig", ipa: "pɪɡ", ko: "돼지", type: "word" },
+    { en: "red", ipa: "red", ko: "빨간색", type: "word" },
+    { en: "blue", ipa: "bluː", ko: "파란색", type: "word" },
+    { en: "yellow", ipa: "ˈjeloʊ", ko: "노란색", type: "word" },
+    { en: "green", ipa: "ɡriːn", ko: "초록색", type: "word" },
+    { en: "white", ipa: "waɪt", ko: "흰색", type: "word" },
+    { en: "black", ipa: "blæk", ko: "검은색", type: "word" },
+    { en: "pink", ipa: "pɪŋk", ko: "분홍색", type: "word" },
+    { en: "brown", ipa: "braʊn", ko: "갈색", type: "word" },
+    { en: "purple", ipa: "ˈpɜːrpl", ko: "보라색", type: "word" },
+    { en: "gray", ipa: "ɡreɪ", ko: "회색", type: "word" },
+    { en: "one", ipa: "wʌn", ko: "하나", type: "word" },
+    { en: "two", ipa: "tuː", ko: "둘", type: "word" },
+    { en: "three", ipa: "θriː", ko: "셋", type: "word" },
+    { en: "four", ipa: "fɔːr", ko: "넷", type: "word" },
+    { en: "five", ipa: "faɪv", ko: "다섯", type: "word" },
+    { en: "six", ipa: "sɪks", ko: "여섯", type: "word" },
+    { en: "seven", ipa: "ˈsevn", ko: "일곱", type: "word" },
+    { en: "eight", ipa: "eɪt", ko: "여덟", type: "word" },
+    { en: "nine", ipa: "naɪn", ko: "아홉", type: "word" },
+    { en: "ten", ipa: "ten", ko: "열", type: "word" },
+    { en: "mom", ipa: "mɑːm", ko: "엄마", type: "word" },
+    { en: "dad", ipa: "dæd", ko: "아빠", type: "word" },
+    { en: "brother", ipa: "ˈbrʌðər", ko: "형, 오빠, 남동생", type: "word" },
+    { en: "sister", ipa: "ˈsɪstər", ko: "언니, 누나, 여동생", type: "word" },
+    { en: "baby", ipa: "ˈbeɪbi", ko: "아기", type: "word" },
+    { en: "family", ipa: "ˈfæməli", ko: "가족", type: "word" },
+    { en: "friend", ipa: "frend", ko: "친구", type: "word" },
+    { en: "boy", ipa: "bɔɪ", ko: "소년", type: "word" },
+    { en: "girl", ipa: "ɡɜːrl", ko: "소녀", type: "word" },
+    { en: "grandma", ipa: "ˈɡrænmɑː", ko: "할머니", type: "word" },
+    { en: "grandpa", ipa: "ˈɡrænpɑː", ko: "할아버지", type: "word" },
+    { en: "uncle", ipa: "ˈʌŋkl", ko: "삼촌", type: "word" },
+    { en: "aunt", ipa: "ænt", ko: "이모, 고모", type: "word" },
+    { en: "book", ipa: "bʊk", ko: "책", type: "word" },
+    { en: "pencil", ipa: "ˈpensl", ko: "연필", type: "word" },
+    { en: "bag", ipa: "bæɡ", ko: "가방", type: "word" },
+    { en: "desk", ipa: "desk", ko: "책상", type: "word" },
+    { en: "chair", ipa: "tʃer", ko: "의자", type: "word" },
+    { en: "door", ipa: "dɔːr", ko: "문", type: "word" },
+    { en: "window", ipa: "ˈwɪndoʊ", ko: "창문", type: "word" },
+    { en: "sun", ipa: "sʌn", ko: "해, 태양", type: "word" },
+    { en: "moon", ipa: "muːn", ko: "달", type: "word" },
+    { en: "star", ipa: "stɑːr", ko: "별", type: "word" },
+    { en: "sky", ipa: "skaɪ", ko: "하늘", type: "word" },
+    { en: "rain", ipa: "reɪn", ko: "비", type: "word" },
+    { en: "snow", ipa: "snoʊ", ko: "눈", type: "word" },
+    { en: "tree", ipa: "triː", ko: "나무", type: "word" },
+    { en: "flower", ipa: "ˈflaʊər", ko: "꽃", type: "word" },
+    { en: "grass", ipa: "ɡræs", ko: "풀, 잔디", type: "word" },
+    { en: "rock", ipa: "rɑːk", ko: "바위, 돌", type: "word" },
+    { en: "big", ipa: "bɪɡ", ko: "큰", type: "word" },
+    { en: "small", ipa: "smɔːl", ko: "작은", type: "word" },
+    { en: "hot", ipa: "hɑːt", ko: "뜨거운, 더운", type: "word" },
+    { en: "cold", ipa: "koʊld", ko: "차가운, 추운", type: "word" },
+    { en: "happy", ipa: "ˈhæpi", ko: "행복한", type: "word" },
+    { en: "sad", ipa: "sæd", ko: "슬픈", type: "word" },
+    { en: "good", ipa: "ɡʊd", ko: "좋은", type: "word" },
+    { en: "bad", ipa: "bæd", ko: "나쁜", type: "word" },
+    { en: "new", ipa: "njuː", ko: "새로운", type: "word" },
+    { en: "old", ipa: "oʊld", ko: "오래된, 나이 든", type: "word" },
+    { en: "run", ipa: "rʌn", ko: "달리다", type: "word" },
+    { en: "jump", ipa: "dʒʌmp", ko: "뛰다, 점프하다", type: "word" },
+    { en: "walk", ipa: "wɔːk", ko: "걷다", type: "word" },
+    { en: "eat", ipa: "iːt", ko: "먹다", type: "word" },
+    { en: "drink", ipa: "drɪŋk", ko: "마시다", type: "word" },
+    { en: "sleep", ipa: "sliːp", ko: "자다", type: "word" },
+    { en: "sit", ipa: "sɪt", ko: "앉다", type: "word" },
+    { en: "stand", ipa: "stænd", ko: "서다", type: "word" },
+    { en: "sing", ipa: "sɪŋ", ko: "노래하다", type: "word" },
+    { en: "dance", ipa: "dæns", ko: "춤추다", type: "word" },
+    { en: "ball", ipa: "bɔːl", ko: "공", type: "word" },
+    { en: "doll", ipa: "dɑːl", ko: "인형", type: "word" },
+    { en: "toy", ipa: "tɔɪ", ko: "장난감", type: "word" },
+    { en: "box", ipa: "bɑːks", ko: "상자", type: "word" },
+    { en: "cup", ipa: "kʌp", ko: "컵", type: "word" },
+    { en: "spoon", ipa: "spuːn", ko: "숟가락", type: "word" },
+    { en: "fork", ipa: "fɔːrk", ko: "포크", type: "word" },
+    { en: "plate", ipa: "pleɪt", ko: "접시", type: "word" },
+    { en: "bed", ipa: "bed", ko: "침대", type: "word" },
+    { en: "table", ipa: "ˈteɪbl", ko: "탁자, 식탁", type: "word" },
+    { en: "strawberry", ipa: "ˈstrɔːberi", ko: "딸기", type: "word" },
+    { en: "watermelon", ipa: "ˈwɔːtərmelən", ko: "수박", type: "word" },
+    { en: "peach", ipa: "piːtʃ", ko: "복숭아", type: "word" },
+    { en: "pear", ipa: "per", ko: "배(과일)", type: "word" },
+    { en: "lemon", ipa: "ˈlemən", ko: "레몬", type: "word" },
+    { en: "melon", ipa: "ˈmelən", ko: "멜론", type: "word" },
+    { en: "tomato", ipa: "təˈmeɪtoʊ", ko: "토마토", type: "word" },
+    { en: "potato", ipa: "pəˈteɪtoʊ", ko: "감자", type: "word" },
+    { en: "carrot", ipa: "ˈkærət", ko: "당근", type: "word" },
+    { en: "onion", ipa: "ˈʌnjən", ko: "양파", type: "word" },
+    { en: "corn", ipa: "kɔːrn", ko: "옥수수", type: "word" },
+    { en: "bean", ipa: "biːn", ko: "콩", type: "word" },
+    { en: "meat", ipa: "miːt", ko: "고기", type: "word" },
+    { en: "butter", ipa: "ˈbʌtər", ko: "버터", type: "word" },
+    { en: "sugar", ipa: "ˈʃʊɡər", ko: "설탕", type: "word" },
+    { en: "salt", ipa: "sɔːlt", ko: "소금", type: "word" },
+    { en: "honey", ipa: "ˈhʌni", ko: "꿀", type: "word" },
+    { en: "jam", ipa: "dʒæm", ko: "잼", type: "word" },
+    { en: "pie", ipa: "paɪ", ko: "파이", type: "word" },
+    { en: "ice cream", ipa: "ˈaɪs kriːm", ko: "아이스크림", type: "word" },
+    { en: "chocolate", ipa: "ˈtʃɑːklət", ko: "초콜릿", type: "word" },
+    { en: "popcorn", ipa: "ˈpɑːpkɔːrn", ko: "팝콘", type: "word" },
+    { en: "hamburger", ipa: "ˈhæmbɜːrɡər", ko: "햄버거", type: "word" },
+    { en: "spaghetti", ipa: "spəˈɡeti", ko: "스파게티", type: "word" },
+    { en: "yogurt", ipa: "ˈjoʊɡərt", ko: "요구르트", type: "word" },
+    { en: "cereal", ipa: "ˈsɪriəl", ko: "시리얼", type: "word" },
+    { en: "snack", ipa: "snæk", ko: "간식", type: "word" },
+    { en: "breakfast", ipa: "ˈbrekfəst", ko: "아침 식사", type: "word" },
+    { en: "lunch", ipa: "lʌntʃ", ko: "점심", type: "word" },
+    { en: "dinner", ipa: "ˈdɪnər", ko: "저녁 식사", type: "word" },
+    { en: "mouse", ipa: "maʊs", ko: "쥐", type: "word" },
+    { en: "ant", ipa: "ænt", ko: "개미", type: "word" },
+    { en: "bee", ipa: "biː", ko: "벌", type: "word" },
+    { en: "butterfly", ipa: "ˈbʌtərflaɪ", ko: "나비", type: "word" },
+    { en: "fox", ipa: "fɑːks", ko: "여우", type: "word" },
+    { en: "wolf", ipa: "wʊlf", ko: "늑대", type: "word" },
+    { en: "deer", ipa: "dɪr", ko: "사슴", type: "word" },
+    { en: "cow", ipa: "kaʊ", ko: "소", type: "word" },
+    { en: "chick", ipa: "tʃɪk", ko: "병아리", type: "word" },
+    { en: "owl", ipa: "aʊl", ko: "부엉이", type: "word" },
+    { en: "penguin", ipa: "ˈpeŋɡwɪn", ko: "펭귄", type: "word" },
+    { en: "panda", ipa: "ˈpændə", ko: "판다", type: "word" },
+    { en: "koala", ipa: "koʊˈɑːlə", ko: "코알라", type: "word" },
+    { en: "whale", ipa: "weɪl", ko: "고래", type: "word" },
+    { en: "shark", ipa: "ʃɑːrk", ko: "상어", type: "word" },
+    { en: "crab", ipa: "kræb", ko: "게", type: "word" },
+    { en: "dolphin", ipa: "ˈdɑːlfɪn", ko: "돌고래", type: "word" },
+    { en: "snail", ipa: "sneɪl", ko: "달팽이", type: "word" },
+    { en: "worm", ipa: "wɜːrm", ko: "벌레, 지렁이", type: "word" },
+    { en: "kangaroo", ipa: "ˌkæŋɡəˈruː", ko: "캥거루", type: "word" },
+    { en: "circle", ipa: "ˈsɜːrkl", ko: "원, 동그라미", type: "word" },
+    { en: "square", ipa: "skwer", ko: "정사각형", type: "word" },
+    { en: "triangle", ipa: "ˈtraɪæŋɡl", ko: "삼각형", type: "word" },
+    { en: "heart", ipa: "hɑːrt", ko: "하트, 심장", type: "word" },
+    { en: "line", ipa: "laɪn", ko: "선, 줄", type: "word" },
+    { en: "dot", ipa: "dɑːt", ko: "점", type: "word" },
+    { en: "color", ipa: "ˈkʌlər", ko: "색깔", type: "word" },
+    { en: "shape", ipa: "ʃeɪp", ko: "모양", type: "word" },
+    { en: "gold", ipa: "ɡoʊld", ko: "금색, 금", type: "word" },
+    { en: "silver", ipa: "ˈsɪlvər", ko: "은색, 은", type: "word" },
+    { en: "face", ipa: "feɪs", ko: "얼굴", type: "word" },
+    { en: "tooth", ipa: "tuːθ", ko: "이, 치아", type: "word" },
+    { en: "tongue", ipa: "tʌŋ", ko: "혀", type: "word" },
+    { en: "finger", ipa: "ˈfɪŋɡər", ko: "손가락", type: "word" },
+    { en: "toe", ipa: "toʊ", ko: "발가락", type: "word" },
+    { en: "knee", ipa: "niː", ko: "무릎", type: "word" },
+    { en: "neck", ipa: "nek", ko: "목", type: "word" },
+    { en: "belly", ipa: "ˈbeli", ko: "배", type: "word" },
+    { en: "cheek", ipa: "tʃiːk", ko: "볼, 뺨", type: "word" },
+    { en: "chin", ipa: "tʃɪn", ko: "턱", type: "word" },
+    { en: "son", ipa: "sʌn", ko: "아들", type: "word" },
+    { en: "daughter", ipa: "ˈdɔːtər", ko: "딸", type: "word" },
+    { en: "man", ipa: "mæn", ko: "남자", type: "word" },
+    { en: "woman", ipa: "ˈwʊmən", ko: "여자", type: "word" },
+    { en: "kid", ipa: "kɪd", ko: "아이", type: "word" },
+    { en: "name", ipa: "neɪm", ko: "이름", type: "word" },
+    { en: "people", ipa: "ˈpiːpl", ko: "사람들", type: "word" },
+    { en: "king", ipa: "kɪŋ", ko: "왕", type: "word" },
+    { en: "queen", ipa: "kwiːn", ko: "여왕", type: "word" },
+    { en: "prince", ipa: "prɪns", ko: "왕자", type: "word" },
+    { en: "paper", ipa: "ˈpeɪpər", ko: "종이", type: "word" },
+    { en: "crayon", ipa: "ˈkreɪɑːn", ko: "크레용", type: "word" },
+    { en: "board", ipa: "bɔːrd", ko: "칠판, 판", type: "word" },
+    { en: "clock", ipa: "klɑːk", ko: "시계", type: "word" },
+    { en: "map", ipa: "mæp", ko: "지도", type: "word" },
+    { en: "key", ipa: "kiː", ko: "열쇠", type: "word" },
+    { en: "bell", ipa: "bel", ko: "종, 벨", type: "word" },
+    { en: "brush", ipa: "brʌʃ", ko: "붓, 빗", type: "word" },
+    { en: "hat", ipa: "hæt", ko: "모자", type: "word" },
+    { en: "shoe", ipa: "ʃuː", ko: "신발", type: "word" },
+    { en: "sofa", ipa: "ˈsoʊfə", ko: "소파", type: "word" },
+    { en: "lamp", ipa: "læmp", ko: "램프, 등", type: "word" },
+    { en: "mirror", ipa: "ˈmɪrər", ko: "거울", type: "word" },
+    { en: "towel", ipa: "ˈtaʊəl", ko: "수건", type: "word" },
+    { en: "soap", ipa: "soʊp", ko: "비누", type: "word" },
+    { en: "fan", ipa: "fæn", ko: "선풍기", type: "word" },
+    { en: "knife", ipa: "naɪf", ko: "칼", type: "word" },
+    { en: "bowl", ipa: "boʊl", ko: "그릇", type: "word" },
+    { en: "basket", ipa: "ˈbæskɪt", ko: "바구니", type: "word" },
+    { en: "blanket", ipa: "ˈblæŋkɪt", ko: "담요", type: "word" },
+    { en: "shirt", ipa: "ʃɜːrt", ko: "셔츠", type: "word" },
+    { en: "pants", ipa: "pænts", ko: "바지", type: "word" },
+    { en: "dress", ipa: "dres", ko: "원피스, 드레스", type: "word" },
+    { en: "socks", ipa: "sɑːks", ko: "양말", type: "word" },
+    { en: "coat", ipa: "koʊt", ko: "외투", type: "word" },
+    { en: "cap", ipa: "kæp", ko: "모자(챙 달린)", type: "word" },
+    { en: "skirt", ipa: "skɜːrt", ko: "치마", type: "word" },
+    { en: "glove", ipa: "ɡlʌv", ko: "장갑", type: "word" },
+    { en: "scarf", ipa: "skɑːrf", ko: "목도리", type: "word" },
+    { en: "jacket", ipa: "ˈdʒækɪt", ko: "재킷", type: "word" },
+    { en: "hill", ipa: "hɪl", ko: "언덕", type: "word" },
+    { en: "sea", ipa: "siː", ko: "바다", type: "word" },
+    { en: "sand", ipa: "sænd", ko: "모래", type: "word" },
+    { en: "leaf", ipa: "liːf", ko: "나뭇잎", type: "word" },
+    { en: "seed", ipa: "siːd", ko: "씨앗", type: "word" },
+    { en: "fire", ipa: "ˈfaɪər", ko: "불", type: "word" },
+    { en: "ice", ipa: "aɪs", ko: "얼음", type: "word" },
+    { en: "light", ipa: "laɪt", ko: "빛", type: "word" },
+    { en: "dark", ipa: "dɑːrk", ko: "어둠, 어두운", type: "word" },
+    { en: "air", ipa: "er", ko: "공기", type: "word" },
+    { en: "pool", ipa: "puːl", ko: "수영장", type: "word" },
+    { en: "beach", ipa: "biːtʃ", ko: "해변", type: "word" },
+    { en: "market", ipa: "ˈmɑːrkɪt", ko: "시장", type: "word" },
+    { en: "street", ipa: "striːt", ko: "거리", type: "word" },
+    { en: "city", ipa: "ˈsɪti", ko: "도시", type: "word" },
+    { en: "town", ipa: "taʊn", ko: "마을", type: "word" },
+    { en: "bridge", ipa: "brɪdʒ", ko: "다리", type: "word" },
+    { en: "boat", ipa: "boʊt", ko: "배", type: "word" },
+    { en: "plane", ipa: "pleɪn", ko: "비행기", type: "word" },
+    { en: "bike", ipa: "baɪk", ko: "자전거", type: "word" },
+    { en: "fly", ipa: "flaɪ", ko: "날다", type: "word" },
+    { en: "swim", ipa: "swɪm", ko: "수영하다", type: "word" },
+    { en: "cry", ipa: "kraɪ", ko: "울다", type: "word" },
+    { en: "smile", ipa: "smaɪl", ko: "미소 짓다", type: "word" },
+    { en: "laugh", ipa: "læf", ko: "웃다", type: "word" },
+    { en: "open", ipa: "ˈoʊpən", ko: "열다", type: "word" },
+    { en: "close", ipa: "kloʊz", ko: "닫다", type: "word" },
+    { en: "push", ipa: "pʊʃ", ko: "밀다", type: "word" },
+    { en: "pull", ipa: "pʊl", ko: "당기다", type: "word" },
+    { en: "give", ipa: "ɡɪv", ko: "주다", type: "word" },
+    { en: "take", ipa: "teɪk", ko: "가져가다", type: "word" },
+    { en: "come", ipa: "kʌm", ko: "오다", type: "word" },
+    { en: "go", ipa: "ɡoʊ", ko: "가다", type: "word" },
+    { en: "look", ipa: "lʊk", ko: "보다, 쳐다보다", type: "word" },
+    { en: "see", ipa: "siː", ko: "보다", type: "word" },
+    { en: "hear", ipa: "hɪr", ko: "듣다", type: "word" },
+    { en: "say", ipa: "seɪ", ko: "말하다", type: "word" },
+    { en: "make", ipa: "meɪk", ko: "만들다", type: "word" },
+    { en: "want", ipa: "wɑːnt", ko: "원하다", type: "word" },
+    { en: "like", ipa: "laɪk", ko: "좋아하다", type: "word" },
+    { en: "cook", ipa: "kʊk", ko: "요리하다", type: "word" },
+    { en: "ride", ipa: "raɪd", ko: "타다", type: "word" },
+    { en: "climb", ipa: "klaɪm", ko: "오르다", type: "word" },
+    { en: "hug", ipa: "hʌɡ", ko: "안다", type: "word" },
+    { en: "count", ipa: "kaʊnt", ko: "세다", type: "word" },
+    { en: "find", ipa: "faɪnd", ko: "찾다", type: "word" },
+    { en: "put", ipa: "pʊt", ko: "놓다, 두다", type: "word" },
+    { en: "work", ipa: "wɜːrk", ko: "일하다", type: "word" },
+    { en: "rest", ipa: "rest", ko: "쉬다", type: "word" },
+    { en: "wait", ipa: "weɪt", ko: "기다리다", type: "word" },
+    { en: "fat", ipa: "fæt", ko: "뚱뚱한", type: "word" },
+    { en: "cute", ipa: "kjuːt", ko: "귀여운", type: "word" },
+    { en: "dirty", ipa: "ˈdɜːrti", ko: "더러운", type: "word" },
+    { en: "wet", ipa: "wet", ko: "젖은", type: "word" },
+    { en: "dry", ipa: "draɪ", ko: "마른", type: "word" },
+    { en: "soft", ipa: "sɔːft", ko: "부드러운", type: "word" },
+    { en: "hard", ipa: "hɑːrd", ko: "딱딱한, 어려운", type: "word" },
+    { en: "full", ipa: "fʊl", ko: "가득 찬, 배부른", type: "word" },
+    { en: "empty", ipa: "ˈempti", ko: "비어 있는", type: "word" },
+    { en: "young", ipa: "jʌŋ", ko: "어린", type: "word" },
+    { en: "nice", ipa: "naɪs", ko: "멋진, 친절한", type: "word" },
+    { en: "warm", ipa: "wɔːrm", ko: "따뜻한", type: "word" },
+    { en: "cool", ipa: "kuːl", ko: "시원한", type: "word" },
+    { en: "sweet", ipa: "swiːt", ko: "달콤한", type: "word" },
+    { en: "sour", ipa: "ˈsaʊər", ko: "신맛의", type: "word" },
+    { en: "fun", ipa: "fʌn", ko: "재미있는", type: "word" },
+    { en: "sick", ipa: "sɪk", ko: "아픈", type: "word" },
+    { en: "busy", ipa: "ˈbɪzi", ko: "바쁜", type: "word" },
+    { en: "free", ipa: "friː", ko: "자유로운, 무료의", type: "word" },
+    { en: "ready", ipa: "ˈredi", ko: "준비된", type: "word" },
+    { en: "eleven", ipa: "ɪˈlevn", ko: "열하나, 11", type: "word" },
+    { en: "twelve", ipa: "twelv", ko: "열둘, 12", type: "word" },
+    { en: "twenty", ipa: "ˈtwenti", ko: "스물, 20", type: "word" },
+    { en: "hundred", ipa: "ˈhʌndrəd", ko: "백, 100", type: "word" },
+    { en: "first", ipa: "fɜːrst", ko: "첫 번째", type: "word" },
+    { en: "last", ipa: "læst", ko: "마지막", type: "word" },
+    { en: "day", ipa: "deɪ", ko: "날, 하루", type: "word" },
+    { en: "week", ipa: "wiːk", ko: "주", type: "word" },
+    { en: "month", ipa: "mʌnθ", ko: "달, 월", type: "word" },
+    { en: "year", ipa: "jɪr", ko: "해, 년", type: "word" },
+    { en: "yes", ipa: "jes", ko: "네", type: "word" },
+    { en: "no", ipa: "noʊ", ko: "아니오", type: "word" },
+    { en: "please", ipa: "pliːz", ko: "부디, ~해 주세요", type: "word" },
+    { en: "sorry", ipa: "ˈsɑːri", ko: "미안한", type: "word" },
+    { en: "hello", ipa: "həˈloʊ", ko: "안녕하세요", type: "word" },
+    { en: "goodbye", ipa: "ˌɡʊdˈbaɪ", ko: "안녕히 가세요", type: "word" },
+    { en: "hi", ipa: "haɪ", ko: "안녕", type: "word" },
+    { en: "bye", ipa: "baɪ", ko: "잘 가", type: "word" },
+    { en: "okay", ipa: "ˌoʊˈkeɪ", ko: "좋아, 괜찮아", type: "word" },
+    { en: "welcome", ipa: "ˈwelkəm", ko: "환영하다", type: "word" },
+  ],
+  3: [
+    { en: "Monday", ipa: "ˈmʌndeɪ", ko: "월요일", type: "word" },
+    { en: "Tuesday", ipa: "ˈtuːzdeɪ", ko: "화요일", type: "word" },
+    { en: "Wednesday", ipa: "ˈwenzdeɪ", ko: "수요일", type: "word" },
+    { en: "Thursday", ipa: "ˈθɜːrzdeɪ", ko: "목요일", type: "word" },
+    { en: "Friday", ipa: "ˈfraɪdeɪ", ko: "금요일", type: "word" },
+    { en: "Saturday", ipa: "ˈsætərdeɪ", ko: "토요일", type: "word" },
+    { en: "Sunday", ipa: "ˈsʌndeɪ", ko: "일요일", type: "word" },
+    { en: "spring", ipa: "sprɪŋ", ko: "봄", type: "word" },
+    { en: "summer", ipa: "ˈsʌmər", ko: "여름", type: "word" },
+    { en: "fall", ipa: "fɔːl", ko: "가을", type: "word" },
+    { en: "winter", ipa: "ˈwɪntər", ko: "겨울", type: "word" },
+    { en: "sunny", ipa: "ˈsʌni", ko: "화창한", type: "word" },
+    { en: "rainy", ipa: "ˈreɪni", ko: "비 오는", type: "word" },
+    { en: "cloudy", ipa: "ˈklaʊdi", ko: "흐린", type: "word" },
+    { en: "snowy", ipa: "ˈsnoʊi", ko: "눈 오는", type: "word" },
+    { en: "windy", ipa: "ˈwɪndi", ko: "바람 부는", type: "word" },
+    { en: "head", ipa: "hed", ko: "머리", type: "word" },
+    { en: "hair", ipa: "her", ko: "머리카락", type: "word" },
+    { en: "eye", ipa: "aɪ", ko: "눈", type: "word" },
+    { en: "ear", ipa: "ɪr", ko: "귀", type: "word" },
+    { en: "nose", ipa: "noʊz", ko: "코", type: "word" },
+    { en: "mouth", ipa: "maʊθ", ko: "입", type: "word" },
+    { en: "hand", ipa: "hænd", ko: "손", type: "word" },
+    { en: "foot", ipa: "fʊt", ko: "발", type: "word" },
+    { en: "arm", ipa: "ɑːrm", ko: "팔", type: "word" },
+    { en: "leg", ipa: "leɡ", ko: "다리", type: "word" },
+    { en: "soup", ipa: "suːp", ko: "수프", type: "word" },
+    { en: "salad", ipa: "ˈsæləd", ko: "샐러드", type: "word" },
+    { en: "pizza", ipa: "ˈpiːtsə", ko: "피자", type: "word" },
+    { en: "sandwich", ipa: "ˈsænwɪtʃ", ko: "샌드위치", type: "word" },
+    { en: "juice", ipa: "dʒuːs", ko: "주스", type: "word" },
+    { en: "cookie", ipa: "ˈkʊki", ko: "쿠키", type: "word" },
+    { en: "candy", ipa: "ˈkændi", ko: "사탕", type: "word" },
+    { en: "chicken", ipa: "ˈtʃɪkɪn", ko: "닭고기", type: "word" },
+    { en: "cheese", ipa: "tʃiːz", ko: "치즈", type: "word" },
+    { en: "noodle", ipa: "ˈnuːdl", ko: "국수", type: "word" },
+    { en: "teacher", ipa: "ˈtiːtʃər", ko: "선생님", type: "word" },
+    { en: "student", ipa: "ˈstuːdnt", ko: "학생", type: "word" },
+    { en: "classroom", ipa: "ˈklæsruːm", ko: "교실", type: "word" },
+    { en: "library", ipa: "ˈlaɪbreri", ko: "도서관", type: "word" },
+    { en: "playground", ipa: "ˈpleɪɡraʊnd", ko: "운동장", type: "word" },
+    { en: "notebook", ipa: "ˈnoʊtbʊk", ko: "공책", type: "word" },
+    { en: "eraser", ipa: "ɪˈreɪsər", ko: "지우개", type: "word" },
+    { en: "ruler", ipa: "ˈruːlər", ko: "자", type: "word" },
+    { en: "scissors", ipa: "ˈsɪzərz", ko: "가위", type: "word" },
+    { en: "glue", ipa: "ɡluː", ko: "풀", type: "word" },
+    { en: "school", ipa: "skuːl", ko: "학교", type: "word" },
+    { en: "hospital", ipa: "ˈhɑːspɪtl", ko: "병원", type: "word" },
+    { en: "park", ipa: "pɑːrk", ko: "공원", type: "word" },
+    { en: "store", ipa: "stɔːr", ko: "가게", type: "word" },
+    { en: "zoo", ipa: "zuː", ko: "동물원", type: "word" },
+    { en: "farm", ipa: "fɑːrm", ko: "농장", type: "word" },
+    { en: "house", ipa: "haʊs", ko: "집", type: "word" },
+    { en: "restaurant", ipa: "ˈrestrɑːnt", ko: "식당", type: "word" },
+    { en: "bank", ipa: "bæŋk", ko: "은행", type: "word" },
+    { en: "museum", ipa: "mjuˈziːəm", ko: "박물관", type: "word" },
+    { en: "elephant", ipa: "ˈelɪfənt", ko: "코끼리", type: "word" },
+    { en: "giraffe", ipa: "dʒəˈræf", ko: "기린", type: "word" },
+    { en: "zebra", ipa: "ˈziːbrə", ko: "얼룩말", type: "word" },
+    { en: "monkey", ipa: "ˈmʌŋki", ko: "원숭이", type: "word" },
+    { en: "horse", ipa: "hɔːrs", ko: "말", type: "word" },
+    { en: "sheep", ipa: "ʃiːp", ko: "양", type: "word" },
+    { en: "goat", ipa: "ɡoʊt", ko: "염소", type: "word" },
+    { en: "frog", ipa: "frɔːɡ", ko: "개구리", type: "word" },
+    { en: "snake", ipa: "sneɪk", ko: "뱀", type: "word" },
+    { en: "turtle", ipa: "ˈtɜːrtl", ko: "거북이", type: "word" },
+    { en: "read", ipa: "riːd", ko: "읽다", type: "word" },
+    { en: "write", ipa: "raɪt", ko: "쓰다", type: "word" },
+    { en: "draw", ipa: "drɔː", ko: "그리다", type: "word" },
+    { en: "paint", ipa: "peɪnt", ko: "페인트칠하다, 그리다", type: "word" },
+    { en: "play", ipa: "pleɪ", ko: "놀다", type: "word" },
+    { en: "study", ipa: "ˈstʌdi", ko: "공부하다", type: "word" },
+    { en: "listen", ipa: "ˈlɪsn", ko: "듣다", type: "word" },
+    { en: "speak", ipa: "spiːk", ko: "말하다", type: "word" },
+    { en: "watch", ipa: "wɑːtʃ", ko: "보다", type: "word" },
+    { en: "help", ipa: "help", ko: "돕다", type: "word" },
+    { en: "tall", ipa: "tɔːl", ko: "키가 큰", type: "word" },
+    { en: "short", ipa: "ʃɔːrt", ko: "키가 작은, 짧은", type: "word" },
+    { en: "long", ipa: "lɔːŋ", ko: "긴", type: "word" },
+    { en: "fast", ipa: "fæst", ko: "빠른", type: "word" },
+    { en: "slow", ipa: "sloʊ", ko: "느린", type: "word" },
+    { en: "strong", ipa: "strɔːŋ", ko: "힘센, 강한", type: "word" },
+    { en: "weak", ipa: "wiːk", ko: "약한", type: "word" },
+    { en: "kind", ipa: "kaɪnd", ko: "친절한", type: "word" },
+    { en: "funny", ipa: "ˈfʌni", ko: "재미있는, 웃긴", type: "word" },
+    { en: "pretty", ipa: "ˈprɪti", ko: "예쁜", type: "word" },
+    { en: "money", ipa: "ˈmʌni", ko: "돈", type: "word" },
+    { en: "letter", ipa: "ˈletər", ko: "편지", type: "word" },
+    { en: "picture", ipa: "ˈpɪktʃər", ko: "그림, 사진", type: "word" },
+    { en: "story", ipa: "ˈstɔːri", ko: "이야기", type: "word" },
+    { en: "song", ipa: "sɔːŋ", ko: "노래", type: "word" },
+    { en: "game", ipa: "ɡeɪm", ko: "게임", type: "word" },
+    { en: "party", ipa: "ˈpɑːrti", ko: "파티", type: "word" },
+    { en: "gift", ipa: "ɡɪft", ko: "선물", type: "word" },
+    { en: "contest", ipa: "ˈkɑːntest", ko: "대회", type: "word" },
+    { en: "trip", ipa: "trɪp", ko: "여행", type: "word" },
+    { en: "camera", ipa: "ˈkæmərə", ko: "카메라", type: "word" },
+    { en: "phone", ipa: "foʊn", ko: "전화", type: "word" },
+    { en: "computer", ipa: "kəmˈpjuːtər", ko: "컴퓨터", type: "word" },
+    { en: "internet", ipa: "ˈɪntərnet", ko: "인터넷", type: "word" },
+    { en: "January", ipa: "ˈdʒænjueri", ko: "1월", type: "word" },
+    { en: "February", ipa: "ˈfebrueri", ko: "2월", type: "word" },
+    { en: "March", ipa: "mɑːrtʃ", ko: "3월", type: "word" },
+    { en: "April", ipa: "ˈeɪprəl", ko: "4월", type: "word" },
+    { en: "May", ipa: "meɪ", ko: "5월", type: "word" },
+    { en: "June", ipa: "dʒuːn", ko: "6월", type: "word" },
+    { en: "July", ipa: "dʒuˈlaɪ", ko: "7월", type: "word" },
+    { en: "August", ipa: "ˈɔːɡəst", ko: "8월", type: "word" },
+    { en: "September", ipa: "sepˈtembər", ko: "9월", type: "word" },
+    { en: "October", ipa: "ɑːkˈtoʊbər", ko: "10월", type: "word" },
+    { en: "November", ipa: "noʊˈvembər", ko: "11월", type: "word" },
+    { en: "December", ipa: "dɪˈsembər", ko: "12월", type: "word" },
+    { en: "hour", ipa: "ˈaʊər", ko: "시간", type: "word" },
+    { en: "minute", ipa: "ˈmɪnɪt", ko: "분", type: "word" },
+    { en: "second", ipa: "ˈsekənd", ko: "초", type: "word" },
+    { en: "o'clock", ipa: "əˈklɑːk", ko: "~시 정각", type: "word" },
+    { en: "noon", ipa: "nuːn", ko: "정오", type: "word" },
+    { en: "midnight", ipa: "ˈmɪdnaɪt", ko: "자정", type: "word" },
+    { en: "early", ipa: "ˈɜːrli", ko: "이른, 일찍", type: "word" },
+    { en: "late", ipa: "leɪt", ko: "늦은, 늦게", type: "word" },
+    { en: "before", ipa: "bɪˈfɔːr", ko: "~전에", type: "word" },
+    { en: "after", ipa: "ˈæftər", ko: "~후에", type: "word" },
+    { en: "math", ipa: "mæθ", ko: "수학", type: "word" },
+    { en: "science", ipa: "ˈsaɪəns", ko: "과학", type: "word" },
+    { en: "English", ipa: "ˈɪŋɡlɪʃ", ko: "영어", type: "word" },
+    { en: "history", ipa: "ˈhɪstri", ko: "역사", type: "word" },
+    { en: "art", ipa: "ɑːrt", ko: "미술", type: "word" },
+    { en: "music", ipa: "ˈmjuːzɪk", ko: "음악", type: "word" },
+    { en: "homework", ipa: "ˈhoʊmwɜːrk", ko: "숙제", type: "word" },
+    { en: "test", ipa: "test", ko: "시험", type: "word" },
+    { en: "grade", ipa: "ɡreɪd", ko: "학년, 성적", type: "word" },
+    { en: "lesson", ipa: "ˈlesn", ko: "수업, 교훈", type: "word" },
+    { en: "pencil case", ipa: "ˈpensl keɪs", ko: "필통", type: "word" },
+    { en: "backpack", ipa: "ˈbækpæk", ko: "배낭, 책가방", type: "word" },
+    { en: "uniform", ipa: "ˈjuːnɪfɔːrm", ko: "교복, 제복", type: "word" },
+    { en: "textbook", ipa: "ˈtekstbʊk", ko: "교과서", type: "word" },
+    { en: "blackboard", ipa: "ˈblækbɔːrd", ko: "칠판", type: "word" },
+    { en: "calendar", ipa: "ˈkælɪndər", ko: "달력", type: "word" },
+    { en: "dictionary", ipa: "ˈdɪkʃəneri", ko: "사전", type: "word" },
+    { en: "folder", ipa: "ˈfoʊldər", ko: "폴더, 서류철", type: "word" },
+    { en: "marker", ipa: "ˈmɑːrkər", ko: "매직펜", type: "word" },
+    { en: "stapler", ipa: "ˈsteɪplər", ko: "스테이플러", type: "word" },
+    { en: "post office", ipa: "ˈpoʊst ɔːfɪs", ko: "우체국", type: "word" },
+    { en: "police station", ipa: "pəˈliːs steɪʃn", ko: "경찰서", type: "word" },
+    { en: "bakery", ipa: "ˈbeɪkəri", ko: "빵집", type: "word" },
+    { en: "airport", ipa: "ˈerpɔːrt", ko: "공항", type: "word" },
+    { en: "station", ipa: "ˈsteɪʃn", ko: "역", type: "word" },
+    { en: "hotel", ipa: "hoʊˈtel", ko: "호텔", type: "word" },
+    { en: "theater", ipa: "ˈθiːətər", ko: "극장", type: "word" },
+    { en: "church", ipa: "tʃɜːrtʃ", ko: "교회", type: "word" },
+    { en: "gym", ipa: "dʒɪm", ko: "체육관", type: "word" },
+    { en: "cafe", ipa: "kæˈfeɪ", ko: "카페", type: "word" },
+    { en: "camel", ipa: "ˈkæml", ko: "낙타", type: "word" },
+    { en: "hippo", ipa: "ˈhɪpoʊ", ko: "하마", type: "word" },
+    { en: "rhino", ipa: "ˈraɪnoʊ", ko: "코뿔소", type: "word" },
+    { en: "squirrel", ipa: "ˈskwɜːrəl", ko: "다람쥐", type: "word" },
+    { en: "hamster", ipa: "ˈhæmstər", ko: "햄스터", type: "word" },
+    { en: "parrot", ipa: "ˈpærət", ko: "앵무새", type: "word" },
+    { en: "eagle", ipa: "ˈiːɡl", ko: "독수리", type: "word" },
+    { en: "peacock", ipa: "ˈpiːkɑːk", ko: "공작", type: "word" },
+    { en: "octopus", ipa: "ˈɑːktəpəs", ko: "문어", type: "word" },
+    { en: "jellyfish", ipa: "ˈdʒelifɪʃ", ko: "해파리", type: "word" },
+    { en: "pepper", ipa: "ˈpepər", ko: "후추, 고추", type: "word" },
+    { en: "sauce", ipa: "sɔːs", ko: "소스", type: "word" },
+    { en: "soda", ipa: "ˈsoʊdə", ko: "탄산음료", type: "word" },
+    { en: "tea", ipa: "tiː", ko: "차", type: "word" },
+    { en: "coffee", ipa: "ˈkɔːfi", ko: "커피", type: "word" },
+    { en: "pancake", ipa: "ˈpænkeɪk", ko: "팬케이크", type: "word" },
+    { en: "donut", ipa: "ˈdoʊnʌt", ko: "도넛", type: "word" },
+    { en: "toast", ipa: "toʊst", ko: "토스트", type: "word" },
+    { en: "curry", ipa: "ˈkɜːri", ko: "카레", type: "word" },
+    { en: "dumpling", ipa: "ˈdʌmplɪŋ", ko: "만두", type: "word" },
+    { en: "begin", ipa: "bɪˈɡɪn", ko: "시작하다", type: "word" },
+    { en: "finish", ipa: "ˈfɪnɪʃ", ko: "끝내다", type: "word" },
+    { en: "learn", ipa: "lɜːrn", ko: "배우다", type: "word" },
+    { en: "teach", ipa: "tiːtʃ", ko: "가르치다", type: "word" },
+    { en: "ask", ipa: "æsk", ko: "묻다", type: "word" },
+    { en: "answer", ipa: "ˈænsər", ko: "대답하다", type: "word" },
+    { en: "call", ipa: "kɔːl", ko: "부르다, 전화하다", type: "word" },
+    { en: "visit", ipa: "ˈvɪzɪt", ko: "방문하다", type: "word" },
+    { en: "invite", ipa: "ɪnˈvaɪt", ko: "초대하다", type: "word" },
+    { en: "join", ipa: "dʒɔɪn", ko: "함께하다, 가입하다", type: "word" },
+    { en: "choose", ipa: "tʃuːz", ko: "고르다", type: "word" },
+    { en: "buy", ipa: "baɪ", ko: "사다", type: "word" },
+    { en: "sell", ipa: "sel", ko: "팔다", type: "word" },
+    { en: "bring", ipa: "brɪŋ", ko: "가져오다", type: "word" },
+    { en: "send", ipa: "send", ko: "보내다", type: "word" },
+    { en: "show", ipa: "ʃoʊ", ko: "보여주다", type: "word" },
+    { en: "tell", ipa: "tel", ko: "말하다", type: "word" },
+    { en: "use", ipa: "juːz", ko: "사용하다", type: "word" },
+    { en: "need", ipa: "niːd", ko: "필요하다", type: "word" },
+    { en: "keep", ipa: "kiːp", ko: "간직하다, 유지하다", type: "word" },
+    { en: "move", ipa: "muːv", ko: "움직이다", type: "word" },
+    { en: "turn", ipa: "tɜːrn", ko: "돌다, 돌리다", type: "word" },
+    { en: "stop", ipa: "stɑːp", ko: "멈추다", type: "word" },
+    { en: "start", ipa: "stɑːrt", ko: "시작하다", type: "word" },
+    { en: "follow", ipa: "ˈfɑːloʊ", ko: "따라가다", type: "word" },
+    { en: "change", ipa: "tʃeɪndʒ", ko: "바꾸다", type: "word" },
+    { en: "enter", ipa: "ˈentər", ko: "들어가다", type: "word" },
+    { en: "leave", ipa: "liːv", ko: "떠나다", type: "word" },
+    { en: "arrive", ipa: "əˈraɪv", ko: "도착하다", type: "word" },
+    { en: "return", ipa: "rɪˈtɜːrn", ko: "돌아오다, 돌려주다", type: "word" },
+    { en: "beautiful", ipa: "ˈbjuːtɪfl", ko: "아름다운", type: "word" },
+    { en: "ugly", ipa: "ˈʌɡli", ko: "못생긴", type: "word" },
+    { en: "smart", ipa: "smɑːrt", ko: "똑똑한", type: "word" },
+    { en: "lazy", ipa: "ˈleɪzi", ko: "게으른", type: "word" },
+    { en: "hungry", ipa: "ˈhʌŋɡri", ko: "배고픈", type: "word" },
+    { en: "thirsty", ipa: "ˈθɜːrsti", ko: "목마른", type: "word" },
+    { en: "sleepy", ipa: "ˈsliːpi", ko: "졸린", type: "word" },
+    { en: "bright", ipa: "braɪt", ko: "밝은", type: "word" },
+    { en: "colorful", ipa: "ˈkʌlərfl", ko: "다채로운", type: "word" },
+    { en: "delicious", ipa: "dɪˈlɪʃəs", ko: "맛있는", type: "word" },
+    { en: "favorite", ipa: "ˈfeɪvərɪt", ko: "가장 좋아하는", type: "word" },
+    { en: "famous", ipa: "ˈfeɪməs", ko: "유명한", type: "word" },
+    { en: "special", ipa: "ˈspeʃl", ko: "특별한", type: "word" },
+    { en: "real", ipa: "ˈriːəl", ko: "진짜의", type: "word" },
+    { en: "same", ipa: "seɪm", ko: "같은", type: "word" },
+    { en: "true", ipa: "truː", ko: "사실인", type: "word" },
+    { en: "correct", ipa: "kəˈrekt", ko: "정확한, 맞는", type: "word" },
+    { en: "lucky", ipa: "ˈlʌki", ko: "운이 좋은", type: "word" },
+    { en: "boring", ipa: "ˈbɔːrɪŋ", ko: "지루한", type: "word" },
+    { en: "exciting", ipa: "ɪkˈsaɪtɪŋ", ko: "신나는", type: "word" },
+    { en: "love", ipa: "lʌv", ko: "사랑하다", type: "word" },
+    { en: "hate", ipa: "heɪt", ko: "싫어하다", type: "word" },
+    { en: "hope", ipa: "hoʊp", ko: "바라다, 희망", type: "word" },
+    { en: "wish", ipa: "wɪʃ", ko: "소원하다", type: "word" },
+    { en: "miss", ipa: "mɪs", ko: "그리워하다, 놓치다", type: "word" },
+    { en: "thank", ipa: "θæŋk", ko: "감사하다", type: "word" },
+    { en: "care", ipa: "ker", ko: "돌보다, 신경 쓰다", type: "word" },
+    { en: "share", ipa: "ʃer", ko: "나누다", type: "word" },
+    { en: "promise", ipa: "ˈprɑːmɪs", ko: "약속하다", type: "word" },
+    { en: "forgive", ipa: "fərˈɡɪv", ko: "용서하다", type: "word" },
+    { en: "hobby", ipa: "ˈhɑːbi", ko: "취미", type: "word" },
+    { en: "movie", ipa: "ˈmuːvi", ko: "영화", type: "word" },
+    { en: "cartoon", ipa: "kɑːrˈtuːn", ko: "만화", type: "word" },
+    { en: "drawing", ipa: "ˈdrɔːɪŋ", ko: "그림 그리기", type: "word" },
+    { en: "reading", ipa: "ˈriːdɪŋ", ko: "독서", type: "word" },
+    { en: "hiking", ipa: "ˈhaɪkɪŋ", ko: "등산", type: "word" },
+    { en: "fishing", ipa: "ˈfɪʃɪŋ", ko: "낚시", type: "word" },
+    { en: "camping", ipa: "ˈkæmpɪŋ", ko: "캠핑", type: "word" },
+    { en: "shopping", ipa: "ˈʃɑːpɪŋ", ko: "쇼핑", type: "word" },
+    { en: "traveling", ipa: "ˈtrævlɪŋ", ko: "여행하기", type: "word" },
+    { en: "body", ipa: "ˈbɑːdi", ko: "몸", type: "word" },
+    { en: "health", ipa: "helθ", ko: "건강", type: "word" },
+    { en: "fever", ipa: "ˈfiːvər", ko: "열", type: "word" },
+    { en: "cough", ipa: "kɔːf", ko: "기침", type: "word" },
+    { en: "hurt", ipa: "hɜːrt", ko: "다치게 하다, 아프다", type: "word" },
+    { en: "skin", ipa: "skɪn", ko: "피부", type: "word" },
+    { en: "bone", ipa: "boʊn", ko: "뼈", type: "word" },
+    { en: "blood", ipa: "blʌd", ko: "피", type: "word" },
+    { en: "brain", ipa: "breɪn", ko: "뇌", type: "word" },
+    { en: "breath", ipa: "breθ", ko: "숨", type: "word" },
+    { en: "in", ipa: "ɪn", ko: "~안에", type: "word" },
+    { en: "on", ipa: "ɑːn", ko: "~위에", type: "word" },
+    { en: "under", ipa: "ˈʌndər", ko: "~아래에", type: "word" },
+    { en: "over", ipa: "ˈoʊvər", ko: "~위로, ~너머", type: "word" },
+    { en: "behind", ipa: "bɪˈhaɪnd", ko: "~뒤에", type: "word" },
+    { en: "between", ipa: "bɪˈtwiːn", ko: "~사이에", type: "word" },
+    { en: "next to", ipa: "ˈnekst tuː", ko: "~옆에", type: "word" },
+    { en: "with", ipa: "wɪð", ko: "~와 함께", type: "word" },
+    { en: "about", ipa: "əˈbaʊt", ko: "~에 대하여", type: "word" },
+    { en: "from", ipa: "frʌm", ko: "~로부터", type: "word" },
+    { en: "weather", ipa: "ˈweðər", ko: "날씨", type: "word" },
+    { en: "rainbow", ipa: "ˈreɪnboʊ", ko: "무지개", type: "word" },
+    { en: "storm", ipa: "stɔːrm", ko: "폭풍", type: "word" },
+    { en: "fog", ipa: "fɔːɡ", ko: "안개", type: "word" },
+    { en: "shadow", ipa: "ˈʃædoʊ", ko: "그림자", type: "word" },
+    { en: "sunrise", ipa: "ˈsʌnraɪz", ko: "해돋이", type: "word" },
+    { en: "sunset", ipa: "ˈsʌnset", ko: "일몰", type: "word" },
+    { en: "season", ipa: "ˈsiːzn", ko: "계절", type: "word" },
+    { en: "dust", ipa: "dʌst", ko: "먼지", type: "word" },
+    { en: "mud", ipa: "mʌd", ko: "진흙", type: "word" },
+    { en: "home", ipa: "hoʊm", ko: "집, 가정", type: "word" },
+    { en: "room", ipa: "ruːm", ko: "방", type: "word" },
+    { en: "apartment", ipa: "əˈpɑːrtmənt", ko: "아파트", type: "word" },
+    { en: "neighbor", ipa: "ˈneɪbər", ko: "이웃", type: "word" },
+    { en: "address", ipa: "ˈædres", ko: "주소", type: "word" },
+    { en: "yard", ipa: "jɑːrd", ko: "마당", type: "word" },
+    { en: "stairs", ipa: "sterz", ko: "계단", type: "word" },
+    { en: "gate", ipa: "ɡeɪt", ko: "대문", type: "word" },
+    { en: "curtain", ipa: "ˈkɜːrtn", ko: "커튼", type: "word" },
+    { en: "closet", ipa: "ˈklɑːzɪt", ko: "옷장", type: "word" },
+    { en: "umbrella", ipa: "ʌmˈbrelə", ko: "우산", type: "word" },
+    { en: "ring", ipa: "rɪŋ", ko: "반지", type: "word" },
+    { en: "belt", ipa: "belt", ko: "벨트", type: "word" },
+    { en: "button", ipa: "ˈbʌtn", ko: "단추", type: "word" },
+    { en: "pocket", ipa: "ˈpɑːkɪt", ko: "주머니", type: "word" },
+    { en: "wallet", ipa: "ˈwɑːlɪt", ko: "지갑", type: "word" },
+    { en: "glasses", ipa: "ˈɡlæsɪz", ko: "안경", type: "word" },
+    { en: "ribbon", ipa: "ˈrɪbən", ko: "리본", type: "word" },
+    { en: "toothbrush", ipa: "ˈtuːθbrʌʃ", ko: "칫솔", type: "word" },
+    { en: "word", ipa: "wɜːrd", ko: "단어", type: "word" },
+    { en: "sentence", ipa: "ˈsentəns", ko: "문장", type: "word" },
+    { en: "number", ipa: "ˈnʌmbər", ko: "숫자", type: "word" },
+    { en: "page", ipa: "peɪdʒ", ko: "쪽, 페이지", type: "word" },
+    { en: "list", ipa: "lɪst", ko: "목록", type: "word" },
+    { en: "group", ipa: "ɡruːp", ko: "무리, 그룹", type: "word" },
+    { en: "team", ipa: "tiːm", ko: "팀", type: "word" },
+    { en: "class", ipa: "klæs", ko: "학급, 수업", type: "word" },
+    { en: "necklace", ipa: "ˈnekləs", ko: "목걸이", type: "word" },
+  ],
+  4: [
+    { en: "morning", ipa: "ˈmɔːrnɪŋ", ko: "아침", type: "word" },
+    { en: "afternoon", ipa: "ˌæftərˈnuːn", ko: "오후", type: "word" },
+    { en: "evening", ipa: "ˈiːvnɪŋ", ko: "저녁", type: "word" },
+    { en: "night", ipa: "naɪt", ko: "밤", type: "word" },
+    { en: "today", ipa: "təˈdeɪ", ko: "오늘", type: "word" },
+    { en: "tomorrow", ipa: "təˈmɔːroʊ", ko: "내일", type: "word" },
+    { en: "yesterday", ipa: "ˈjestərdeɪ", ko: "어제", type: "word" },
+    { en: "weekend", ipa: "ˈwiːkend", ko: "주말", type: "word" },
+    { en: "holiday", ipa: "ˈhɑːlədeɪ", ko: "휴일, 방학", type: "word" },
+    { en: "birthday", ipa: "ˈbɜːrθdeɪ", ko: "생일", type: "word" },
+    { en: "up", ipa: "ʌp", ko: "위로", type: "word" },
+    { en: "down", ipa: "daʊn", ko: "아래로", type: "word" },
+    { en: "left", ipa: "left", ko: "왼쪽", type: "word" },
+    { en: "right", ipa: "raɪt", ko: "오른쪽", type: "word" },
+    { en: "front", ipa: "frʌnt", ko: "앞", type: "word" },
+    { en: "back", ipa: "bæk", ko: "뒤", type: "word" },
+    { en: "near", ipa: "nɪr", ko: "가까운", type: "word" },
+    { en: "far", ipa: "fɑːr", ko: "먼", type: "word" },
+    { en: "inside", ipa: "ɪnˈsaɪd", ko: "안에", type: "word" },
+    { en: "outside", ipa: "aʊtˈsaɪd", ko: "밖에", type: "word" },
+    { en: "angry", ipa: "ˈæŋɡri", ko: "화난", type: "word" },
+    { en: "scared", ipa: "skerd", ko: "무서운, 겁먹은", type: "word" },
+    { en: "surprised", ipa: "sərˈpraɪzd", ko: "놀란", type: "word" },
+    { en: "excited", ipa: "ɪkˈsaɪtɪd", ko: "신난", type: "word" },
+    { en: "tired", ipa: "ˈtaɪərd", ko: "피곤한", type: "word" },
+    { en: "bored", ipa: "bɔːrd", ko: "지루한", type: "word" },
+    { en: "worried", ipa: "ˈwɜːrid", ko: "걱정하는", type: "word" },
+    { en: "proud", ipa: "praʊd", ko: "자랑스러운", type: "word" },
+    { en: "nervous", ipa: "ˈnɜːrvəs", ko: "긴장한", type: "word" },
+    { en: "jealous", ipa: "ˈdʒeləs", ko: "질투하는", type: "word" },
+    { en: "thunder", ipa: "ˈθʌndər", ko: "천둥", type: "word" },
+    { en: "lightning", ipa: "ˈlaɪtnɪŋ", ko: "번개", type: "word" },
+    { en: "cloud", ipa: "klaʊd", ko: "구름", type: "word" },
+    { en: "wind", ipa: "wɪnd", ko: "바람", type: "word" },
+    { en: "ocean", ipa: "ˈoʊʃn", ko: "바다, 대양", type: "word" },
+    { en: "mountain", ipa: "ˈmaʊntn", ko: "산", type: "word" },
+    { en: "river", ipa: "ˈrɪvər", ko: "강", type: "word" },
+    { en: "lake", ipa: "leɪk", ko: "호수", type: "word" },
+    { en: "island", ipa: "ˈaɪlənd", ko: "섬", type: "word" },
+    { en: "forest", ipa: "ˈfɔːrɪst", ko: "숲", type: "word" },
+    { en: "doctor", ipa: "ˈdɑːktər", ko: "의사", type: "word" },
+    { en: "nurse", ipa: "nɜːrs", ko: "간호사", type: "word" },
+    { en: "police officer", ipa: "pəˈliːs ˈɔːfɪsər", ko: "경찰관", type: "word" },
+    { en: "firefighter", ipa: "ˈfaɪərfaɪtər", ko: "소방관", type: "word" },
+    { en: "farmer", ipa: "ˈfɑːrmər", ko: "농부", type: "word" },
+    { en: "cook", ipa: "kʊk", ko: "요리사", type: "word" },
+    { en: "singer", ipa: "ˈsɪŋər", ko: "가수", type: "word" },
+    { en: "dancer", ipa: "ˈdænsər", ko: "무용수", type: "word" },
+    { en: "pilot", ipa: "ˈpaɪlət", ko: "조종사", type: "word" },
+    { en: "driver", ipa: "ˈdraɪvər", ko: "운전기사", type: "word" },
+    { en: "soccer", ipa: "ˈsɑːkər", ko: "축구", type: "word" },
+    { en: "baseball", ipa: "ˈbeɪsbɔːl", ko: "야구", type: "word" },
+    { en: "basketball", ipa: "ˈbæskɪtbɔːl", ko: "농구", type: "word" },
+    { en: "tennis", ipa: "ˈtenɪs", ko: "테니스", type: "word" },
+    { en: "swimming", ipa: "ˈswɪmɪŋ", ko: "수영", type: "word" },
+    { en: "skating", ipa: "ˈskeɪtɪŋ", ko: "스케이트", type: "word" },
+    { en: "skiing", ipa: "ˈskiːɪŋ", ko: "스키", type: "word" },
+    { en: "badminton", ipa: "ˈbædmɪntən", ko: "배드민턴", type: "word" },
+    { en: "volleyball", ipa: "ˈvɑːlibɔːl", ko: "배구", type: "word" },
+    { en: "jogging", ipa: "ˈdʒɑːɡɪŋ", ko: "조깅", type: "word" },
+    { en: "bake", ipa: "beɪk", ko: "굽다", type: "word" },
+    { en: "clean", ipa: "kliːn", ko: "청소하다", type: "word" },
+    { en: "wash", ipa: "wɑːʃ", ko: "씻다", type: "word" },
+    { en: "fix", ipa: "fɪks", ko: "고치다", type: "word" },
+    { en: "build", ipa: "bɪld", ko: "짓다, 만들다", type: "word" },
+    { en: "carry", ipa: "ˈkæri", ko: "나르다", type: "word" },
+    { en: "catch", ipa: "kætʃ", ko: "잡다", type: "word" },
+    { en: "throw", ipa: "θroʊ", ko: "던지다", type: "word" },
+    { en: "kick", ipa: "kɪk", ko: "차다", type: "word" },
+    { en: "hit", ipa: "hɪt", ko: "치다", type: "word" },
+    { en: "heavy", ipa: "ˈhevi", ko: "무거운", type: "word" },
+    { en: "light", ipa: "laɪt", ko: "가벼운", type: "word" },
+    { en: "deep", ipa: "diːp", ko: "깊은", type: "word" },
+    { en: "shallow", ipa: "ˈʃæloʊ", ko: "얕은", type: "word" },
+    { en: "wide", ipa: "waɪd", ko: "넓은", type: "word" },
+    { en: "narrow", ipa: "ˈnæroʊ", ko: "좁은", type: "word" },
+    { en: "thick", ipa: "θɪk", ko: "두꺼운", type: "word" },
+    { en: "thin", ipa: "θɪn", ko: "얇은, 마른", type: "word" },
+    { en: "loud", ipa: "laʊd", ko: "시끄러운", type: "word" },
+    { en: "quiet", ipa: "ˈkwaɪət", ko: "조용한", type: "word" },
+    { en: "car", ipa: "kɑːr", ko: "자동차", type: "word" },
+    { en: "bus", ipa: "bʌs", ko: "버스", type: "word" },
+    { en: "train", ipa: "treɪn", ko: "기차", type: "word" },
+    { en: "airplane", ipa: "ˈerpleɪn", ko: "비행기", type: "word" },
+    { en: "ship", ipa: "ʃɪp", ko: "배", type: "word" },
+    { en: "bicycle", ipa: "ˈbaɪsɪkl", ko: "자전거", type: "word" },
+    { en: "subway", ipa: "ˈsʌbweɪ", ko: "지하철", type: "word" },
+    { en: "taxi", ipa: "ˈtæksi", ko: "택시", type: "word" },
+    { en: "truck", ipa: "trʌk", ko: "트럭", type: "word" },
+    { en: "motorcycle", ipa: "ˈmoʊtərsaɪkl", ko: "오토바이", type: "word" },
+    { en: "kitchen", ipa: "ˈkɪtʃɪn", ko: "부엌", type: "word" },
+    { en: "bedroom", ipa: "ˈbedruːm", ko: "침실", type: "word" },
+    { en: "bathroom", ipa: "ˈbæθruːm", ko: "욕실", type: "word" },
+    { en: "living room", ipa: "ˈlɪvɪŋ ruːm", ko: "거실", type: "word" },
+    { en: "garden", ipa: "ˈɡɑːrdn", ko: "정원", type: "word" },
+    { en: "roof", ipa: "ruːf", ko: "지붕", type: "word" },
+    { en: "wall", ipa: "wɔːl", ko: "벽", type: "word" },
+    { en: "floor", ipa: "flɔːr", ko: "바닥", type: "word" },
+    { en: "ceiling", ipa: "ˈsiːlɪŋ", ko: "천장", type: "word" },
+    { en: "garage", ipa: "ɡəˈrɑːʒ", ko: "차고", type: "word" },
+    { en: "scientist", ipa: "ˈsaɪəntɪst", ko: "과학자", type: "word" },
+    { en: "engineer", ipa: "ˌendʒɪˈnɪr", ko: "기술자, 엔지니어", type: "word" },
+    { en: "writer", ipa: "ˈraɪtər", ko: "작가", type: "word" },
+    { en: "artist", ipa: "ˈɑːrtɪst", ko: "예술가", type: "word" },
+    { en: "reporter", ipa: "rɪˈpɔːrtər", ko: "기자", type: "word" },
+    { en: "lawyer", ipa: "ˈlɔːjər", ko: "변호사", type: "word" },
+    { en: "dentist", ipa: "ˈdentɪst", ko: "치과의사", type: "word" },
+    { en: "vet", ipa: "vet", ko: "수의사", type: "word" },
+    { en: "soldier", ipa: "ˈsoʊldʒər", ko: "군인", type: "word" },
+    { en: "chef", ipa: "ʃef", ko: "요리사", type: "word" },
+    { en: "ticket", ipa: "ˈtɪkɪt", ko: "표", type: "word" },
+    { en: "passport", ipa: "ˈpæspɔːrt", ko: "여권", type: "word" },
+    { en: "luggage", ipa: "ˈlʌɡɪdʒ", ko: "짐, 수하물", type: "word" },
+    { en: "tour", ipa: "tʊr", ko: "관광", type: "word" },
+    { en: "guide", ipa: "ɡaɪd", ko: "안내자, 안내하다", type: "word" },
+    { en: "journey", ipa: "ˈdʒɜːrni", ko: "여정", type: "word" },
+    { en: "flight", ipa: "flaɪt", ko: "비행, 항공편", type: "word" },
+    { en: "seat", ipa: "siːt", ko: "좌석", type: "word" },
+    { en: "schedule", ipa: "ˈskedʒuːl", ko: "일정", type: "word" },
+    { en: "delay", ipa: "dɪˈleɪ", ko: "지연, 미루다", type: "word" },
+    { en: "desert", ipa: "ˈdezərt", ko: "사막", type: "word" },
+    { en: "valley", ipa: "ˈvæli", ko: "계곡", type: "word" },
+    { en: "cave", ipa: "keɪv", ko: "동굴", type: "word" },
+    { en: "waterfall", ipa: "ˈwɔːtərfɔːl", ko: "폭포", type: "word" },
+    { en: "field", ipa: "fiːld", ko: "들판", type: "word" },
+    { en: "coast", ipa: "koʊst", ko: "해안", type: "word" },
+    { en: "jungle", ipa: "ˈdʒʌŋɡl", ko: "정글", type: "word" },
+    { en: "pond", ipa: "pɑːnd", ko: "연못", type: "word" },
+    { en: "cliff", ipa: "klɪf", ko: "절벽", type: "word" },
+    { en: "canyon", ipa: "ˈkænjən", ko: "협곡", type: "word" },
+    { en: "insect", ipa: "ˈɪnsekt", ko: "곤충", type: "word" },
+    { en: "feather", ipa: "ˈfeðər", ko: "깃털", type: "word" },
+    { en: "wing", ipa: "wɪŋ", ko: "날개", type: "word" },
+    { en: "tail", ipa: "teɪl", ko: "꼬리", type: "word" },
+    { en: "paw", ipa: "pɔː", ko: "동물의 발", type: "word" },
+    { en: "nest", ipa: "nest", ko: "둥지", type: "word" },
+    { en: "hive", ipa: "haɪv", ko: "벌집", type: "word" },
+    { en: "fur", ipa: "fɜːr", ko: "털", type: "word" },
+    { en: "claw", ipa: "klɔː", ko: "발톱", type: "word" },
+    { en: "shell", ipa: "ʃel", ko: "껍데기", type: "word" },
+    { en: "borrow", ipa: "ˈbɑːroʊ", ko: "빌리다", type: "word" },
+    { en: "lend", ipa: "lend", ko: "빌려주다", type: "word" },
+    { en: "collect", ipa: "kəˈlekt", ko: "모으다", type: "word" },
+    { en: "gather", ipa: "ˈɡæðər", ko: "모이다, 모으다", type: "word" },
+    { en: "prepare", ipa: "prɪˈper", ko: "준비하다", type: "word" },
+    { en: "protect", ipa: "prəˈtekt", ko: "보호하다", type: "word" },
+    { en: "receive", ipa: "rɪˈsiːv", ko: "받다", type: "word" },
+    { en: "deliver", ipa: "dɪˈlɪvər", ko: "배달하다", type: "word" },
+    { en: "reach", ipa: "riːtʃ", ko: "닿다, 도달하다", type: "word" },
+    { en: "spread", ipa: "spred", ko: "펼치다, 퍼지다", type: "word" },
+    { en: "hide", ipa: "haɪd", ko: "숨다, 숨기다", type: "word" },
+    { en: "order", ipa: "ˈɔːrdər", ko: "주문하다, 순서", type: "word" },
+    { en: "serve", ipa: "sɜːrv", ko: "제공하다", type: "word" },
+    { en: "taste", ipa: "teɪst", ko: "맛보다, 맛", type: "word" },
+    { en: "smell", ipa: "smel", ko: "냄새 맡다, 냄새", type: "word" },
+    { en: "touch", ipa: "tʌtʃ", ko: "만지다", type: "word" },
+    { en: "feel", ipa: "fiːl", ko: "느끼다", type: "word" },
+    { en: "notice", ipa: "ˈnoʊtɪs", ko: "알아차리다", type: "word" },
+    { en: "guess", ipa: "ɡes", ko: "추측하다", type: "word" },
+    { en: "solve", ipa: "sɑːlv", ko: "해결하다", type: "word" },
+    { en: "shout", ipa: "ʃaʊt", ko: "소리치다", type: "word" },
+    { en: "whisper", ipa: "ˈwɪspər", ko: "속삭이다", type: "word" },
+    { en: "knock", ipa: "nɑːk", ko: "두드리다", type: "word" },
+    { en: "wave", ipa: "weɪv", ko: "손을 흔들다, 파도", type: "word" },
+    { en: "point", ipa: "pɔɪnt", ko: "가리키다, 요점", type: "word" },
+    { en: "nod", ipa: "nɑːd", ko: "고개를 끄덕이다", type: "word" },
+    { en: "greet", ipa: "ɡriːt", ko: "인사하다", type: "word" },
+    { en: "introduce", ipa: "ˌɪntrəˈduːs", ko: "소개하다", type: "word" },
+    { en: "apologize", ipa: "əˈpɑːlədʒaɪz", ko: "사과하다", type: "word" },
+    { en: "celebrate", ipa: "ˈselɪbreɪt", ko: "축하하다", type: "word" },
+    { en: "comfortable", ipa: "ˈkʌmftəbl", ko: "편안한", type: "word" },
+    { en: "simple", ipa: "ˈsɪmpl", ko: "단순한", type: "word" },
+    { en: "useful", ipa: "ˈjuːsfl", ko: "유용한", type: "word" },
+    { en: "useless", ipa: "ˈjuːsləs", ko: "쓸모없는", type: "word" },
+    { en: "popular", ipa: "ˈpɑːpjələr", ko: "인기 있는", type: "word" },
+    { en: "natural", ipa: "ˈnætʃrəl", ko: "자연의, 자연스러운", type: "word" },
+    { en: "fresh", ipa: "freʃ", ko: "신선한", type: "word" },
+    { en: "sharp", ipa: "ʃɑːrp", ko: "날카로운", type: "word" },
+    { en: "smooth", ipa: "smuːð", ko: "매끄러운", type: "word" },
+    { en: "rough", ipa: "rʌf", ko: "거친", type: "word" },
+    { en: "tight", ipa: "taɪt", ko: "꽉 끼는", type: "word" },
+    { en: "loose", ipa: "luːs", ko: "헐렁한", type: "word" },
+    { en: "salty", ipa: "ˈsɔːlti", ko: "짠", type: "word" },
+    { en: "spicy", ipa: "ˈspaɪsi", ko: "매운", type: "word" },
+    { en: "bitter", ipa: "ˈbɪtər", ko: "쓴", type: "word" },
+    { en: "crowded", ipa: "ˈkraʊdɪd", ko: "붐비는", type: "word" },
+    { en: "silent", ipa: "ˈsaɪlənt", ko: "조용한", type: "word" },
+    { en: "gentle", ipa: "ˈdʒentl", ko: "부드러운, 온화한", type: "word" },
+    { en: "wild", ipa: "waɪld", ko: "야생의", type: "word" },
+    { en: "modern", ipa: "ˈmɑːdərn", ko: "현대의", type: "word" },
+    { en: "always", ipa: "ˈɔːlweɪz", ko: "항상", type: "word" },
+    { en: "usually", ipa: "ˈjuːʒuəli", ko: "보통", type: "word" },
+    { en: "often", ipa: "ˈɔːfn", ko: "자주", type: "word" },
+    { en: "sometimes", ipa: "ˈsʌmtaɪmz", ko: "가끔", type: "word" },
+    { en: "never", ipa: "ˈnevər", ko: "결코 ~않다", type: "word" },
+    { en: "very", ipa: "ˈveri", ko: "매우", type: "word" },
+    { en: "really", ipa: "ˈriːəli", ko: "정말로", type: "word" },
+    { en: "together", ipa: "təˈɡeðər", ko: "함께", type: "word" },
+    { en: "again", ipa: "əˈɡen", ko: "다시", type: "word" },
+    { en: "maybe", ipa: "ˈmeɪbi", ko: "아마도", type: "word" },
+    { en: "lonely", ipa: "ˈloʊnli", ko: "외로운", type: "word" },
+    { en: "upset", ipa: "ʌpˈset", ko: "속상한", type: "word" },
+    { en: "calm", ipa: "kɑːm", ko: "차분한", type: "word" },
+    { en: "glad", ipa: "ɡlæd", ko: "기쁜", type: "word" },
+    { en: "thankful", ipa: "ˈθæŋkfl", ko: "감사하는", type: "word" },
+    { en: "hopeful", ipa: "ˈhoʊpfl", ko: "희망적인", type: "word" },
+    { en: "afraid", ipa: "əˈfreɪd", ko: "두려워하는", type: "word" },
+    { en: "shocked", ipa: "ʃɑːkt", ko: "충격을 받은", type: "word" },
+    { en: "embarrassed", ipa: "ɪmˈbærəst", ko: "부끄러운", type: "word" },
+    { en: "relaxed", ipa: "rɪˈlækst", ko: "느긋한", type: "word" },
+    { en: "screen", ipa: "skriːn", ko: "화면", type: "word" },
+    { en: "keyboard", ipa: "ˈkiːbɔːrd", ko: "키보드", type: "word" },
+    { en: "website", ipa: "ˈwebsaɪt", ko: "웹사이트", type: "word" },
+    { en: "email", ipa: "ˈiːmeɪl", ko: "이메일", type: "word" },
+    { en: "password", ipa: "ˈpæswɜːrd", ko: "비밀번호", type: "word" },
+    { en: "message", ipa: "ˈmesɪdʒ", ko: "메시지", type: "word" },
+    { en: "video", ipa: "ˈvɪdioʊ", ko: "영상", type: "word" },
+    { en: "photo", ipa: "ˈfoʊtoʊ", ko: "사진", type: "word" },
+    { en: "app", ipa: "æp", ko: "앱", type: "word" },
+    { en: "robot", ipa: "ˈroʊbɑːt", ko: "로봇", type: "word" },
+    { en: "report", ipa: "rɪˈpɔːrt", ko: "보고서", type: "word" },
+    { en: "project", ipa: "ˈprɑːdʒekt", ko: "과제, 프로젝트", type: "word" },
+    { en: "quiz", ipa: "kwɪz", ko: "쪽지시험, 퀴즈", type: "word" },
+    { en: "prize", ipa: "praɪz", ko: "상", type: "word" },
+    { en: "rule", ipa: "ruːl", ko: "규칙", type: "word" },
+    { en: "recess", ipa: "ˈriːses", ko: "쉬는 시간", type: "word" },
+    { en: "field trip", ipa: "ˈfiːld trɪp", ko: "현장 학습", type: "word" },
+    { en: "club", ipa: "klʌb", ko: "동아리", type: "word" },
+    { en: "exam", ipa: "ɪɡˈzæm", ko: "시험", type: "word" },
+    { en: "review", ipa: "rɪˈvjuː", ko: "복습하다, 검토", type: "word" },
+    { en: "recipe", ipa: "ˈresəpi", ko: "조리법", type: "word" },
+    { en: "oven", ipa: "ˈʌvn", ko: "오븐", type: "word" },
+    { en: "pan", ipa: "pæn", ko: "프라이팬", type: "word" },
+    { en: "pot", ipa: "pɑːt", ko: "냄비", type: "word" },
+    { en: "fry", ipa: "fraɪ", ko: "튀기다, 부치다", type: "word" },
+    { en: "boil", ipa: "bɔɪl", ko: "끓이다", type: "word" },
+    { en: "mix", ipa: "mɪks", ko: "섞다", type: "word" },
+    { en: "slice", ipa: "slaɪs", ko: "얇게 썰다, 조각", type: "word" },
+    { en: "freeze", ipa: "friːz", ko: "얼리다", type: "word" },
+    { en: "dish", ipa: "dɪʃ", ko: "접시, 요리", type: "word" },
+    { en: "size", ipa: "saɪz", ko: "크기", type: "word" },
+    { en: "weight", ipa: "weɪt", ko: "무게", type: "word" },
+    { en: "length", ipa: "leŋθ", ko: "길이", type: "word" },
+    { en: "height", ipa: "haɪt", ko: "높이, 키", type: "word" },
+    { en: "half", ipa: "hæf", ko: "절반", type: "word" },
+    { en: "quarter", ipa: "ˈkwɔːrtər", ko: "4분의 1", type: "word" },
+    { en: "pair", ipa: "per", ko: "한 쌍", type: "word" },
+    { en: "dozen", ipa: "ˈdʌzn", ko: "12개", type: "word" },
+    { en: "few", ipa: "fjuː", ko: "몇 안 되는", type: "word" },
+    { en: "many", ipa: "ˈmeni", ko: "많은", type: "word" },
+    { en: "elevator", ipa: "ˈelɪveɪtər", ko: "엘리베이터", type: "word" },
+    { en: "hallway", ipa: "ˈhɔːlweɪ", ko: "복도", type: "word" },
+    { en: "basement", ipa: "ˈbeɪsmənt", ko: "지하실", type: "word" },
+    { en: "balcony", ipa: "ˈbælkəni", ko: "발코니", type: "word" },
+    { en: "sidewalk", ipa: "ˈsaɪdwɔːk", ko: "인도", type: "word" },
+    { en: "crosswalk", ipa: "ˈkrɔːswɔːk", ko: "횡단보도", type: "word" },
+    { en: "traffic light", ipa: "ˈtræfɪk laɪt", ko: "신호등", type: "word" },
+    { en: "corner", ipa: "ˈkɔːrnər", ko: "모퉁이", type: "word" },
+    { en: "block", ipa: "blɑːk", ko: "구역, 블록", type: "word" },
+    { en: "parking lot", ipa: "ˈpɑːrkɪŋ lɑːt", ko: "주차장", type: "word" },
+    { en: "helmet", ipa: "ˈhelmɪt", ko: "헬멧", type: "word" },
+    { en: "seat belt", ipa: "ˈsiːt belt", ko: "안전벨트", type: "word" },
+    { en: "accident", ipa: "ˈæksɪdənt", ko: "사고", type: "word" },
+    { en: "danger", ipa: "ˈdeɪndʒər", ko: "위험", type: "word" },
+    { en: "emergency", ipa: "ɪˈmɜːrdʒənsi", ko: "비상 사태", type: "word" },
+    { en: "rescue", ipa: "ˈreskjuː", ko: "구조하다", type: "word" },
+    { en: "safety", ipa: "ˈseɪfti", ko: "안전", type: "word" },
+    { en: "ambulance", ipa: "ˈæmbjələns", ko: "구급차", type: "word" },
+    { en: "bandage", ipa: "ˈbændɪdʒ", ko: "붕대", type: "word" },
+    { en: "mask", ipa: "mæsk", ko: "마스크", type: "word" },
+    { en: "once", ipa: "wʌns", ko: "한 번", type: "word" },
+    { en: "twice", ipa: "twaɪs", ko: "두 번", type: "word" },
+    { en: "daily", ipa: "ˈdeɪli", ko: "매일의", type: "word" },
+    { en: "weekly", ipa: "ˈwiːkli", ko: "매주의", type: "word" },
+    { en: "monthly", ipa: "ˈmʌnθli", ko: "매달의", type: "word" },
+    { en: "future", ipa: "ˈfjuːtʃər", ko: "미래", type: "word" },
+    { en: "past", ipa: "pæst", ko: "과거", type: "word" },
+    { en: "present", ipa: "ˈpreznt", ko: "현재, 선물", type: "word" },
+    { en: "moment", ipa: "ˈmoʊmənt", ko: "순간", type: "word" },
+    { en: "soon", ipa: "suːn", ko: "곧", type: "word" },
+    { en: "gas", ipa: "ɡæs", ko: "기체, 가스", type: "word" },
+    { en: "liquid", ipa: "ˈlɪkwɪd", ko: "액체", type: "word" },
+    { en: "solid", ipa: "ˈsɑːlɪd", ko: "고체", type: "word" },
+    { en: "metal", ipa: "ˈmetl", ko: "금속", type: "word" },
+    { en: "wood", ipa: "wʊd", ko: "나무, 목재", type: "word" },
+    { en: "plastic", ipa: "ˈplæstɪk", ko: "플라스틱", type: "word" },
+    { en: "glass", ipa: "ɡlæs", ko: "유리", type: "word" },
+    { en: "stone", ipa: "stoʊn", ko: "돌", type: "word" },
+    { en: "cotton", ipa: "ˈkɑːtn", ko: "면, 솜", type: "word" },
+    { en: "rubber", ipa: "ˈrʌbər", ko: "고무", type: "word" },
+    { en: "race", ipa: "reɪs", ko: "경주", type: "word" },
+    { en: "match", ipa: "mætʃ", ko: "경기, 시합", type: "word" },
+    { en: "score", ipa: "skɔːr", ko: "점수", type: "word" },
+    { en: "coach", ipa: "koʊtʃ", ko: "코치", type: "word" },
+    { en: "player", ipa: "ˈpleɪər", ko: "선수", type: "word" },
+    { en: "winner", ipa: "ˈwɪnər", ko: "우승자", type: "word" },
+    { en: "loser", ipa: "ˈluːzər", ko: "패자", type: "word" },
+    { en: "medal", ipa: "ˈmedl", ko: "메달", type: "word" },
+    { en: "referee", ipa: "ˌrefəˈriː", ko: "심판", type: "word" },
+    { en: "cheer", ipa: "tʃɪr", ko: "응원하다", type: "word" },
+  ],
+  5: [
+    { en: "idea", ipa: "aɪˈdiːə", ko: "생각, 아이디어", type: "word" },
+    { en: "problem", ipa: "ˈprɑːbləm", ko: "문제", type: "word" },
+    { en: "solution", ipa: "səˈluːʃn", ko: "해결책", type: "word" },
+    { en: "reason", ipa: "ˈriːzn", ko: "이유", type: "word" },
+    { en: "example", ipa: "ɪɡˈzæmpl", ko: "예시", type: "word" },
+    { en: "subject", ipa: "ˈsʌbdʒɪkt", ko: "과목, 주제", type: "word" },
+    { en: "question", ipa: "ˈkwestʃən", ko: "질문", type: "word" },
+    { en: "answer", ipa: "ˈænsər", ko: "대답", type: "word" },
+    { en: "fact", ipa: "fækt", ko: "사실", type: "word" },
+    { en: "opinion", ipa: "əˈpɪnjən", ko: "의견", type: "word" },
+    { en: "decide", ipa: "dɪˈsaɪd", ko: "결정하다", type: "word" },
+    { en: "believe", ipa: "bɪˈliːv", ko: "믿다", type: "word" },
+    { en: "understand", ipa: "ˌʌndərˈstænd", ko: "이해하다", type: "word" },
+    { en: "remember", ipa: "rɪˈmembər", ko: "기억하다", type: "word" },
+    { en: "forget", ipa: "fərˈɡet", ko: "잊다", type: "word" },
+    { en: "imagine", ipa: "ɪˈmædʒɪn", ko: "상상하다", type: "word" },
+    { en: "explain", ipa: "ɪkˈspleɪn", ko: "설명하다", type: "word" },
+    { en: "agree", ipa: "əˈɡriː", ko: "동의하다", type: "word" },
+    { en: "disagree", ipa: "ˌdɪsəˈɡriː", ko: "동의하지 않다", type: "word" },
+    { en: "suggest", ipa: "səˈdʒest", ko: "제안하다", type: "word" },
+    { en: "difficult", ipa: "ˈdɪfɪkəlt", ko: "어려운", type: "word" },
+    { en: "easy", ipa: "ˈiːzi", ko: "쉬운", type: "word" },
+    { en: "important", ipa: "ɪmˈpɔːrtnt", ko: "중요한", type: "word" },
+    { en: "dangerous", ipa: "ˈdeɪndʒərəs", ko: "위험한", type: "word" },
+    { en: "safe", ipa: "seɪf", ko: "안전한", type: "word" },
+    { en: "careful", ipa: "ˈkerfl", ko: "조심스러운", type: "word" },
+    { en: "careless", ipa: "ˈkerləs", ko: "부주의한", type: "word" },
+    { en: "honest", ipa: "ˈɑːnɪst", ko: "정직한", type: "word" },
+    { en: "brave", ipa: "breɪv", ko: "용감한", type: "word" },
+    { en: "shy", ipa: "ʃaɪ", ko: "수줍은", type: "word" },
+    { en: "planet", ipa: "ˈplænɪt", ko: "행성", type: "word" },
+    { en: "earth", ipa: "ɜːrθ", ko: "지구", type: "word" },
+    { en: "moonlight", ipa: "ˈmuːnlaɪt", ko: "달빛", type: "word" },
+    { en: "gravity", ipa: "ˈɡrævəti", ko: "중력", type: "word" },
+    { en: "energy", ipa: "ˈenərdʒi", ko: "에너지", type: "word" },
+    { en: "environment", ipa: "ɪnˈvaɪrənmənt", ko: "환경", type: "word" },
+    { en: "pollution", ipa: "pəˈluːʃn", ko: "오염", type: "word" },
+    { en: "recycle", ipa: "riːˈsaɪkl", ko: "재활용하다", type: "word" },
+    { en: "temperature", ipa: "ˈtemprətʃər", ko: "온도, 기온", type: "word" },
+    { en: "volcano", ipa: "vɑːlˈkeɪnoʊ", ko: "화산", type: "word" },
+    { en: "country", ipa: "ˈkʌntri", ko: "나라", type: "word" },
+    { en: "culture", ipa: "ˈkʌltʃər", ko: "문화", type: "word" },
+    { en: "language", ipa: "ˈlæŋɡwɪdʒ", ko: "언어", type: "word" },
+    { en: "tradition", ipa: "trəˈdɪʃn", ko: "전통", type: "word" },
+    { en: "custom", ipa: "ˈkʌstəm", ko: "관습", type: "word" },
+    { en: "festival", ipa: "ˈfestɪvl", ko: "축제", type: "word" },
+    { en: "ceremony", ipa: "ˈserəmoʊni", ko: "의식, 예식", type: "word" },
+    { en: "government", ipa: "ˈɡʌvərnmənt", ko: "정부", type: "word" },
+    { en: "citizen", ipa: "ˈsɪtɪzn", ko: "시민", type: "word" },
+    { en: "community", ipa: "kəˈmjuːnəti", ko: "공동체, 지역사회", type: "word" },
+    { en: "exercise", ipa: "ˈeksərsaɪz", ko: "운동", type: "word" },
+    { en: "diet", ipa: "ˈdaɪət", ko: "식단", type: "word" },
+    { en: "illness", ipa: "ˈɪlnəs", ko: "질병", type: "word" },
+    { en: "medicine", ipa: "ˈmedɪsn", ko: "약", type: "word" },
+    { en: "symptom", ipa: "ˈsɪmptəm", ko: "증상", type: "word" },
+    { en: "injury", ipa: "ˈɪndʒəri", ko: "부상", type: "word" },
+    { en: "patient", ipa: "ˈpeɪʃnt", ko: "환자", type: "word" },
+    { en: "treatment", ipa: "ˈtriːtmənt", ko: "치료", type: "word" },
+    { en: "checkup", ipa: "ˈtʃekʌp", ko: "건강검진", type: "word" },
+    { en: "vitamin", ipa: "ˈvaɪtəmɪn", ko: "비타민", type: "word" },
+    { en: "price", ipa: "praɪs", ko: "가격", type: "word" },
+    { en: "discount", ipa: "ˈdɪskaʊnt", ko: "할인", type: "word" },
+    { en: "receipt", ipa: "rɪˈsiːt", ko: "영수증", type: "word" },
+    { en: "customer", ipa: "ˈkʌstəmər", ko: "손님, 고객", type: "word" },
+    { en: "cashier", ipa: "kæˈʃɪr", ko: "계산원", type: "word" },
+    { en: "budget", ipa: "ˈbʌdʒɪt", ko: "예산", type: "word" },
+    { en: "expensive", ipa: "ɪkˈspensɪv", ko: "비싼", type: "word" },
+    { en: "cheap", ipa: "tʃiːp", ko: "싼", type: "word" },
+    { en: "save", ipa: "seɪv", ko: "저축하다, 아끼다", type: "word" },
+    { en: "spend", ipa: "spend", ko: "쓰다, 소비하다", type: "word" },
+    { en: "break a leg", ko: "행운을 빌어! (공연 전에 쓰는 응원 표현)", type: "idiom" },
+    { en: "piece of cake", ko: "식은 죽 먹기, 아주 쉬운 일", type: "idiom" },
+    { en: "under the weather", ko: "몸이 좀 안 좋은", type: "idiom" },
+    { en: "once in a blue moon", ko: "아주 가끔, 매우 드물게", type: "idiom" },
+    { en: "hit the books", ko: "열심히 공부하다", type: "idiom" },
+    { en: "let the cat out of the bag", ko: "비밀을 무심코 말해버리다", type: "idiom" },
+    { en: "cost an arm and a leg", ko: "매우 비싸다", type: "idiom" },
+    { en: "raining cats and dogs", ko: "비가 억수같이 오다", type: "idiom" },
+    { en: "spill the beans", ko: "비밀을 누설하다", type: "idiom" },
+    { en: "on cloud nine", ko: "매우 행복한, 구름 위를 걷는 기분인", type: "idiom" },
+    { en: "practice", ipa: "ˈpræktɪs", ko: "연습하다", type: "word" },
+    { en: "improve", ipa: "ɪmˈpruːv", ko: "향상시키다", type: "word" },
+    { en: "achieve", ipa: "əˈtʃiːv", ko: "성취하다, 달성하다", type: "word" },
+    { en: "succeed", ipa: "səkˈsiːd", ko: "성공하다", type: "word" },
+    { en: "fail", ipa: "feɪl", ko: "실패하다", type: "word" },
+    { en: "try", ipa: "traɪ", ko: "노력하다, 시도하다", type: "word" },
+    { en: "focus", ipa: "ˈfoʊkəs", ko: "집중하다", type: "word" },
+    { en: "concentrate", ipa: "ˈkɑːnsntreɪt", ko: "집중하다", type: "word" },
+    { en: "compete", ipa: "kəmˈpiːt", ko: "경쟁하다", type: "word" },
+    { en: "participate", ipa: "pɑːrˈtɪsɪpeɪt", ko: "참여하다", type: "word" },
+    { en: "confident", ipa: "ˈkɑːnfɪdənt", ko: "자신감 있는", type: "word" },
+    { en: "curious", ipa: "ˈkjʊriəs", ko: "호기심 많은", type: "word" },
+    { en: "creative", ipa: "kriˈeɪtɪv", ko: "창의적인", type: "word" },
+    { en: "active", ipa: "ˈæktɪv", ko: "활동적인", type: "word" },
+    { en: "positive", ipa: "ˈpɑːzətɪv", ko: "긍정적인", type: "word" },
+    { en: "negative", ipa: "ˈneɡətɪv", ko: "부정적인", type: "word" },
+    { en: "polite", ipa: "pəˈlaɪt", ko: "예의 바른", type: "word" },
+    { en: "rude", ipa: "ruːd", ko: "무례한", type: "word" },
+    { en: "generous", ipa: "ˈdʒenərəs", ko: "관대한, 너그러운", type: "word" },
+    { en: "humble", ipa: "ˈhʌmbl", ko: "겸손한", type: "word" },
+    { en: "experiment", ipa: "ɪkˈsperɪmənt", ko: "실험", type: "word" },
+    { en: "theory", ipa: "ˈθiːəri", ko: "이론", type: "word" },
+    { en: "atom", ipa: "ˈætəm", ko: "원자", type: "word" },
+    { en: "cell", ipa: "sel", ko: "세포", type: "word" },
+    { en: "molecule", ipa: "ˈmɑːlɪkjuːl", ko: "분자", type: "word" },
+    { en: "chemical", ipa: "ˈkemɪkl", ko: "화학 물질", type: "word" },
+    { en: "mixture", ipa: "ˈmɪkstʃər", ko: "혼합물", type: "word" },
+    { en: "force", ipa: "fɔːrs", ko: "힘", type: "word" },
+    { en: "motion", ipa: "ˈmoʊʃn", ko: "움직임", type: "word" },
+    { en: "speed", ipa: "spiːd", ko: "속도", type: "word" },
+    { en: "distance", ipa: "ˈdɪstəns", ko: "거리", type: "word" },
+    { en: "mass", ipa: "mæs", ko: "질량", type: "word" },
+    { en: "volume", ipa: "ˈvɑːljuːm", ko: "부피, 음량", type: "word" },
+    { en: "magnet", ipa: "ˈmæɡnət", ko: "자석", type: "word" },
+    { en: "electricity", ipa: "ɪˌlekˈtrɪsəti", ko: "전기", type: "word" },
+    { en: "circuit", ipa: "ˈsɜːrkɪt", ko: "회로", type: "word" },
+    { en: "orbit", ipa: "ˈɔːrbɪt", ko: "궤도", type: "word" },
+    { en: "telescope", ipa: "ˈtelɪskoʊp", ko: "망원경", type: "word" },
+    { en: "microscope", ipa: "ˈmaɪkrəskoʊp", ko: "현미경", type: "word" },
+    { en: "gravity force", ipa: "ˈɡrævəti fɔːrs", ko: "중력", type: "word" },
+    { en: "habitat", ipa: "ˈhæbɪtæt", ko: "서식지", type: "word" },
+    { en: "species", ipa: "ˈspiːʃiːz", ko: "종(種)", type: "word" },
+    { en: "oxygen", ipa: "ˈɑːksɪdʒən", ko: "산소", type: "word" },
+    { en: "carbon", ipa: "ˈkɑːrbən", ko: "탄소", type: "word" },
+    { en: "soil", ipa: "sɔɪl", ko: "흙, 토양", type: "word" },
+    { en: "fossil", ipa: "ˈfɑːsl", ko: "화석", type: "word" },
+    { en: "mineral", ipa: "ˈmɪnərəl", ko: "광물", type: "word" },
+    { en: "glacier", ipa: "ˈɡleɪʃər", ko: "빙하", type: "word" },
+    { en: "atmosphere", ipa: "ˈætməsfɪr", ko: "대기, 분위기", type: "word" },
+    { en: "erosion", ipa: "ɪˈroʊʒn", ko: "침식", type: "word" },
+    { en: "law", ipa: "lɔː", ko: "법", type: "word" },
+    { en: "rights", ipa: "raɪts", ko: "권리", type: "word" },
+    { en: "duty", ipa: "ˈduːti", ko: "의무", type: "word" },
+    { en: "election", ipa: "ɪˈlekʃn", ko: "선거", type: "word" },
+    { en: "vote", ipa: "voʊt", ko: "투표하다", type: "word" },
+    { en: "leader", ipa: "ˈliːdər", ko: "지도자", type: "word" },
+    { en: "president", ipa: "ˈprezɪdənt", ko: "대통령", type: "word" },
+    { en: "mayor", ipa: "ˈmeɪər", ko: "시장(직책)", type: "word" },
+    { en: "court", ipa: "kɔːrt", ko: "법원", type: "word" },
+    { en: "judge", ipa: "dʒʌdʒ", ko: "판사, 판단하다", type: "word" },
+    { en: "income", ipa: "ˈɪnkʌm", ko: "수입", type: "word" },
+    { en: "profit", ipa: "ˈprɑːfɪt", ko: "이익", type: "word" },
+    { en: "loss", ipa: "lɔːs", ko: "손실", type: "word" },
+    { en: "salary", ipa: "ˈsæləri", ko: "급여", type: "word" },
+    { en: "loan", ipa: "loʊn", ko: "대출", type: "word" },
+    { en: "debt", ipa: "det", ko: "빚", type: "word" },
+    { en: "invest", ipa: "ɪnˈvest", ko: "투자하다", type: "word" },
+    { en: "wealth", ipa: "welθ", ko: "부, 재산", type: "word" },
+    { en: "poverty", ipa: "ˈpɑːvərti", ko: "빈곤", type: "word" },
+    { en: "charity", ipa: "ˈtʃærəti", ko: "자선", type: "word" },
+    { en: "assignment", ipa: "əˈsaɪnmənt", ko: "과제", type: "word" },
+    { en: "deadline", ipa: "ˈdedlaɪn", ko: "마감일", type: "word" },
+    { en: "semester", ipa: "sɪˈmestər", ko: "학기", type: "word" },
+    { en: "lecture", ipa: "ˈlektʃər", ko: "강의", type: "word" },
+    { en: "notes", ipa: "noʊts", ko: "필기, 메모", type: "word" },
+    { en: "essay", ipa: "ˈeseɪ", ko: "에세이, 글", type: "word" },
+    { en: "chapter", ipa: "ˈtʃæptər", ko: "장(章)", type: "word" },
+    { en: "paragraph", ipa: "ˈpærəɡræf", ko: "문단", type: "word" },
+    { en: "summary", ipa: "ˈsʌməri", ko: "요약", type: "word" },
+    { en: "definition", ipa: "ˌdefɪˈnɪʃn", ko: "정의", type: "word" },
+    { en: "accept", ipa: "əkˈsept", ko: "받아들이다", type: "word" },
+    { en: "refuse", ipa: "rɪˈfjuːz", ko: "거절하다", type: "word" },
+    { en: "admit", ipa: "ədˈmɪt", ko: "인정하다", type: "word" },
+    { en: "deny", ipa: "dɪˈnaɪ", ko: "부인하다", type: "word" },
+    { en: "allow", ipa: "əˈlaʊ", ko: "허락하다", type: "word" },
+    { en: "avoid", ipa: "əˈvɔɪd", ko: "피하다", type: "word" },
+    { en: "expect", ipa: "ɪkˈspekt", ko: "기대하다", type: "word" },
+    { en: "prefer", ipa: "prɪˈfɜːr", ko: "더 좋아하다", type: "word" },
+    { en: "realize", ipa: "ˈriːəlaɪz", ko: "깨닫다", type: "word" },
+    { en: "recognize", ipa: "ˈrekəɡnaɪz", ko: "알아보다", type: "word" },
+    { en: "consider", ipa: "kənˈsɪdər", ko: "고려하다", type: "word" },
+    { en: "require", ipa: "rɪˈkwaɪər", ko: "필요로 하다", type: "word" },
+    { en: "provide", ipa: "prəˈvaɪd", ko: "제공하다", type: "word" },
+    { en: "prevent", ipa: "prɪˈvent", ko: "막다, 예방하다", type: "word" },
+    { en: "reduce", ipa: "rɪˈduːs", ko: "줄이다", type: "word" },
+    { en: "increase", ipa: "ɪnˈkriːs", ko: "늘리다", type: "word" },
+    { en: "include", ipa: "ɪnˈkluːd", ko: "포함하다", type: "word" },
+    { en: "contain", ipa: "kənˈteɪn", ko: "담고 있다", type: "word" },
+    { en: "connect", ipa: "kəˈnekt", ko: "연결하다", type: "word" },
+    { en: "separate", ipa: "ˈsepəreɪt", ko: "분리하다", type: "word" },
+    { en: "replace", ipa: "rɪˈpleɪs", ko: "대체하다", type: "word" },
+    { en: "repeat", ipa: "rɪˈpiːt", ko: "반복하다", type: "word" },
+    { en: "prove", ipa: "pruːv", ko: "증명하다", type: "word" },
+    { en: "predict", ipa: "prɪˈdɪkt", ko: "예측하다", type: "word" },
+    { en: "measure", ipa: "ˈmeʒər", ko: "측정하다", type: "word" },
+    { en: "observe", ipa: "əbˈzɜːrv", ko: "관찰하다", type: "word" },
+    { en: "affect", ipa: "əˈfekt", ko: "영향을 주다", type: "word" },
+    { en: "depend", ipa: "dɪˈpend", ko: "의존하다", type: "word" },
+    { en: "manage", ipa: "ˈmænɪdʒ", ko: "관리하다, 해내다", type: "word" },
+    { en: "respect", ipa: "rɪˈspekt", ko: "존중하다", type: "word" },
+    { en: "possible", ipa: "ˈpɑːsəbl", ko: "가능한", type: "word" },
+    { en: "impossible", ipa: "ɪmˈpɑːsəbl", ko: "불가능한", type: "word" },
+    { en: "certain", ipa: "ˈsɜːrtn", ko: "확실한", type: "word" },
+    { en: "likely", ipa: "ˈlaɪkli", ko: "~할 것 같은", type: "word" },
+    { en: "obvious", ipa: "ˈɑːbviəs", ko: "분명한", type: "word" },
+    { en: "serious", ipa: "ˈsɪriəs", ko: "심각한, 진지한", type: "word" },
+    { en: "terrible", ipa: "ˈterəbl", ko: "끔찍한", type: "word" },
+    { en: "wonderful", ipa: "ˈwʌndərfl", ko: "멋진", type: "word" },
+    { en: "awful", ipa: "ˈɔːfl", ko: "형편없는", type: "word" },
+    { en: "perfect", ipa: "ˈpɜːrfɪkt", ko: "완벽한", type: "word" },
+    { en: "normal", ipa: "ˈnɔːrml", ko: "보통의", type: "word" },
+    { en: "strange", ipa: "streɪndʒ", ko: "이상한", type: "word" },
+    { en: "familiar", ipa: "fəˈmɪliər", ko: "익숙한", type: "word" },
+    { en: "foreign", ipa: "ˈfɔːrən", ko: "외국의", type: "word" },
+    { en: "local", ipa: "ˈloʊkl", ko: "지역의", type: "word" },
+    { en: "public", ipa: "ˈpʌblɪk", ko: "공공의", type: "word" },
+    { en: "private", ipa: "ˈpraɪvət", ko: "사적인", type: "word" },
+    { en: "personal", ipa: "ˈpɜːrsənl", ko: "개인적인", type: "word" },
+    { en: "general", ipa: "ˈdʒenrəl", ko: "일반적인", type: "word" },
+    { en: "specific", ipa: "spəˈsɪfɪk", ko: "구체적인", type: "word" },
+    { en: "complete", ipa: "kəmˈpliːt", ko: "완전한, 완료하다", type: "word" },
+    { en: "recent", ipa: "ˈriːsnt", ko: "최근의", type: "word" },
+    { en: "ancient", ipa: "ˈeɪnʃənt", ko: "고대의", type: "word" },
+    { en: "sudden", ipa: "ˈsʌdn", ko: "갑작스러운", type: "word" },
+    { en: "current", ipa: "ˈkɜːrənt", ko: "현재의", type: "word" },
+    { en: "major", ipa: "ˈmeɪdʒər", ko: "주요한", type: "word" },
+    { en: "minor", ipa: "ˈmaɪnər", ko: "사소한", type: "word" },
+    { en: "total", ipa: "ˈtoʊtl", ko: "전체의", type: "word" },
+    { en: "actual", ipa: "ˈæktʃuəl", ko: "실제의", type: "word" },
+    { en: "usual", ipa: "ˈjuːʒuəl", ko: "평소의", type: "word" },
+    { en: "nutrition", ipa: "nuˈtrɪʃn", ko: "영양", type: "word" },
+    { en: "protein", ipa: "ˈproʊtiːn", ko: "단백질", type: "word" },
+    { en: "calorie", ipa: "ˈkæləri", ko: "칼로리", type: "word" },
+    { en: "allergy", ipa: "ˈælərdʒi", ko: "알레르기", type: "word" },
+    { en: "surgery", ipa: "ˈsɜːrdʒəri", ko: "수술", type: "word" },
+    { en: "therapy", ipa: "ˈθerəpi", ko: "치료", type: "word" },
+    { en: "mental", ipa: "ˈmentl", ko: "정신의", type: "word" },
+    { en: "physical", ipa: "ˈfɪzɪkl", ko: "신체의", type: "word" },
+    { en: "recovery", ipa: "rɪˈkʌvəri", ko: "회복", type: "word" },
+    { en: "prescription", ipa: "prɪˈskrɪpʃn", ko: "처방전", type: "word" },
+    { en: "ambitious", ipa: "æmˈbɪʃəs", ko: "야심 있는", type: "word" },
+    { en: "stubborn", ipa: "ˈstʌbərn", ko: "고집 센", type: "word" },
+    { en: "cheerful", ipa: "ˈtʃɪrfl", ko: "쾌활한", type: "word" },
+    { en: "selfish", ipa: "ˈselfɪʃ", ko: "이기적인", type: "word" },
+    { en: "sincere", ipa: "sɪnˈsɪr", ko: "진실한", type: "word" },
+    { en: "sensitive", ipa: "ˈsensətɪv", ko: "예민한", type: "word" },
+    { en: "thoughtful", ipa: "ˈθɔːtfl", ko: "사려 깊은", type: "word" },
+    { en: "independent", ipa: "ˌɪndɪˈpendənt", ko: "독립적인", type: "word" },
+    { en: "reliable", ipa: "rɪˈlaɪəbl", ko: "믿을 만한", type: "word" },
+    { en: "habit", ipa: "ˈhæbɪt", ko: "습관", type: "word" },
+    { en: "effort", ipa: "ˈefərt", ko: "노력", type: "word" },
+    { en: "chance", ipa: "tʃæns", ko: "기회, 가능성", type: "word" },
+    { en: "risk", ipa: "rɪsk", ko: "위험", type: "word" },
+    { en: "benefit", ipa: "ˈbenɪfɪt", ko: "이익, 혜택", type: "word" },
+    { en: "purpose", ipa: "ˈpɜːrpəs", ko: "목적", type: "word" },
+    { en: "method", ipa: "ˈmeθəd", ko: "방법", type: "word" },
+    { en: "result", ipa: "rɪˈzʌlt", ko: "결과", type: "word" },
+    { en: "effect", ipa: "ɪˈfekt", ko: "효과, 영향", type: "word" },
+    { en: "cause", ipa: "kɔːz", ko: "원인, 야기하다", type: "word" },
+    { en: "process", ipa: "ˈprɑːses", ko: "과정", type: "word" },
+    { en: "progress", ipa: "ˈprɑːɡres", ko: "진전", type: "word" },
+    { en: "condition", ipa: "kənˈdɪʃn", ko: "상태, 조건", type: "word" },
+    { en: "situation", ipa: "ˌsɪtʃuˈeɪʃn", ko: "상황", type: "word" },
+    { en: "event", ipa: "ɪˈvent", ko: "사건, 행사", type: "word" },
+    { en: "issue", ipa: "ˈɪʃuː", ko: "문제, 사안", type: "word" },
+    { en: "topic", ipa: "ˈtɑːpɪk", ko: "주제", type: "word" },
+    { en: "detail", ipa: "ˈdiːteɪl", ko: "세부 사항", type: "word" },
+    { en: "quality", ipa: "ˈkwɑːləti", ko: "품질", type: "word" },
+    { en: "quantity", ipa: "ˈkwɑːntəti", ko: "양", type: "word" },
+    { en: "article", ipa: "ˈɑːrtɪkl", ko: "기사", type: "word" },
+    { en: "headline", ipa: "ˈhedlaɪn", ko: "표제", type: "word" },
+    { en: "advertisement", ipa: "ˌædvərˈtaɪzmənt", ko: "광고", type: "word" },
+    { en: "channel", ipa: "ˈtʃænl", ko: "채널", type: "word" },
+    { en: "broadcast", ipa: "ˈbrɔːdkæst", ko: "방송하다", type: "word" },
+    { en: "network", ipa: "ˈnetwɜːrk", ko: "네트워크", type: "word" },
+    { en: "data", ipa: "ˈdeɪtə", ko: "자료, 데이터", type: "word" },
+    { en: "program", ipa: "ˈproʊɡræm", ko: "프로그램", type: "word" },
+    { en: "software", ipa: "ˈsɔːftwer", ko: "소프트웨어", type: "word" },
+    { en: "device", ipa: "dɪˈvaɪs", ko: "기기, 장치", type: "word" },
+    { en: "destination", ipa: "ˌdestɪˈneɪʃn", ko: "목적지", type: "word" },
+    { en: "direction", ipa: "dəˈrekʃn", ko: "방향", type: "word" },
+    { en: "border", ipa: "ˈbɔːrdər", ko: "국경, 경계", type: "word" },
+    { en: "capital", ipa: "ˈkæpɪtl", ko: "수도, 자본", type: "word" },
+    { en: "region", ipa: "ˈriːdʒən", ko: "지역", type: "word" },
+    { en: "route", ipa: "ruːt", ko: "경로", type: "word" },
+    { en: "landmark", ipa: "ˈlændmɑːrk", ko: "랜드마크, 명소", type: "word" },
+    { en: "entrance", ipa: "ˈentrəns", ko: "입구", type: "word" },
+    { en: "exit", ipa: "ˈeksɪt", ko: "출구", type: "word" },
+    { en: "platform", ipa: "ˈplætfɔːrm", ko: "승강장, 플랫폼", type: "word" },
+    { en: "instrument", ipa: "ˈɪnstrəmənt", ko: "악기, 도구", type: "word" },
+    { en: "keep in touch", ko: "연락하고 지내다", type: "idiom", example_en: "Let's keep in touch after summer camp.", example_ko: "여름 캠프 끝나고도 연락하며 지내자." },
+    { en: "make up one's mind", ko: "결심하다", type: "idiom", example_en: "She made up her mind to join the club.", example_ko: "그녀는 그 동아리에 들기로 결심했다." },
+    { en: "look forward to", ko: "~을 기대하다", type: "idiom", example_en: "I look forward to the school trip.", example_ko: "나는 수학여행이 기대된다." },
+    { en: "take a break", ko: "잠시 쉬다", type: "idiom", example_en: "Let's take a break for ten minutes.", example_ko: "10분만 쉬자." },
+    { en: "run into", ko: "우연히 만나다", type: "idiom", example_en: "I ran into my teacher at the mall.", example_ko: "쇼핑몰에서 선생님을 우연히 만났다." },
+    { en: "by heart", ko: "외워서", type: "idiom", example_en: "He learned the poem by heart.", example_ko: "그는 그 시를 통째로 외웠다." },
+    { en: "in a hurry", ko: "서둘러", type: "idiom", example_en: "She left in a hurry this morning.", example_ko: "그녀는 오늘 아침 서둘러 나갔다." },
+    { en: "on time", ko: "제시간에", type: "idiom", example_en: "The bus arrived right on time.", example_ko: "버스가 정확히 제시간에 도착했다." },
+    { en: "all of a sudden", ko: "갑자기", type: "idiom", example_en: "All of a sudden, it started to rain.", example_ko: "갑자기 비가 오기 시작했다." },
+    { en: "as soon as possible", ko: "가능한 한 빨리", type: "idiom", example_en: "Please call me back as soon as possible.", example_ko: "가능한 한 빨리 전화 주세요." },
+    { en: "give someone a hand", ko: "도와주다", type: "idiom", example_en: "Can you give me a hand with this box?", example_ko: "이 상자 옮기는 것 좀 도와줄래?" },
+    { en: "keep your fingers crossed", ko: "행운을 빌다", type: "idiom", example_en: "Keep your fingers crossed for my test!", example_ko: "내 시험 잘 보게 행운을 빌어줘!" },
+    { en: "sleep like a log", ko: "푹 자다", type: "idiom", example_en: "I slept like a log after the field trip.", example_ko: "현장 학습 다녀와서 푹 잤다." },
+    { en: "a bookworm", ko: "책벌레", type: "idiom", example_en: "My sister is a real bookworm.", example_ko: "우리 언니는 진짜 책벌레다." },
+    { en: "easier said than done", ko: "말은 쉽지만 하긴 어렵다", type: "idiom", example_en: "Waking up early is easier said than done.", example_ko: "일찍 일어나는 건 말처럼 쉽지 않다." },
+    { en: "better late than never", ko: "늦더라도 안 하는 것보다 낫다", type: "idiom", example_en: "You finally started studying — better late than never.", example_ko: "드디어 공부를 시작했구나. 늦더라도 안 하는 것보단 낫지." },
+    { en: "from time to time", ko: "가끔씩", type: "idiom", example_en: "We visit grandma from time to time.", example_ko: "우리는 가끔씩 할머니 댁에 간다." },
+    { en: "in the same boat", ko: "같은 처지다", type: "idiom", example_en: "Don't worry, we're all in the same boat.", example_ko: "걱정 마, 우리 모두 같은 처지야." },
+    { en: "hit the sack", ko: "잠자리에 들다", type: "idiom", example_en: "I'm tired, so I'll hit the sack early.", example_ko: "피곤해서 일찍 잘게." },
+    { en: "call it a day", ko: "그만하고 마치다", type: "idiom", example_en: "We've done enough, let's call it a day.", example_ko: "충분히 했으니 오늘은 여기까지 하자." },
+  ],
+  6: [
+    { en: "opportunity", ipa: "ˌɑːpərˈtuːnəti", ko: "기회", type: "word" },
+    { en: "experience", ipa: "ɪkˈspɪriəns", ko: "경험", type: "word" },
+    { en: "achievement", ipa: "əˈtʃiːvmənt", ko: "성취, 업적", type: "word" },
+    { en: "challenge", ipa: "ˈtʃælɪndʒ", ko: "도전", type: "word" },
+    { en: "responsibility", ipa: "rɪˌspɑːnsəˈbɪləti", ko: "책임", type: "word" },
+    { en: "relationship", ipa: "rɪˈleɪʃnʃɪp", ko: "관계", type: "word" },
+    { en: "communication", ipa: "kəˌmjuːnɪˈkeɪʃn", ko: "의사소통", type: "word" },
+    { en: "technology", ipa: "tekˈnɑːlədʒi", ko: "기술", type: "word" },
+    { en: "invention", ipa: "ɪnˈvenʃn", ko: "발명", type: "word" },
+    { en: "discovery", ipa: "dɪˈskʌvəri", ko: "발견", type: "word" },
+    { en: "develop", ipa: "dɪˈveləp", ko: "개발하다, 발전시키다", type: "word" },
+    { en: "create", ipa: "kriˈeɪt", ko: "창조하다, 만들다", type: "word" },
+    { en: "invent", ipa: "ɪnˈvent", ko: "발명하다", type: "word" },
+    { en: "discover", ipa: "dɪˈskʌvər", ko: "발견하다", type: "word" },
+    { en: "research", ipa: "rɪˈsɜːrtʃ", ko: "연구하다", type: "word" },
+    { en: "analyze", ipa: "ˈænəlaɪz", ko: "분석하다", type: "word" },
+    { en: "compare", ipa: "kəmˈper", ko: "비교하다", type: "word" },
+    { en: "contrast", ipa: "kənˈtræst", ko: "대조하다", type: "word" },
+    { en: "describe", ipa: "dɪˈskraɪb", ko: "묘사하다, 설명하다", type: "word" },
+    { en: "summarize", ipa: "ˈsʌməraɪz", ko: "요약하다", type: "word" },
+    { en: "efficient", ipa: "ɪˈfɪʃnt", ko: "효율적인", type: "word" },
+    { en: "effective", ipa: "ɪˈfektɪv", ko: "효과적인", type: "word" },
+    { en: "valuable", ipa: "ˈvæljuəbl", ko: "소중한, 가치 있는", type: "word" },
+    { en: "essential", ipa: "ɪˈsenʃl", ko: "필수적인", type: "word" },
+    { en: "various", ipa: "ˈveriəs", ko: "다양한", type: "word" },
+    { en: "similar", ipa: "ˈsɪmələr", ko: "비슷한", type: "word" },
+    { en: "different", ipa: "ˈdɪfrənt", ko: "다른", type: "word" },
+    { en: "unique", ipa: "juˈniːk", ko: "독특한", type: "word" },
+    { en: "common", ipa: "ˈkɑːmən", ko: "흔한, 공통의", type: "word" },
+    { en: "rare", ipa: "rer", ko: "희귀한, 드문", type: "word" },
+    { en: "economy", ipa: "ɪˈkɑːnəmi", ko: "경제", type: "word" },
+    { en: "industry", ipa: "ˈɪndəstri", ko: "산업", type: "word" },
+    { en: "agriculture", ipa: "ˈæɡrɪkʌltʃər", ko: "농업", type: "word" },
+    { en: "trade", ipa: "treɪd", ko: "무역", type: "word" },
+    { en: "export", ipa: "ɪkˈspɔːrt", ko: "수출하다", type: "word" },
+    { en: "import", ipa: "ɪmˈpɔːrt", ko: "수입하다", type: "word" },
+    { en: "population", ipa: "ˌpɑːpjuˈleɪʃn", ko: "인구", type: "word" },
+    { en: "resource", ipa: "ˈriːsɔːrs", ko: "자원", type: "word" },
+    { en: "continent", ipa: "ˈkɑːntɪnənt", ko: "대륙", type: "word" },
+    { en: "hemisphere", ipa: "ˈhemɪsfɪr", ko: "반구", type: "word" },
+    { en: "graduate", ipa: "ˈɡrædʒueɪt", ko: "졸업하다", type: "word" },
+    { en: "university", ipa: "ˌjuːnɪˈvɜːrsəti", ko: "대학교", type: "word" },
+    { en: "career", ipa: "kəˈrɪr", ko: "직업, 진로", type: "word" },
+    { en: "major", ipa: "ˈmeɪdʒər", ko: "전공", type: "word" },
+    { en: "degree", ipa: "dɪˈɡriː", ko: "학위", type: "word" },
+    { en: "scholarship", ipa: "ˈskɑːlərʃɪp", ko: "장학금", type: "word" },
+    { en: "interview", ipa: "ˈɪntərvjuː", ko: "면접, 인터뷰", type: "word" },
+    { en: "resume", ipa: "ˈrezəmeɪ", ko: "이력서", type: "word" },
+    { en: "skill", ipa: "skɪl", ko: "기술, 능력", type: "word" },
+    { en: "goal", ipa: "ɡoʊl", ko: "목표", type: "word" },
+    { en: "give up", ko: "포기하다", type: "idiom" },
+    { en: "look for", ko: "찾다", type: "idiom" },
+    { en: "find out", ko: "알아내다", type: "idiom" },
+    { en: "work out", ko: "운동하다, (일이) 잘 풀리다", type: "idiom" },
+    { en: "get along", ko: "사이좋게 지내다", type: "idiom" },
+    { en: "come up with", ko: "(아이디어 등을) 생각해내다", type: "idiom" },
+    { en: "put off", ko: "미루다, 연기하다", type: "idiom" },
+    { en: "take care of", ko: "~을 돌보다", type: "idiom" },
+    { en: "look after", ko: "~을 돌보다", type: "idiom" },
+    { en: "run out of", ko: "~이 다 떨어지다", type: "idiom" },
+    { en: "break the ice", ko: "어색한 분위기를 깨다", type: "idiom" },
+    { en: "kill two birds with one stone", ko: "일석이조, 한 번에 두 가지를 해결하다", type: "idiom" },
+    { en: "when pigs fly", ko: "절대 그럴 리 없다 (해가 서쪽에서 뜨면)", type: "idiom" },
+    { en: "the last straw", ko: "더 이상 참을 수 없게 만드는 마지막 한 가지", type: "idiom" },
+    { en: "back to square one", ko: "원점으로 돌아가다", type: "idiom" },
+    { en: "bite the bullet", ko: "이를 악물고 참다, 힘든 일을 받아들이다", type: "idiom" },
+    { en: "get out of hand", ko: "감당할 수 없게 되다, 통제 불능이 되다", type: "idiom" },
+    { en: "hang in there", ko: "포기하지 말고 버텨라", type: "idiom" },
+    { en: "keep an eye on", ko: "~을 잘 지켜보다", type: "idiom" },
+    { en: "out of the blue", ko: "갑자기, 예상치 못하게", type: "idiom" },
+    { en: "climate", ipa: "ˈklaɪmət", ko: "기후", type: "word" },
+    { en: "disaster", ipa: "dɪˈzæstər", ko: "재난, 재해", type: "word" },
+    { en: "drought", ipa: "draʊt", ko: "가뭄", type: "word" },
+    { en: "extinction", ipa: "ɪkˈstɪŋkʃn", ko: "멸종", type: "word" },
+    { en: "endangered", ipa: "ɪnˈdeɪndʒərd", ko: "멸종 위기에 처한", type: "word" },
+    { en: "renewable", ipa: "rɪˈnuːəbl", ko: "재생 가능한", type: "word" },
+    { en: "sustainable", ipa: "səˈsteɪnəbl", ko: "지속 가능한", type: "word" },
+    { en: "greenhouse", ipa: "ˈɡriːnhaʊs", ko: "온실", type: "word" },
+    { en: "ecosystem", ipa: "ˈiːkoʊsɪstəm", ko: "생태계", type: "word" },
+    { en: "biodiversity", ipa: "ˌbaɪoʊdaɪˈvɜːrsəti", ko: "생물 다양성", type: "word" },
+    { en: "sympathy", ipa: "ˈsɪmpəθi", ko: "동정, 공감", type: "word" },
+    { en: "empathy", ipa: "ˈempəθi", ko: "공감", type: "word" },
+    { en: "gratitude", ipa: "ˈɡrætɪtuːd", ko: "감사", type: "word" },
+    { en: "disappointment", ipa: "ˌdɪsəˈpɔɪntmənt", ko: "실망", type: "word" },
+    { en: "satisfaction", ipa: "ˌsætɪsˈfækʃn", ko: "만족", type: "word" },
+    { en: "frustration", ipa: "frʌˈstreɪʃn", ko: "좌절", type: "word" },
+    { en: "anxiety", ipa: "æŋˈzaɪəti", ko: "불안", type: "word" },
+    { en: "confidence", ipa: "ˈkɑːnfɪdəns", ko: "자신감", type: "word" },
+    { en: "courage", ipa: "ˈkɜːrɪdʒ", ko: "용기", type: "word" },
+    { en: "patience", ipa: "ˈpeɪʃns", ko: "인내심", type: "word" },
+    { en: "argument", ipa: "ˈɑːrɡjumənt", ko: "논쟁, 말다툼", type: "word" },
+    { en: "discussion", ipa: "dɪˈskʌʃn", ko: "토론", type: "word" },
+    { en: "debate", ipa: "dɪˈbeɪt", ko: "토론, 논쟁", type: "word" },
+    { en: "agreement", ipa: "əˈɡriːmənt", ko: "합의, 동의", type: "word" },
+    { en: "disagreement", ipa: "ˌdɪsəˈɡriːmənt", ko: "의견 차이", type: "word" },
+    { en: "apology", ipa: "əˈpɑːlədʒi", ko: "사과", type: "word" },
+    { en: "compliment", ipa: "ˈkɑːmplɪmənt", ko: "칭찬", type: "word" },
+    { en: "complaint", ipa: "kəmˈpleɪnt", ko: "불평, 불만", type: "word" },
+    { en: "request", ipa: "rɪˈkwest", ko: "요청", type: "word" },
+    { en: "suggestion", ipa: "səˈdʒestʃən", ko: "제안", type: "word" },
+    { en: "concept", ipa: "ˈkɑːnsept", ko: "개념", type: "word" },
+    { en: "principle", ipa: "ˈprɪnsəpl", ko: "원칙, 원리", type: "word" },
+    { en: "evidence", ipa: "ˈevɪdəns", ko: "증거", type: "word" },
+    { en: "factor", ipa: "ˈfæktər", ko: "요인", type: "word" },
+    { en: "aspect", ipa: "ˈæspekt", ko: "측면", type: "word" },
+    { en: "feature", ipa: "ˈfiːtʃər", ko: "특징", type: "word" },
+    { en: "structure", ipa: "ˈstrʌktʃər", ko: "구조", type: "word" },
+    { en: "function", ipa: "ˈfʌŋkʃn", ko: "기능", type: "word" },
+    { en: "pattern", ipa: "ˈpætərn", ko: "양식, 패턴", type: "word" },
+    { en: "trend", ipa: "trend", ko: "경향", type: "word" },
+    { en: "impact", ipa: "ˈɪmpækt", ko: "영향", type: "word" },
+    { en: "influence", ipa: "ˈɪnfluəns", ko: "영향력", type: "word" },
+    { en: "consequence", ipa: "ˈkɑːnsɪkwens", ko: "결과", type: "word" },
+    { en: "advantage", ipa: "ədˈvæntɪdʒ", ko: "장점", type: "word" },
+    { en: "disadvantage", ipa: "ˌdɪsədˈvæntɪdʒ", ko: "단점", type: "word" },
+    { en: "alternative", ipa: "ɔːlˈtɜːrnətɪv", ko: "대안", type: "word" },
+    { en: "priority", ipa: "praɪˈɔːrəti", ko: "우선순위", type: "word" },
+    { en: "strategy", ipa: "ˈstrætədʒi", ko: "전략", type: "word" },
+    { en: "conclusion", ipa: "kənˈkluːʒn", ko: "결론", type: "word" },
+    { en: "assumption", ipa: "əˈsʌmpʃn", ko: "가정", type: "word" },
+    { en: "establish", ipa: "ɪˈstæblɪʃ", ko: "설립하다", type: "word" },
+    { en: "maintain", ipa: "meɪnˈteɪn", ko: "유지하다", type: "word" },
+    { en: "obtain", ipa: "əbˈteɪn", ko: "얻다", type: "word" },
+    { en: "contribute", ipa: "kənˈtrɪbjuːt", ko: "기여하다", type: "word" },
+    { en: "demonstrate", ipa: "ˈdemənstreɪt", ko: "보여주다, 입증하다", type: "word" },
+    { en: "indicate", ipa: "ˈɪndɪkeɪt", ko: "나타내다", type: "word" },
+    { en: "illustrate", ipa: "ˈɪləstreɪt", ko: "설명하다, 예를 들다", type: "word" },
+    { en: "emphasize", ipa: "ˈemfəsaɪz", ko: "강조하다", type: "word" },
+    { en: "evaluate", ipa: "ɪˈvæljueɪt", ko: "평가하다", type: "word" },
+    { en: "estimate", ipa: "ˈestɪmeɪt", ko: "추정하다", type: "word" },
+    { en: "assume", ipa: "əˈsuːm", ko: "가정하다", type: "word" },
+    { en: "imply", ipa: "ɪmˈplaɪ", ko: "암시하다", type: "word" },
+    { en: "interpret", ipa: "ɪnˈtɜːrprət", ko: "해석하다", type: "word" },
+    { en: "distinguish", ipa: "dɪˈstɪŋɡwɪʃ", ko: "구별하다", type: "word" },
+    { en: "identify", ipa: "aɪˈdentɪfaɪ", ko: "확인하다, 알아보다", type: "word" },
+    { en: "determine", ipa: "dɪˈtɜːrmɪn", ko: "결정하다", type: "word" },
+    { en: "generate", ipa: "ˈdʒenəreɪt", ko: "만들어 내다", type: "word" },
+    { en: "transform", ipa: "trænsˈfɔːrm", ko: "변형시키다", type: "word" },
+    { en: "expand", ipa: "ɪkˈspænd", ko: "확장하다", type: "word" },
+    { en: "eliminate", ipa: "ɪˈlɪmɪneɪt", ko: "제거하다", type: "word" },
+    { en: "encourage", ipa: "ɪnˈkɜːrɪdʒ", ko: "격려하다", type: "word" },
+    { en: "inspire", ipa: "ɪnˈspaɪər", ko: "영감을 주다", type: "word" },
+    { en: "persuade", ipa: "pərˈsweɪd", ko: "설득하다", type: "word" },
+    { en: "negotiate", ipa: "nɪˈɡoʊʃieɪt", ko: "협상하다", type: "word" },
+    { en: "collaborate", ipa: "kəˈlæbəreɪt", ko: "협업하다", type: "word" },
+    { en: "adapt", ipa: "əˈdæpt", ko: "적응하다", type: "word" },
+    { en: "adopt", ipa: "əˈdɑːpt", ko: "채택하다, 입양하다", type: "word" },
+    { en: "reflect", ipa: "rɪˈflekt", ko: "반영하다, 되돌아보다", type: "word" },
+    { en: "accomplish", ipa: "əˈkɑːmplɪʃ", ko: "완수하다", type: "word" },
+    { en: "overcome", ipa: "ˌoʊvərˈkʌm", ko: "극복하다", type: "word" },
+    { en: "significant", ipa: "sɪɡˈnɪfɪkənt", ko: "중요한, 상당한", type: "word" },
+    { en: "sufficient", ipa: "səˈfɪʃnt", ko: "충분한", type: "word" },
+    { en: "appropriate", ipa: "əˈproʊpriət", ko: "적절한", type: "word" },
+    { en: "accurate", ipa: "ˈækjərət", ko: "정확한", type: "word" },
+    { en: "complex", ipa: "kəmˈpleks", ko: "복잡한", type: "word" },
+    { en: "flexible", ipa: "ˈfleksəbl", ko: "유연한", type: "word" },
+    { en: "stable", ipa: "ˈsteɪbl", ko: "안정적인", type: "word" },
+    { en: "potential", ipa: "pəˈtenʃl", ko: "잠재적인, 잠재력", type: "word" },
+    { en: "previous", ipa: "ˈpriːviəs", ko: "이전의", type: "word" },
+    { en: "ultimate", ipa: "ˈʌltɪmət", ko: "궁극적인", type: "word" },
+    { en: "primary", ipa: "ˈpraɪmeri", ko: "주된, 최초의", type: "word" },
+    { en: "relevant", ipa: "ˈreləvənt", ko: "관련 있는", type: "word" },
+    { en: "capable", ipa: "ˈkeɪpəbl", ko: "능력 있는", type: "word" },
+    { en: "aware", ipa: "əˈwer", ko: "알고 있는", type: "word" },
+    { en: "willing", ipa: "ˈwɪlɪŋ", ko: "기꺼이 하는", type: "word" },
+    { en: "eager", ipa: "ˈiːɡər", ko: "열망하는", type: "word" },
+    { en: "reluctant", ipa: "rɪˈlʌktənt", ko: "꺼리는", type: "word" },
+    { en: "apparent", ipa: "əˈpærənt", ko: "명백한", type: "word" },
+    { en: "constant", ipa: "ˈkɑːnstənt", ko: "끊임없는", type: "word" },
+    { en: "temporary", ipa: "ˈtempəreri", ko: "일시적인", type: "word" },
+    { en: "permanent", ipa: "ˈpɜːrmənənt", ko: "영구적인", type: "word" },
+    { en: "sensible", ipa: "ˈsensəbl", ko: "분별 있는", type: "word" },
+    { en: "practical", ipa: "ˈpræktɪkl", ko: "실용적인", type: "word" },
+    { en: "abstract", ipa: "ˈæbstrækt", ko: "추상적인", type: "word" },
+    { en: "remarkable", ipa: "rɪˈmɑːrkəbl", ko: "놀라운", type: "word" },
+    { en: "society", ipa: "səˈsaɪəti", ko: "사회", type: "word" },
+    { en: "democracy", ipa: "dɪˈmɑːkrəsi", ko: "민주주의", type: "word" },
+    { en: "equality", ipa: "iˈkwɑːləti", ko: "평등", type: "word" },
+    { en: "freedom", ipa: "ˈfriːdəm", ko: "자유", type: "word" },
+    { en: "justice", ipa: "ˈdʒʌstɪs", ko: "정의", type: "word" },
+    { en: "welfare", ipa: "ˈwelfer", ko: "복지", type: "word" },
+    { en: "immigration", ipa: "ˌɪmɪˈɡreɪʃn", ko: "이민", type: "word" },
+    { en: "refugee", ipa: "ˌrefjuˈdʒiː", ko: "난민", type: "word" },
+    { en: "diversity", ipa: "daɪˈvɜːrsəti", ko: "다양성", type: "word" },
+    { en: "conflict", ipa: "ˈkɑːnflɪkt", ko: "갈등", type: "word" },
+    { en: "peace", ipa: "piːs", ko: "평화", type: "word" },
+    { en: "treaty", ipa: "ˈtriːti", ko: "조약", type: "word" },
+    { en: "policy", ipa: "ˈpɑːləsi", ko: "정책", type: "word" },
+    { en: "protest", ipa: "ˈproʊtest", ko: "시위, 항의하다", type: "word" },
+    { en: "volunteer", ipa: "ˌvɑːlənˈtɪr", ko: "자원봉사자", type: "word" },
+    { en: "artificial intelligence", ipa: "ˌɑːrtɪˈfɪʃl ɪnˈtelɪdʒəns", ko: "인공지능", type: "word" },
+    { en: "algorithm", ipa: "ˈælɡərɪðəm", ko: "알고리즘", type: "word" },
+    { en: "satellite", ipa: "ˈsætəlaɪt", ko: "인공위성", type: "word" },
+    { en: "vaccine", ipa: "vækˈsiːn", ko: "백신", type: "word" },
+    { en: "gene", ipa: "dʒiːn", ko: "유전자", type: "word" },
+    { en: "virus", ipa: "ˈvaɪrəs", ko: "바이러스", type: "word" },
+    { en: "bacteria", ipa: "bækˈtɪriə", ko: "박테리아", type: "word" },
+    { en: "laboratory", ipa: "ˈlæbrətɔːri", ko: "실험실", type: "word" },
+    { en: "engineering", ipa: "ˌendʒɪˈnɪrɪŋ", ko: "공학", type: "word" },
+    { en: "innovation", ipa: "ˌɪnəˈveɪʃn", ko: "혁신", type: "word" },
+    { en: "automation", ipa: "ˌɔːtəˈmeɪʃn", ko: "자동화", type: "word" },
+    { en: "digital", ipa: "ˈdɪdʒɪtl", ko: "디지털의", type: "word" },
+    { en: "virtual", ipa: "ˈvɜːrtʃuəl", ko: "가상의", type: "word" },
+    { en: "database", ipa: "ˈdeɪtəbeɪs", ko: "데이터베이스", type: "word" },
+    { en: "sensor", ipa: "ˈsensər", ko: "센서", type: "word" },
+    { en: "emission", ipa: "ɪˈmɪʃn", ko: "배출, 배기가스", type: "word" },
+    { en: "landfill", ipa: "ˈlændfɪl", ko: "쓰레기 매립지", type: "word" },
+    { en: "deforestation", ipa: "ˌdiːˌfɔːrɪˈsteɪʃn", ko: "삼림 벌채", type: "word" },
+    { en: "wildlife", ipa: "ˈwaɪldlaɪf", ko: "야생 생물", type: "word" },
+    { en: "conservation", ipa: "ˌkɑːnsərˈveɪʃn", ko: "보존", type: "word" },
+    { en: "solar energy", ipa: "ˈsoʊlər ˈenərdʒi", ko: "태양 에너지", type: "word" },
+    { en: "fuel", ipa: "ˈfjuːəl", ko: "연료", type: "word" },
+    { en: "waste", ipa: "weɪst", ko: "폐기물, 낭비하다", type: "word" },
+    { en: "organic", ipa: "ɔːrˈɡænɪk", ko: "유기농의", type: "word" },
+    { en: "eco-friendly", ipa: "ˌiːkoʊ ˈfrendli", ko: "친환경적인", type: "word" },
+    { en: "employer", ipa: "ɪmˈplɔɪər", ko: "고용주", type: "word" },
+    { en: "employee", ipa: "ɪmˈplɔɪiː", ko: "직원", type: "word" },
+    { en: "colleague", ipa: "ˈkɑːliːɡ", ko: "동료", type: "word" },
+    { en: "client", ipa: "ˈklaɪənt", ko: "고객, 의뢰인", type: "word" },
+    { en: "contract", ipa: "ˈkɑːntrækt", ko: "계약", type: "word" },
+    { en: "promotion", ipa: "prəˈmoʊʃn", ko: "승진, 홍보", type: "word" },
+    { en: "department", ipa: "dɪˈpɑːrtmənt", ko: "부서", type: "word" },
+    { en: "manager", ipa: "ˈmænɪdʒər", ko: "관리자", type: "word" },
+    { en: "revenue", ipa: "ˈrevənuː", ko: "수익", type: "word" },
+    { en: "startup", ipa: "ˈstɑːrtʌp", ko: "신생 기업", type: "word" },
+    { en: "brand", ipa: "brænd", ko: "상표, 브랜드", type: "word" },
+    { en: "competition", ipa: "ˌkɑːmpəˈtɪʃn", ko: "경쟁, 대회", type: "word" },
+    { en: "marketing", ipa: "ˈmɑːrkɪtɪŋ", ko: "마케팅", type: "word" },
+    { en: "investment", ipa: "ɪnˈvestmənt", ko: "투자", type: "word" },
+    { en: "partnership", ipa: "ˈpɑːrtnərʃɪp", ko: "동업, 협력 관계", type: "word" },
+    { en: "motivation", ipa: "ˌmoʊtɪˈveɪʃn", ko: "동기", type: "word" },
+    { en: "attitude", ipa: "ˈætɪtuːd", ko: "태도", type: "word" },
+    { en: "personality", ipa: "ˌpɜːrsəˈnæləti", ko: "성격", type: "word" },
+    { en: "self-esteem", ipa: "ˌself ɪˈstiːm", ko: "자존감", type: "word" },
+    { en: "stress", ipa: "stres", ko: "스트레스", type: "word" },
+    { en: "pressure", ipa: "ˈpreʃər", ko: "압박", type: "word" },
+    { en: "mood", ipa: "muːd", ko: "기분", type: "word" },
+    { en: "memory", ipa: "ˈmeməri", ko: "기억", type: "word" },
+    { en: "imagination", ipa: "ɪˌmædʒɪˈneɪʃn", ko: "상상력", type: "word" },
+    { en: "willpower", ipa: "ˈwɪlpaʊər", ko: "의지력", type: "word" },
+    { en: "expression", ipa: "ɪkˈspreʃn", ko: "표현", type: "word" },
+    { en: "tone", ipa: "toʊn", ko: "어조", type: "word" },
+    { en: "gesture", ipa: "ˈdʒestʃər", ko: "몸짓", type: "word" },
+    { en: "audience", ipa: "ˈɔːdiəns", ko: "청중", type: "word" },
+    { en: "speech", ipa: "spiːtʃ", ko: "연설", type: "word" },
+    { en: "feedback", ipa: "ˈfiːdbæk", ko: "피드백", type: "word" },
+    { en: "criticism", ipa: "ˈkrɪtɪsɪzəm", ko: "비판", type: "word" },
+    { en: "translation", ipa: "trænsˈleɪʃn", ko: "번역", type: "word" },
+    { en: "vocabulary", ipa: "vəˈkæbjəleri", ko: "어휘", type: "word" },
+    { en: "pronunciation", ipa: "prəˌnʌnsiˈeɪʃn", ko: "발음", type: "word" },
+    { en: "literature", ipa: "ˈlɪtrətʃər", ko: "문학", type: "word" },
+    { en: "novel", ipa: "ˈnɑːvl", ko: "소설", type: "word" },
+    { en: "poem", ipa: "ˈpoʊəm", ko: "시", type: "word" },
+    { en: "author", ipa: "ˈɔːθər", ko: "저자", type: "word" },
+    { en: "character", ipa: "ˈkærəktər", ko: "등장인물, 성격", type: "word" },
+    { en: "plot", ipa: "plɑːt", ko: "줄거리", type: "word" },
+    { en: "theme", ipa: "θiːm", ko: "주제", type: "word" },
+    { en: "sculpture", ipa: "ˈskʌlptʃər", ko: "조각", type: "word" },
+    { en: "orchestra", ipa: "ˈɔːrkɪstrə", ko: "관현악단", type: "word" },
+    { en: "exhibition", ipa: "ˌeksɪˈbɪʃn", ko: "전시회", type: "word" },
+    { en: "bring up", ko: "기르다, (화제를) 꺼내다", type: "idiom", example_en: "She brought up an interesting point.", example_ko: "그녀가 흥미로운 점을 꺼냈다." },
+    { en: "call off", ko: "취소하다", type: "idiom", example_en: "They called off the game because of rain.", example_ko: "비 때문에 경기가 취소됐다." },
+    { en: "carry out", ko: "수행하다", type: "idiom", example_en: "We carried out the experiment carefully.", example_ko: "우리는 실험을 신중히 수행했다." },
+    { en: "check out", ko: "확인하다, 살펴보다", type: "idiom", example_en: "Check out this new library app.", example_ko: "이 새 도서관 앱 한번 봐 봐." },
+    { en: "come across", ko: "우연히 마주치다", type: "idiom", example_en: "I came across an old photo album.", example_ko: "옛날 사진첩을 우연히 발견했다." },
+    { en: "deal with", ko: "다루다, 처리하다", type: "idiom", example_en: "He knows how to deal with stress.", example_ko: "그는 스트레스를 다루는 법을 안다." },
+    { en: "figure out", ko: "알아내다", type: "idiom", example_en: "I finally figured out the answer.", example_ko: "드디어 답을 알아냈다." },
+    { en: "fill out", ko: "(서식을) 작성하다", type: "idiom", example_en: "Please fill out this form.", example_ko: "이 양식을 작성해 주세요." },
+    { en: "get over", ko: "극복하다", type: "idiom", example_en: "It took a week to get over the cold.", example_ko: "감기를 이겨내는 데 일주일 걸렸다." },
+    { en: "give in", ko: "굴복하다", type: "idiom", example_en: "Don't give in to pressure.", example_ko: "압박에 굴복하지 마." },
+    { en: "go over", ko: "검토하다", type: "idiom", example_en: "Let's go over the notes once more.", example_ko: "필기를 한 번 더 훑어보자." },
+    { en: "hand in", ko: "제출하다", type: "idiom", example_en: "Hand in your report by Friday.", example_ko: "금요일까지 보고서를 제출하세요." },
+    { en: "hold on", ko: "기다리다, 견디다", type: "idiom", example_en: "Hold on a second, please.", example_ko: "잠깐만 기다려 주세요." },
+    { en: "keep up with", ko: "뒤처지지 않고 따라가다", type: "idiom", example_en: "It's hard to keep up with the news.", example_ko: "뉴스를 계속 따라가기가 어렵다." },
+    { en: "look up", ko: "찾아보다", type: "idiom", example_en: "Look up the word in a dictionary.", example_ko: "그 단어를 사전에서 찾아봐." },
+    { en: "make up", ko: "지어내다, 화해하다", type: "idiom", example_en: "They made up after the argument.", example_ko: "그들은 다툰 뒤 화해했다." },
+    { en: "pass away", ko: "돌아가시다", type: "idiom", example_en: "His grandfather passed away last year.", example_ko: "그의 할아버지가 작년에 돌아가셨다." },
+    { en: "pick up", ko: "집어 들다, 데리러 가다", type: "idiom", example_en: "My mom will pick me up at six.", example_ko: "엄마가 6시에 데리러 오실 거야." },
+    { en: "point out", ko: "지적하다", type: "idiom", example_en: "She pointed out my mistake kindly.", example_ko: "그녀가 내 실수를 친절히 짚어 줬다." },
+    { en: "put up with", ko: "참다", type: "idiom", example_en: "I can't put up with the noise.", example_ko: "그 소음을 참을 수가 없다." },
+    { en: "set up", ko: "설치하다, 마련하다", type: "idiom", example_en: "We set up the tent before dark.", example_ko: "어두워지기 전에 텐트를 쳤다." },
+    { en: "show up", ko: "나타나다", type: "idiom", example_en: "He showed up ten minutes late.", example_ko: "그는 10분 늦게 나타났다." },
+    { en: "take off", ko: "이륙하다, 벗다", type: "idiom", example_en: "The plane took off on time.", example_ko: "비행기가 제시간에 이륙했다." },
+    { en: "turn down", ko: "거절하다, 소리를 줄이다", type: "idiom", example_en: "She turned down the offer politely.", example_ko: "그녀는 제안을 정중히 거절했다." },
+    { en: "turn in", ko: "제출하다", type: "idiom", example_en: "Turn in your homework tomorrow.", example_ko: "내일 숙제를 제출하렴." },
+    { en: "wrap up", ko: "마무리하다", type: "idiom", example_en: "Let's wrap up the meeting.", example_ko: "회의를 마무리합시다." },
+    { en: "beat around the bush", ko: "돌려서 말하다", type: "idiom", example_en: "Stop beating around the bush and tell me.", example_ko: "돌려 말하지 말고 그냥 말해 줘." },
+    { en: "cut corners", ko: "대충 하다", type: "idiom", example_en: "Don't cut corners on your project.", example_ko: "과제를 대충 하지 마." },
+    { en: "down to earth", ko: "현실적이고 소탈한", type: "idiom", example_en: "Our teacher is very down to earth.", example_ko: "우리 선생님은 아주 소탈하시다." },
+    { en: "get cold feet", ko: "겁이 나서 망설이다", type: "idiom", example_en: "He got cold feet before the speech.", example_ko: "그는 연설 전에 겁이 나서 망설였다." },
+    { en: "in the long run", ko: "결국에는", type: "idiom", example_en: "Studying daily pays off in the long run.", example_ko: "매일 공부하면 결국엔 보답이 온다." },
+    { en: "jump to conclusions", ko: "성급하게 결론짓다", type: "idiom", example_en: "Don't jump to conclusions too fast.", example_ko: "너무 성급하게 결론 내리지 마." },
+    { en: "on the same page", ko: "생각이 일치하는", type: "idiom", example_en: "Let's make sure we're on the same page.", example_ko: "우리 생각이 같은지 확인하자." },
+    { en: "pull someone's leg", ko: "놀리다", type: "idiom", example_en: "Relax, I'm just pulling your leg.", example_ko: "진정해, 그냥 놀린 거야." },
+    { en: "see eye to eye", ko: "의견이 일치하다", type: "idiom", example_en: "We don't see eye to eye on this.", example_ko: "이 문제에선 우리 의견이 다르다." },
+    { en: "take it easy", ko: "진정하다, 여유를 갖다", type: "idiom", example_en: "Take it easy, we still have time.", example_ko: "진정해, 아직 시간 있어." },
+    { en: "under pressure", ko: "압박을 받는", type: "idiom", example_en: "He works well under pressure.", example_ko: "그는 압박 속에서도 일을 잘한다." },
+    { en: "up in the air", ko: "아직 미정인", type: "idiom", example_en: "Our travel plans are still up in the air.", example_ko: "우리 여행 계획은 아직 미정이다." },
+    { en: "once and for all", ko: "완전히, 마지막으로", type: "idiom", example_en: "Let's settle this once and for all.", example_ko: "이걸 완전히 매듭짓자." },
+    { en: "no matter what", ko: "무슨 일이 있어도", type: "idiom", example_en: "I'll support you no matter what.", example_ko: "무슨 일이 있어도 널 응원할게." },
+  ],
+  adult: [
+    { en: "give up", ko: "포기하다", type: "phrasal", example_en: "Don't give up on your dreams.", example_ko: "꿈을 포기하지 마세요." },
+    { en: "look into", ko: "조사하다, 살펴보다", type: "phrasal", example_en: "The manager will look into the complaint.", example_ko: "매니저가 그 불만사항을 조사할 것이다." },
+    { en: "find out", ko: "알아내다", type: "phrasal", example_en: "I need to find out the exact schedule.", example_ko: "나는 정확한 일정을 알아내야 한다." },
+    { en: "get along with", ko: "~와 잘 지내다", type: "phrasal", example_en: "He gets along with his coworkers.", example_ko: "그는 동료들과 잘 지낸다." },
+    { en: "put off", ko: "미루다, 연기하다", type: "phrasal", example_en: "We had to put off the meeting.", example_ko: "우리는 회의를 미뤄야 했다." },
+    { en: "carry out", ko: "수행하다, 실행하다", type: "phrasal", example_en: "The team carried out the plan successfully.", example_ko: "팀은 계획을 성공적으로 수행했다." },
+    { en: "bring up", ko: "(화제를) 꺼내다, 기르다", type: "phrasal", example_en: "She brought up an important issue.", example_ko: "그녀는 중요한 문제를 꺼냈다." },
+    { en: "come across", ko: "우연히 발견하다", type: "phrasal", example_en: "I came across an old photo.", example_ko: "나는 오래된 사진을 우연히 발견했다." },
+    { en: "run into", ko: "우연히 만나다", type: "phrasal", example_en: "I ran into my old friend yesterday.", example_ko: "나는 어제 옛 친구를 우연히 만났다." },
+    { en: "deal with", ko: "처리하다, 다루다", type: "phrasal", example_en: "We need to deal with this problem now.", example_ko: "우리는 지금 이 문제를 처리해야 한다." },
+    { en: "take over", ko: "인수하다, 넘겨받다", type: "phrasal", example_en: "She took over the project last month.", example_ko: "그녀는 지난달에 그 프로젝트를 인수했다." },
+    { en: "set up", ko: "설립하다, 준비하다", type: "phrasal", example_en: "They set up a new company.", example_ko: "그들은 새 회사를 설립했다." },
+    { en: "figure out", ko: "이해하다, 알아내다", type: "phrasal", example_en: "I can't figure out how to fix this.", example_ko: "나는 이걸 어떻게 고칠지 모르겠다." },
+    { en: "work out", ko: "운동하다, (일이) 해결되다", type: "phrasal", example_en: "Everything worked out in the end.", example_ko: "결국 모든 것이 잘 해결됐다." },
+    { en: "turn down", ko: "거절하다", type: "phrasal", example_en: "He turned down the job offer.", example_ko: "그는 그 일자리 제안을 거절했다." },
+    { en: "turn out", ko: "밝혀지다, ~인 것으로 드러나다", type: "phrasal", example_en: "It turned out to be a misunderstanding.", example_ko: "그것은 오해로 밝혀졌다." },
+    { en: "point out", ko: "지적하다", type: "phrasal", example_en: "She pointed out a mistake in the report.", example_ko: "그녀는 보고서의 실수를 지적했다." },
+    { en: "hold on", ko: "기다리다, 견디다", type: "phrasal", example_en: "Please hold on for a moment.", example_ko: "잠시만 기다려 주세요." },
+    { en: "hang up", ko: "전화를 끊다", type: "phrasal", example_en: "He hung up the phone suddenly.", example_ko: "그는 갑자기 전화를 끊었다." },
+    { en: "show up", ko: "나타나다", type: "phrasal", example_en: "She didn't show up for the meeting.", example_ko: "그녀는 회의에 나타나지 않았다." },
+    { en: "break down", ko: "고장 나다, 무너지다", type: "phrasal", example_en: "The car broke down on the highway.", example_ko: "차가 고속도로에서 고장 났다." },
+    { en: "break out", ko: "발생하다, 발발하다", type: "phrasal", example_en: "A fire broke out in the building.", example_ko: "건물에 화재가 발생했다." },
+    { en: "break up", ko: "헤어지다", type: "phrasal", example_en: "They broke up after five years.", example_ko: "그들은 5년 만에 헤어졌다." },
+    { en: "bring about", ko: "초래하다, 야기하다", type: "phrasal", example_en: "The policy brought about many changes.", example_ko: "그 정책은 많은 변화를 초래했다." },
+    { en: "call off", ko: "취소하다", type: "phrasal", example_en: "They called off the event due to rain.", example_ko: "그들은 비 때문에 행사를 취소했다." },
+    { en: "catch up on", ko: "밀린 것을 따라잡다", type: "phrasal", example_en: "I need to catch up on my emails.", example_ko: "나는 밀린 이메일을 처리해야 한다." },
+    { en: "check in", ko: "체크인하다, 입실하다", type: "phrasal", example_en: "We checked in at the hotel around noon.", example_ko: "우리는 정오쯤 호텔에 체크인했다." },
+    { en: "check out", ko: "체크아웃하다, 확인해보다", type: "phrasal", example_en: "Please check out the new menu.", example_ko: "새 메뉴를 확인해 보세요." },
+    { en: "come up with", ko: "생각해내다", type: "phrasal", example_en: "He came up with a great idea.", example_ko: "그는 좋은 아이디어를 생각해냈다." },
+    { en: "cut down on", ko: "줄이다", type: "phrasal", example_en: "I'm trying to cut down on sugar.", example_ko: "나는 설탕 섭취를 줄이려고 노력 중이다." },
+    { en: "drop by", ko: "잠깐 들르다", type: "phrasal", example_en: "Feel free to drop by anytime.", example_ko: "언제든지 편하게 들러주세요." },
+    { en: "end up", ko: "결국 ~하게 되다", type: "phrasal", example_en: "We ended up staying home.", example_ko: "우리는 결국 집에 있게 되었다." },
+    { en: "fill out", ko: "(양식을) 작성하다", type: "phrasal", example_en: "Please fill out this form.", example_ko: "이 양식을 작성해 주세요." },
+    { en: "get away with", ko: "(나쁜 짓을 하고도) 처벌을 면하다", type: "phrasal", example_en: "He won't get away with lying.", example_ko: "그는 거짓말을 하고도 무사히 넘어가지 못할 것이다." },
+    { en: "get over", ko: "극복하다", type: "phrasal", example_en: "It took her months to get over the loss.", example_ko: "그녀가 상실감을 극복하는 데 몇 달이 걸렸다." },
+    { en: "get through", ko: "통과하다, 견뎌내다", type: "phrasal", example_en: "We managed to get through the crisis.", example_ko: "우리는 그 위기를 잘 헤쳐나갔다." },
+    { en: "give in", ko: "굴복하다, 항복하다", type: "phrasal", example_en: "He finally gave in to their demands.", example_ko: "그는 결국 그들의 요구에 굴복했다." },
+    { en: "give away", ko: "나눠주다, 폭로하다", type: "phrasal", example_en: "She gave away all her old clothes.", example_ko: "그녀는 낡은 옷을 모두 나눠주었다." },
+    { en: "go over", ko: "검토하다, 복습하다", type: "phrasal", example_en: "Let's go over the report together.", example_ko: "함께 보고서를 검토합시다." },
+    { en: "go through", ko: "겪다, 살펴보다", type: "phrasal", example_en: "She went through a difficult time.", example_ko: "그녀는 힘든 시기를 겪었다." },
+    { en: "hand in", ko: "제출하다", type: "phrasal", example_en: "Please hand in your assignment by Friday.", example_ko: "금요일까지 과제를 제출해 주세요." },
+    { en: "hand out", ko: "나눠주다, 배포하다", type: "phrasal", example_en: "The teacher handed out the worksheets.", example_ko: "선생님이 활동지를 나눠주었다." },
+    { en: "hold off", ko: "미루다, 연기하다", type: "phrasal", example_en: "Let's hold off on the decision for now.", example_ko: "지금은 결정을 미루도록 하자." },
+    { en: "keep up with", ko: "뒤처지지 않다, 따라가다", type: "phrasal", example_en: "It's hard to keep up with new technology.", example_ko: "새로운 기술을 따라가기가 어렵다." },
+    { en: "leave out", ko: "빠뜨리다, 제외하다", type: "phrasal", example_en: "You left out an important detail.", example_ko: "당신은 중요한 세부사항을 빠뜨렸다." },
+    { en: "look after", ko: "돌보다", type: "phrasal", example_en: "She looks after her elderly parents.", example_ko: "그녀는 나이 든 부모님을 돌본다." },
+    { en: "look forward to", ko: "기대하다", type: "phrasal", example_en: "I'm looking forward to the weekend.", example_ko: "나는 주말을 기대하고 있다." },
+    { en: "make up for", ko: "만회하다, 보충하다", type: "phrasal", example_en: "He tried to make up for his mistake.", example_ko: "그는 자신의 실수를 만회하려고 노력했다." },
+    { en: "pass away", ko: "돌아가시다 (죽다)", type: "phrasal", example_en: "Her grandfather passed away last year.", example_ko: "그녀의 할아버지는 작년에 돌아가셨다." },
+    { en: "pick up", ko: "태우러 가다, 집어 들다, 회복하다", type: "phrasal", example_en: "I'll pick you up at seven.", example_ko: "7시에 데리러 갈게요." },
+    { en: "put away", ko: "치우다, 정리하다", type: "phrasal", example_en: "Please put away your toys.", example_ko: "장난감을 정리해 주세요." },
+    { en: "put together", ko: "조립하다, 준비하다", type: "phrasal", example_en: "They put together a great presentation.", example_ko: "그들은 훌륭한 발표를 준비했다." },
+    { en: "run out of", ko: "~이 다 떨어지다", type: "phrasal", example_en: "We ran out of milk this morning.", example_ko: "오늘 아침 우유가 다 떨어졌다." },
+    { en: "set off", ko: "출발하다, (경보 등을) 작동시키다", type: "phrasal", example_en: "We set off early in the morning.", example_ko: "우리는 아침 일찍 출발했다." },
+    { en: "sort out", ko: "해결하다, 정리하다", type: "phrasal", example_en: "We finally sorted out the issue.", example_ko: "우리는 마침내 그 문제를 해결했다." },
+    { en: "stand for", ko: "상징하다, 의미하다", type: "phrasal", example_en: "What does this abbreviation stand for?", example_ko: "이 약자는 무엇을 의미하나요?" },
+    { en: "stick to", ko: "고수하다, 지키다", type: "phrasal", example_en: "You should stick to your plan.", example_ko: "당신의 계획을 고수해야 한다." },
+    { en: "take after", ko: "닮다", type: "phrasal", example_en: "She takes after her mother.", example_ko: "그녀는 어머니를 닮았다." },
+    { en: "take off", ko: "이륙하다, (옷을) 벗다", type: "phrasal", example_en: "The plane took off on time.", example_ko: "비행기가 제시간에 이륙했다." },
+    { en: "take on", ko: "(일을) 맡다", type: "phrasal", example_en: "He took on extra responsibilities.", example_ko: "그는 추가적인 책임을 맡았다." },
+    { en: "talk over", ko: "상의하다", type: "phrasal", example_en: "Let's talk it over before deciding.", example_ko: "결정하기 전에 그것에 대해 상의합시다." },
+    { en: "throw away", ko: "버리다", type: "phrasal", example_en: "Don't throw away that document.", example_ko: "그 문서를 버리지 마세요." },
+    { en: "try on", ko: "입어보다", type: "phrasal", example_en: "She tried on several dresses.", example_ko: "그녀는 여러 벌의 드레스를 입어봤다." },
+    { en: "turn into", ko: "~으로 변하다", type: "phrasal", example_en: "The caterpillar turned into a butterfly.", example_ko: "애벌레가 나비로 변했다." },
+    { en: "turn off", ko: "(전원을) 끄다", type: "phrasal", example_en: "Please turn off the lights when you leave.", example_ko: "나갈 때 불을 꺼주세요." },
+    { en: "turn on", ko: "(전원을) 켜다", type: "phrasal", example_en: "Can you turn on the air conditioner?", example_ko: "에어컨 좀 켜줄래요?" },
+    { en: "wake up", ko: "일어나다, 깨다", type: "phrasal", example_en: "I woke up early today.", example_ko: "나는 오늘 일찍 일어났다." },
+    { en: "wear out", ko: "닳다, 지치게 하다", type: "phrasal", example_en: "The long meeting wore everyone out.", example_ko: "긴 회의가 모두를 지치게 했다." },
+    { en: "work on", ko: "~에 노력을 들이다, 작업하다", type: "phrasal", example_en: "She is working on a new project.", example_ko: "그녀는 새 프로젝트를 진행하고 있다." },
+    { en: "account for", ko: "설명하다, 차지하다", type: "phrasal", example_en: "This factor accounts for the delay.", example_ko: "이 요인이 지연을 설명한다." },
+    { en: "back up", ko: "지지하다, 백업하다", type: "phrasal", example_en: "Always back up your files.", example_ko: "항상 파일을 백업하세요." },
+    { en: "bring back", ko: "다시 가져오다, 상기시키다", type: "phrasal", example_en: "This song brings back memories.", example_ko: "이 노래는 추억을 떠올리게 한다." },
+    { en: "cut off", ko: "차단하다, 끊다", type: "phrasal", example_en: "The power was cut off during the storm.", example_ko: "폭풍 중에 전기가 끊겼다." },
+    { en: "draw up", ko: "(계획 등을) 작성하다", type: "phrasal", example_en: "The lawyer drew up the contract.", example_ko: "변호사가 계약서를 작성했다." },
+    { en: "fall behind", ko: "뒤처지다", type: "phrasal", example_en: "He fell behind on his payments.", example_ko: "그는 지불이 밀렸다." },
+    { en: "fall through", ko: "무산되다, 실패하다", type: "phrasal", example_en: "The deal fell through at the last minute.", example_ko: "그 거래는 막판에 무산되었다." },
+    { en: "go ahead", ko: "진행하다, 그렇게 하세요", type: "phrasal", example_en: "Go ahead and start without me.", example_ko: "저 없이 먼저 시작하세요." },
+    { en: "go off", ko: "(경보가) 울리다, 폭발하다", type: "phrasal", example_en: "The alarm went off at midnight.", example_ko: "자정에 경보가 울렸다." },
+    { en: "hold up", ko: "지연시키다, 견디다", type: "phrasal", example_en: "Traffic held us up for an hour.", example_ko: "교통 체증이 우리를 한 시간 지연시켰다." },
+    { en: "keep on", ko: "계속하다", type: "phrasal", example_en: "She kept on working despite the pain.", example_ko: "그녀는 아픔에도 불구하고 계속 일했다." },
+    { en: "lay off", ko: "해고하다", type: "phrasal", example_en: "The company laid off many workers.", example_ko: "회사는 많은 직원을 해고했다." },
+    { en: "live up to", ko: "(기대에) 부응하다", type: "phrasal", example_en: "The movie lived up to expectations.", example_ko: "그 영화는 기대에 부응했다." },
+    { en: "move on", ko: "넘어가다, 나아가다", type: "phrasal", example_en: "It's time to move on from the past.", example_ko: "이제 과거에서 벗어나 나아갈 때다." },
+    { en: "narrow down", ko: "좁히다, 추리다", type: "phrasal", example_en: "We narrowed down the options to three.", example_ko: "우리는 선택지를 세 개로 좁혔다." },
+    { en: "pay off", ko: "성과를 거두다, 다 갚다", type: "phrasal", example_en: "Her hard work finally paid off.", example_ko: "그녀의 노력이 마침내 결실을 맺었다." },
+    { en: "pull off", ko: "성공적으로 해내다", type: "phrasal", example_en: "They pulled off an amazing performance.", example_ko: "그들은 놀라운 공연을 성공적으로 해냈다." },
+    { en: "put up with", ko: "참다, 견디다", type: "phrasal", example_en: "I can't put up with this noise anymore.", example_ko: "나는 더 이상 이 소음을 참을 수 없다." },
+    { en: "reach out", ko: "연락하다, 손을 내밀다", type: "phrasal", example_en: "Feel free to reach out anytime.", example_ko: "언제든지 편하게 연락 주세요." },
+    { en: "rely on", ko: "의존하다, 신뢰하다", type: "phrasal", example_en: "You can rely on her judgment.", example_ko: "그녀의 판단을 믿어도 된다." },
+    { en: "rule out", ko: "배제하다", type: "phrasal", example_en: "We can't rule out that possibility.", example_ko: "우리는 그 가능성을 배제할 수 없다." },
+    { en: "settle down", ko: "정착하다, 안정되다", type: "phrasal", example_en: "They settled down in a small town.", example_ko: "그들은 작은 마을에 정착했다." },
+    { en: "speak up", ko: "큰 소리로 말하다, 의견을 내다", type: "phrasal", example_en: "Please speak up if you disagree.", example_ko: "동의하지 않으면 말씀해 주세요." },
+    { en: "stand out", ko: "눈에 띄다, 두드러지다", type: "phrasal", example_en: "Her design really stands out.", example_ko: "그녀의 디자인은 정말 눈에 띈다." },
+    { en: "step down", ko: "사임하다, 물러나다", type: "phrasal", example_en: "The CEO decided to step down.", example_ko: "그 CEO는 사임하기로 결정했다." },
+    { en: "take away", ko: "빼앗다, 치우다", type: "phrasal", example_en: "Please take away these dishes.", example_ko: "이 접시들을 치워주세요." },
+    { en: "take up", ko: "(시간·공간을) 차지하다, 시작하다", type: "phrasal", example_en: "She took up painting last year.", example_ko: "그녀는 작년에 그림을 시작했다." },
+    { en: "warm up", ko: "준비운동을 하다, 데우다", type: "phrasal", example_en: "Athletes warm up before the game.", example_ko: "선수들은 경기 전에 준비운동을 한다." },
+    { en: "weigh in", ko: "의견을 밝히다, 참견하다", type: "phrasal", example_en: "Experts weighed in on the debate.", example_ko: "전문가들이 그 논쟁에 의견을 냈다." },
+    { en: "wind up", ko: "결국 ~하게 되다, 끝내다", type: "phrasal", example_en: "We wound up talking for hours.", example_ko: "우리는 결국 몇 시간 동안 이야기했다." },
+    { en: "zoom in on", ko: "~을 확대해서 보다, 집중 조명하다", type: "phrasal", example_en: "The report zoomed in on economic issues.", example_ko: "그 보고서는 경제 문제를 집중 조명했다." },
+    { en: "negotiate", ipa: "nɪˈɡoʊʃieɪt", ko: "협상하다", type: "word", example_en: "They negotiated a better price.", example_ko: "그들은 더 나은 가격을 협상했다." },
+    { en: "deadline", ipa: "ˈdedlaɪn", ko: "마감일", type: "word", example_en: "The deadline is next Friday.", example_ko: "마감일은 다음 주 금요일이다." },
+    { en: "budget", ipa: "ˈbʌdʒɪt", ko: "예산", type: "word", example_en: "We need to stick to the budget.", example_ko: "우리는 예산을 지켜야 한다." },
+    { en: "colleague", ipa: "ˈkɑːliːɡ", ko: "동료", type: "word", example_en: "My colleague helped me with the report.", example_ko: "내 동료가 보고서 작성을 도와줬다." },
+    { en: "client", ipa: "ˈklaɪənt", ko: "고객, 의뢰인", type: "word", example_en: "We have a meeting with a new client.", example_ko: "새로운 고객과 미팅이 있다." },
+    { en: "proposal", ipa: "prəˈpoʊzl", ko: "제안서", type: "word", example_en: "She submitted a business proposal.", example_ko: "그녀는 사업 제안서를 제출했다." },
+    { en: "contract", ipa: "ˈkɑːntrækt", ko: "계약(서)", type: "word", example_en: "Both parties signed the contract.", example_ko: "양측은 계약서에 서명했다." },
+    { en: "revenue", ipa: "ˈrevənuː", ko: "수익, 매출", type: "word", example_en: "The company's revenue increased this year.", example_ko: "회사의 매출이 올해 증가했다." },
+    { en: "investment", ipa: "ɪnˈvestmənt", ko: "투자", type: "word", example_en: "This is a good investment opportunity.", example_ko: "이것은 좋은 투자 기회이다." },
+    { en: "strategy", ipa: "ˈstrætədʒi", ko: "전략", type: "word", example_en: "We need a new marketing strategy.", example_ko: "우리는 새로운 마케팅 전략이 필요하다." },
+    { en: "efficiency", ipa: "ɪˈfɪʃnsi", ko: "효율성", type: "word", example_en: "The new system improved efficiency.", example_ko: "새 시스템이 효율성을 향상시켰다." },
+    { en: "productivity", ipa: "ˌproʊdʌkˈtɪvəti", ko: "생산성", type: "word", example_en: "Productivity increased after the training.", example_ko: "교육 이후 생산성이 향상됐다." },
+    { en: "supervisor", ipa: "ˈsuːpərvaɪzər", ko: "상사, 관리자", type: "word", example_en: "My supervisor approved the request.", example_ko: "내 상사가 요청을 승인했다." },
+    { en: "employee", ipa: "ɪmˈplɔɪiː", ko: "직원", type: "word", example_en: "The company hired ten new employees.", example_ko: "그 회사는 신입 직원 열 명을 채용했다." },
+    { en: "resign", ipa: "rɪˈzaɪn", ko: "사임하다, 퇴사하다", type: "word", example_en: "He decided to resign from his position.", example_ko: "그는 그의 직위에서 사임하기로 결정했다." },
+    { en: "promote", ipa: "prəˈmoʊt", ko: "승진시키다", type: "word", example_en: "She was promoted to manager.", example_ko: "그녀는 매니저로 승진했다." },
+    { en: "salary", ipa: "ˈsæləri", ko: "급여", type: "word", example_en: "The salary was negotiated in advance.", example_ko: "급여는 사전에 협상되었다." },
+    { en: "benefit", ipa: "ˈbenɪfɪt", ko: "혜택, 이익", type: "word", example_en: "The job offers great benefits.", example_ko: "그 일자리는 좋은 혜택을 제공한다." },
+    { en: "quarter", ipa: "ˈkwɔːrtər", ko: "분기", type: "word", example_en: "Sales dropped in the third quarter.", example_ko: "3분기에 매출이 떨어졌다." },
+    { en: "forecast", ipa: "ˈfɔːrkæst", ko: "예측(하다)", type: "word", example_en: "The forecast predicts strong growth.", example_ko: "예측에 따르면 강한 성장이 있을 것이다." },
+    { en: "merger", ipa: "ˈmɜːrdʒər", ko: "합병", type: "word", example_en: "The merger was completed last year.", example_ko: "합병은 작년에 완료되었다." },
+    { en: "shareholder", ipa: "ˈʃerhoʊldər", ko: "주주", type: "word", example_en: "Shareholders voted on the proposal.", example_ko: "주주들이 제안에 투표했다." },
+    { en: "asset", ipa: "ˈæset", ko: "자산", type: "word", example_en: "Real estate is a valuable asset.", example_ko: "부동산은 가치 있는 자산이다." },
+    { en: "liability", ipa: "ˌlaɪəˈbɪləti", ko: "부채, 책임", type: "word", example_en: "The company reduced its liabilities.", example_ko: "그 회사는 부채를 줄였다." },
+    { en: "inventory", ipa: "ˈɪnvəntɔːri", ko: "재고", type: "word", example_en: "We need to check the inventory.", example_ko: "우리는 재고를 확인해야 한다." },
+    { en: "logistics", ipa: "loʊˈdʒɪstɪks", ko: "물류", type: "word", example_en: "Logistics costs rose sharply.", example_ko: "물류 비용이 급격히 올랐다." },
+    { en: "supplier", ipa: "səˈplaɪər", ko: "공급업체", type: "word", example_en: "We changed our supplier last month.", example_ko: "우리는 지난달에 공급업체를 바꿨다." },
+    { en: "procurement", ipa: "prəˈkjʊrmənt", ko: "조달, 구매", type: "word", example_en: "The procurement process takes weeks.", example_ko: "조달 과정은 몇 주가 걸린다." },
+    { en: "compliance", ipa: "kəmˈplaɪəns", ko: "준수, 컴플라이언스", type: "word", example_en: "The company follows strict compliance rules.", example_ko: "그 회사는 엄격한 준수 규정을 따른다." },
+    { en: "regulation", ipa: "ˌreɡjuˈleɪʃn", ko: "규제", type: "word", example_en: "New regulations affected the industry.", example_ko: "새로운 규제가 산업에 영향을 미쳤다." },
+    { en: "entrepreneur", ipa: "ˌɑːntrəprəˈnɜːr", ko: "기업가", type: "word", example_en: "She is a successful entrepreneur.", example_ko: "그녀는 성공한 기업가이다." },
+    { en: "startup", ipa: "ˈstɑːrtʌp", ko: "스타트업, 신생 기업", type: "word", example_en: "He founded a tech startup.", example_ko: "그는 기술 스타트업을 설립했다." },
+    { en: "innovation", ipa: "ˌɪnəˈveɪʃn", ko: "혁신", type: "word", example_en: "Innovation drives long-term growth.", example_ko: "혁신은 장기적 성장을 이끈다." },
+    { en: "competitor", ipa: "kəmˈpetɪtər", ko: "경쟁자, 경쟁사", type: "word", example_en: "Our competitor lowered their prices.", example_ko: "우리 경쟁사가 가격을 낮췄다." },
+    { en: "consumer", ipa: "kənˈsuːmər", ko: "소비자", type: "word", example_en: "Consumer demand is rising.", example_ko: "소비자 수요가 증가하고 있다." },
+    { en: "transaction", ipa: "trænˈzækʃn", ko: "거래", type: "word", example_en: "The transaction was completed online.", example_ko: "거래는 온라인으로 완료되었다." },
+    { en: "negotiation", ipa: "nɪˌɡoʊʃiˈeɪʃn", ko: "협상", type: "word", example_en: "The negotiation lasted three hours.", example_ko: "협상은 세 시간 동안 지속되었다." },
+    { en: "milestone", ipa: "ˈmaɪlstoʊn", ko: "이정표, 중요한 단계", type: "word", example_en: "We reached an important milestone.", example_ko: "우리는 중요한 이정표에 도달했다." },
+    { en: "feedback", ipa: "ˈfiːdbæk", ko: "피드백", type: "word", example_en: "Please give me your feedback.", example_ko: "피드백을 주세요." },
+    { en: "performance", ipa: "pərˈfɔːrməns", ko: "성과, 실적", type: "word", example_en: "His performance improved significantly.", example_ko: "그의 성과가 크게 향상되었다." },
+    { en: "flexible", ipa: "ˈfleksəbl", ko: "유연한", type: "word", example_en: "We offer flexible working hours.", example_ko: "우리는 유연한 근무 시간을 제공한다." },
+    { en: "reliable", ipa: "rɪˈlaɪəbl", ko: "믿을 수 있는", type: "word", example_en: "She is a reliable partner.", example_ko: "그녀는 믿을 수 있는 파트너이다." },
+    { en: "accountable", ipa: "əˈkaʊntəbl", ko: "책임이 있는", type: "word", example_en: "Managers are accountable for results.", example_ko: "관리자는 결과에 책임이 있다." },
+    { en: "scalable", ipa: "ˈskeɪləbl", ko: "확장 가능한", type: "word", example_en: "The business model is scalable.", example_ko: "그 비즈니스 모델은 확장 가능하다." },
+    { en: "outsource", ipa: "ˈaʊtsɔːrs", ko: "외주를 주다", type: "word", example_en: "They outsourced the customer service.", example_ko: "그들은 고객 서비스를 외주 줬다." },
+    { en: "streamline", ipa: "ˈstriːmlaɪn", ko: "간소화하다", type: "word", example_en: "We streamlined the approval process.", example_ko: "우리는 승인 절차를 간소화했다." },
+    { en: "prioritize", ipa: "praɪˈɔːrətaɪz", ko: "우선순위를 정하다", type: "word", example_en: "You should prioritize urgent tasks.", example_ko: "긴급한 업무의 우선순위를 정해야 한다." },
+    { en: "delegate", ipa: "ˈdelɪɡeɪt", ko: "위임하다", type: "word", example_en: "A good leader knows how to delegate.", example_ko: "좋은 리더는 위임하는 법을 안다." },
+    { en: "collaborate", ipa: "kəˈlæbəreɪt", ko: "협업하다", type: "word", example_en: "The two teams collaborated on the project.", example_ko: "두 팀이 그 프로젝트에서 협업했다." },
+    { en: "implement", ipa: "ˈɪmplɪment", ko: "시행하다, 실행하다", type: "word", example_en: "The company implemented a new policy.", example_ko: "그 회사는 새로운 정책을 시행했다." },
+    { en: "think outside the box", ko: "창의적으로 생각하다", type: "idiom", example_en: "We need to think outside the box to solve this.", example_ko: "이것을 해결하려면 창의적으로 생각해야 한다." },
+    { en: "get the ball rolling", ko: "일을 시작하다", type: "idiom", example_en: "Let's get the ball rolling on this project.", example_ko: "이 프로젝트를 시작합시다." },
+    { en: "on the same page", ko: "생각이 일치하는", type: "idiom", example_en: "Let's make sure we're on the same page.", example_ko: "우리가 같은 생각인지 확인합시다." },
+    { en: "touch base", ko: "다시 연락하다, 상황을 공유하다", type: "idiom", example_en: "I'll touch base with you next week.", example_ko: "다음 주에 다시 연락드릴게요." },
+    { en: "cut corners", ko: "절차를 생략하다, 대충하다", type: "idiom", example_en: "Don't cut corners on safety.", example_ko: "안전에 있어서는 대충 하지 마세요." },
+    { en: "back to the drawing board", ko: "처음부터 다시 시작하다", type: "idiom", example_en: "The plan failed, so it's back to the drawing board.", example_ko: "계획이 실패해서 처음부터 다시 시작해야 한다." },
+    { en: "call it a day", ko: "오늘은 여기까지 하다, 끝내다", type: "idiom", example_en: "Let's call it a day.", example_ko: "오늘은 여기까지 합시다." },
+    { en: "in the loop", ko: "정보를 공유받는, 알고 있는", type: "idiom", example_en: "Please keep me in the loop.", example_ko: "계속 정보를 공유해 주세요." },
+    { en: "run the numbers", ko: "수치를 계산해보다", type: "idiom", example_en: "Let's run the numbers before deciding.", example_ko: "결정하기 전에 수치를 계산해봅시다." },
+    { en: "from scratch", ko: "처음부터", type: "idiom", example_en: "We built the system from scratch.", example_ko: "우리는 시스템을 처음부터 만들었다." },
+    { en: "up in the air", ko: "미정인, 불확실한", type: "idiom", example_en: "The final decision is still up in the air.", example_ko: "최종 결정은 아직 미정이다." },
+    { en: "game changer", ko: "판도를 바꾸는 것", type: "idiom", example_en: "This technology is a real game changer.", example_ko: "이 기술은 진정한 게임 체인저다." },
+    { en: "take the lead", ko: "주도하다, 앞장서다", type: "idiom", example_en: "She took the lead on the new project.", example_ko: "그녀는 새 프로젝트를 주도했다." },
+    { en: "on the fence", ko: "결정을 못 내린, 망설이는", type: "idiom", example_en: "I'm still on the fence about this offer.", example_ko: "나는 아직 이 제안에 대해 망설이고 있다." },
+    { en: "in the long run", ko: "장기적으로", type: "idiom", example_en: "It will pay off in the long run.", example_ko: "장기적으로는 성과가 있을 것이다." },
+    { en: "bottom line", ko: "요점, 순이익", type: "idiom", example_en: "The bottom line is we need more time.", example_ko: "요점은 우리에게 시간이 더 필요하다는 것이다." },
+    { en: "red tape", ko: "관료적 절차", type: "idiom", example_en: "There's a lot of red tape in this process.", example_ko: "이 절차에는 관료적 형식이 많다." },
+    { en: "rule of thumb", ko: "경험 법칙", type: "idiom", example_en: "As a rule of thumb, save 20% of your income.", example_ko: "경험상 소득의 20%를 저축하라." },
+    { en: "learning curve", ko: "학습 곡선", type: "idiom", example_en: "There's a steep learning curve for this software.", example_ko: "이 소프트웨어는 학습 곡선이 가파르다." },
+    { en: "win-win situation", ko: "상호 이익이 되는 상황", type: "idiom", example_en: "This deal is a win-win situation for both sides.", example_ko: "이 거래는 양측 모두에게 이익이다." },
+    { en: "state of the art", ko: "최첨단의", type: "idiom", example_en: "The factory uses state-of-the-art technology.", example_ko: "그 공장은 최첨단 기술을 사용한다." },
+    { en: "keep someone posted", ko: "계속 소식을 전하다", type: "idiom", example_en: "I'll keep you posted on the progress.", example_ko: "진행 상황을 계속 알려드릴게요." },
+    { en: "wrap up", ko: "마무리하다", type: "idiom", example_en: "Let's wrap up the meeting.", example_ko: "회의를 마무리합시다." },
+    { en: "cover all the bases", ko: "모든 상황에 대비하다", type: "idiom", example_en: "We need to cover all the bases before launch.", example_ko: "출시 전에 모든 상황에 대비해야 한다." },
+    { en: "jump on the bandwagon", ko: "유행에 편승하다", type: "idiom", example_en: "Many companies jumped on the bandwagon.", example_ko: "많은 회사들이 유행에 편승했다." },
+    { en: "raise the bar", ko: "기준을 높이다", type: "idiom", example_en: "The new manager raised the bar for quality.", example_ko: "새 매니저는 품질 기준을 높였다." },
+    { en: "behind schedule", ko: "일정보다 늦은", type: "idiom", example_en: "The project is behind schedule.", example_ko: "프로젝트가 일정보다 늦어지고 있다." },
+    { en: "ahead of the curve", ko: "시대를 앞서가는", type: "idiom", example_en: "The company stays ahead of the curve.", example_ko: "그 회사는 시대를 앞서간다." },
+    { en: "down to the wire", ko: "마지막 순간까지 가는", type: "idiom", example_en: "The negotiation went down to the wire.", example_ko: "협상은 마지막 순간까지 갔다." },
+    { en: "close the deal", ko: "거래를 성사시키다", type: "idiom", example_en: "We finally closed the deal.", example_ko: "우리는 마침내 거래를 성사시켰다." },
+    { en: "I'd like to ~", ko: "~하고 싶습니다", type: "pattern", example_en: "I'd like to make a reservation.", example_ko: "예약을 하고 싶습니다." },
+    { en: "Could you please ~?", ko: "~해 주시겠어요?", type: "pattern", example_en: "Could you please repeat that?", example_ko: "다시 한번 말씀해 주시겠어요?" },
+    { en: "I'm afraid that ~", ko: "유감이지만 ~입니다", type: "pattern", example_en: "I'm afraid that the flight is delayed.", example_ko: "유감이지만 비행기가 지연됐습니다." },
+    { en: "Would you mind ~ing?", ko: "~해도 괜찮을까요?", type: "pattern", example_en: "Would you mind closing the window?", example_ko: "창문을 닫아도 괜찮을까요?" },
+    { en: "I was wondering if ~", ko: "~인지 궁금합니다 (정중한 요청)", type: "pattern", example_en: "I was wondering if you could help me.", example_ko: "도와주실 수 있는지 궁금합니다." },
+    { en: "It seems like ~", ko: "~인 것 같습니다", type: "pattern", example_en: "It seems like we have a problem.", example_ko: "문제가 있는 것 같습니다." },
+    { en: "As far as I know, ~", ko: "제가 알기로는 ~", type: "pattern", example_en: "As far as I know, the store is closed.", example_ko: "제가 알기로는 가게가 문을 닫았습니다." },
+    { en: "I appreciate ~", ko: "~에 감사드립니다", type: "pattern", example_en: "I appreciate your help.", example_ko: "도와주셔서 감사합니다." },
+    { en: "I'm looking forward to ~", ko: "~을 기대하고 있습니다", type: "pattern", example_en: "I'm looking forward to meeting you.", example_ko: "만나 뵙기를 기대하고 있습니다." },
+    { en: "What do you think about ~?", ko: "~에 대해 어떻게 생각하세요?", type: "pattern", example_en: "What do you think about this plan?", example_ko: "이 계획에 대해 어떻게 생각하세요?" },
+    { en: "I have to admit that ~", ko: "인정해야겠지만 ~", type: "pattern", example_en: "I have to admit that I was wrong.", example_ko: "제가 틀렸다는 걸 인정해야겠습니다." },
+    { en: "It's worth ~ing", ko: "~할 가치가 있습니다", type: "pattern", example_en: "It's worth trying.", example_ko: "시도해 볼 가치가 있습니다." },
+    { en: "I'm not sure if ~", ko: "~인지 확실하지 않습니다", type: "pattern", example_en: "I'm not sure if this is correct.", example_ko: "이것이 맞는지 확실하지 않습니다." },
+    { en: "Let me know if ~", ko: "~이면 알려주세요", type: "pattern", example_en: "Let me know if you need anything.", example_ko: "필요한 게 있으면 알려주세요." },
+    { en: "I used to ~", ko: "예전에 ~하곤 했습니다", type: "pattern", example_en: "I used to live in Busan.", example_ko: "저는 예전에 부산에 살았습니다." },
+    { en: "I can't help but ~", ko: "~하지 않을 수 없습니다", type: "pattern", example_en: "I can't help but agree.", example_ko: "동의하지 않을 수 없네요." },
+    { en: "It depends on ~", ko: "~에 달려 있습니다", type: "pattern", example_en: "It depends on the weather.", example_ko: "그것은 날씨에 달려 있습니다." },
+    { en: "I'm supposed to ~", ko: "~하기로 되어 있습니다", type: "pattern", example_en: "I'm supposed to submit this by Friday.", example_ko: "저는 금요일까지 이것을 제출하기로 되어 있습니다." },
+    { en: "On top of that, ~", ko: "게다가, ~", type: "pattern", example_en: "On top of that, it started raining.", example_ko: "게다가 비까지 내리기 시작했다." },
+    { en: "In terms of ~", ko: "~의 측면에서", type: "pattern", example_en: "In terms of cost, this option is better.", example_ko: "비용 측면에서 이 옵션이 더 낫다." },
+    { en: "I take it that ~", ko: "~인 걸로 알겠습니다", type: "pattern", example_en: "I take it that you agree.", example_ko: "동의하시는 걸로 알겠습니다." },
+    { en: "Speaking of ~", ko: "~ 얘기가 나와서 말인데", type: "pattern", example_en: "Speaking of vacation, where are you going?", example_ko: "휴가 얘기가 나와서 말인데, 어디로 가세요?" },
+    { en: "I'd rather ~ than ...", ko: "...하느니 차라리 ~하겠다", type: "pattern", example_en: "I'd rather walk than wait for the bus.", example_ko: "버스를 기다리느니 차라리 걷겠다." },
+    { en: "There's no point in ~ing", ko: "~해도 소용없다", type: "pattern", example_en: "There's no point in arguing.", example_ko: "논쟁해도 소용없다." },
+    { en: "I might as well ~", ko: "~하는 게 낫겠다", type: "pattern", example_en: "I might as well finish it now.", example_ko: "지금 끝내는 게 낫겠다." },
+    { en: "What if ~?", ko: "만약 ~라면 어떨까요?", type: "pattern", example_en: "What if we changed the schedule?", example_ko: "만약 일정을 바꾸면 어떨까요?" },
+    { en: "I can't afford to ~", ko: "~할 여유가 없다", type: "pattern", example_en: "I can't afford to take a break now.", example_ko: "지금은 쉴 여유가 없다." },
+    { en: "To be honest, ~", ko: "솔직히 말하면 ~", type: "pattern", example_en: "To be honest, I didn't like the movie.", example_ko: "솔직히 말하면 그 영화가 마음에 들지 않았다." },
+    { en: "I guess I'll have to ~", ko: "~해야 할 것 같다", type: "pattern", example_en: "I guess I'll have to cancel my trip.", example_ko: "여행을 취소해야 할 것 같다." },
+    { en: "It's about time ~", ko: "~할 때가 되었다", type: "pattern", example_en: "It's about time we left.", example_ko: "우리가 떠날 때가 되었다." },
+    { en: "I couldn't agree more.", ko: "전적으로 동의합니다.", type: "pattern", example_en: "I couldn't agree more with your opinion.", example_ko: "당신의 의견에 전적으로 동의합니다." },
+    { en: "Let's face it.", ko: "현실을 직시하자.", type: "pattern", example_en: "Let's face it, we need more time.", example_ko: "현실을 직시하자, 시간이 더 필요하다." },
+    { en: "That being said, ~", ko: "그렇긴 하지만, ~", type: "pattern", example_en: "That being said, we should still try.", example_ko: "그렇긴 하지만 여전히 시도해봐야 한다." },
+    { en: "I take full responsibility for ~", ko: "~에 대해 전적으로 책임지겠습니다", type: "pattern", example_en: "I take full responsibility for the mistake.", example_ko: "그 실수에 대해 전적으로 책임지겠습니다." },
+    { en: "It's not that I don't want to, but ~", ko: "하기 싫은 건 아니지만, ~", type: "pattern", example_en: "It's not that I don't want to, but I'm too busy.", example_ko: "하기 싫은 건 아니지만 너무 바빠요." },
+    { en: "I'll get back to you on that.", ko: "그것에 대해 다시 연락드릴게요.", type: "pattern", example_en: "Let me check and I'll get back to you on that.", example_ko: "확인하고 다시 연락드릴게요." },
+    { en: "Correct me if I'm wrong, but ~", ko: "제가 틀렸으면 정정해 주세요, ~", type: "pattern", example_en: "Correct me if I'm wrong, but the meeting is at 3.", example_ko: "제가 틀렸으면 정정해 주세요, 회의가 3시죠?" },
+    { en: "I'm all for ~", ko: "저는 ~에 전적으로 찬성입니다", type: "pattern", example_en: "I'm all for the new plan.", example_ko: "저는 새 계획에 전적으로 찬성입니다." },
+    { en: "Feel free to ~", ko: "편하게 ~하세요", type: "pattern", example_en: "Feel free to ask any questions.", example_ko: "편하게 질문해 주세요." },
+    { en: "Now that I think about it, ~", ko: "생각해보니, ~", type: "pattern", example_en: "Now that I think about it, he did mention it.", example_ko: "생각해보니 그가 그것을 언급했었다." },
+    { en: "Let's touch base next week.", ko: "다음 주에 다시 논의합시다.", type: "business" },
+    { en: "I'll circle back to you on this.", ko: "이 건에 대해 다시 연락드리겠습니다.", type: "business" },
+    { en: "Could you send me the file by EOD?", ko: "오늘 중으로(EOD) 파일을 보내주실 수 있나요?", type: "business" },
+    { en: "Let's schedule a follow-up meeting.", ko: "후속 회의를 잡읍시다.", type: "business" },
+    { en: "I'm CC'ing the team on this email.", ko: "이 이메일에 팀원들을 참조로 넣었습니다.", type: "business" },
+    { en: "Please find the attached report.", ko: "첨부된 보고서를 확인해 주세요.", type: "business" },
+    { en: "We're on track to meet the deadline.", ko: "마감일을 맞출 수 있는 상황입니다.", type: "business" },
+    { en: "Let's take this offline.", ko: "이건 따로(개인적으로) 이야기합시다.", type: "business" },
+    { en: "I'll loop in the marketing team.", ko: "마케팅 팀도 참여시키겠습니다.", type: "business" },
+    { en: "Can we push the meeting to 3 PM?", ko: "회의를 3시로 미룰 수 있을까요?", type: "business" },
+    { en: "Let's put a pin in that for now.", ko: "그건 일단 보류합시다.", type: "business" },
+    { en: "I'll follow up with an email.", ko: "이메일로 후속 조치하겠습니다.", type: "business" },
+    { en: "We need to align on the budget.", ko: "예산에 대해 의견을 맞춰야 합니다.", type: "business" },
+    { en: "Let's table this discussion for later.", ko: "이 논의는 나중으로 미룹시다.", type: "business" },
+    { en: "I appreciate your patience on this matter.", ko: "이 건에 대해 인내해 주셔서 감사합니다.", type: "business" },
+    { en: "Could you walk me through the process?", ko: "그 과정을 설명해 주시겠어요?", type: "business" },
+    { en: "We should leverage our resources better.", ko: "우리는 자원을 더 잘 활용해야 합니다.", type: "business" },
+    { en: "Let's get everyone on the same page.", ko: "모두의 생각을 일치시킵시다.", type: "business" },
+    { en: "I'll draft a proposal by tomorrow.", ko: "내일까지 제안서 초안을 작성하겠습니다.", type: "business" },
+    { en: "Please keep this confidential.", ko: "이 내용은 비밀로 해주세요.", type: "business" },
+    { en: "We're finalizing the details now.", ko: "지금 세부사항을 마무리하고 있습니다.", type: "business" },
+    { en: "Let's brainstorm some ideas.", ko: "아이디어를 브레인스토밍해봅시다.", type: "business" },
+    { en: "I'll take the minutes for this meeting.", ko: "이번 회의 회의록을 작성하겠습니다.", type: "business" },
+    { en: "Can you elaborate on that point?", ko: "그 부분을 좀 더 자세히 설명해 주시겠어요?", type: "business" },
+    { en: "We're open to feedback.", ko: "저희는 피드백을 환영합니다.", type: "business" },
+    { en: "Let's move forward with the plan.", ko: "계획대로 진행합시다.", type: "business" },
+    { en: "I'll need your sign-off on this.", ko: "이 건에 대한 승인이 필요합니다.", type: "business" },
+    { en: "We're currently understaffed.", ko: "저희는 현재 인력이 부족합니다.", type: "business" },
+    { en: "Let's revisit this next quarter.", ko: "다음 분기에 다시 검토합시다.", type: "business" },
+    { en: "I want to make sure we're aligned.", ko: "우리 의견이 일치하는지 확인하고 싶습니다.", type: "business" },
+    { en: "Could you cc me on that thread?", ko: "그 이메일 스레드에 저도 참조해 주시겠어요?", type: "business" },
+    { en: "We hit a snag with the vendor.", ko: "공급업체와 문제가 생겼습니다.", type: "business" },
+    { en: "Let's set some KPIs for this project.", ko: "이 프로젝트에 핵심성과지표(KPI)를 설정합시다.", type: "business" },
+    { en: "I'll escalate this to management.", ko: "이 문제를 경영진에게 보고하겠습니다.", type: "business" },
+    { en: "We're ahead of schedule.", ko: "저희는 일정보다 앞서 있습니다.", type: "business" },
+    { en: "Let's iron out the details.", ko: "세부사항을 정리합시다.", type: "business" },
+    { en: "I'd like to propose an alternative.", ko: "대안을 제안하고 싶습니다.", type: "business" },
+    { en: "We need buy-in from stakeholders.", ko: "이해관계자들의 동의가 필요합니다.", type: "business" },
+    { en: "Let's debrief after the presentation.", ko: "발표 후에 피드백을 나눕시다.", type: "business" },
+    { en: "I'll keep you in the loop.", ko: "계속 상황을 공유해 드리겠습니다.", type: "business" },
+    { en: "bring in", ko: "도입하다, 영입하다", type: "phrasal", example_en: "We brought in a consultant to help.", example_ko: "도움을 받으려고 컨설턴트를 영입했어요." },
+    { en: "call back", ko: "다시 전화하다", type: "phrasal", example_en: "I'll call you back in ten minutes.", example_ko: "10분 뒤에 다시 전화드릴게요." },
+    { en: "call on", ko: "요청하다, 방문하다", type: "phrasal", example_en: "The chair called on me to present.", example_ko: "의장이 제게 발표를 요청했어요." },
+    { en: "carry on", ko: "계속하다", type: "phrasal", example_en: "Please carry on without me.", example_ko: "저 없이 계속 진행해 주세요." },
+    { en: "come along", ko: "함께 가다, 진척되다", type: "phrasal", example_en: "How is the project coming along?", example_ko: "프로젝트는 얼마나 진행됐나요?" },
+    { en: "come down with", ko: "(병에) 걸리다", type: "phrasal", example_en: "I came down with a cold last night.", example_ko: "어젯밤에 감기에 걸렸어요." },
+    { en: "count on", ko: "믿다, 의지하다", type: "phrasal", example_en: "You can count on me for this.", example_ko: "이 건은 저를 믿으셔도 됩니다." },
+    { en: "cross out", ko: "줄을 그어 지우다", type: "phrasal", example_en: "Cross out the items we don't need.", example_ko: "필요 없는 항목은 지워 주세요." },
+    { en: "cut in", ko: "끼어들다", type: "phrasal", example_en: "Sorry to cut in, but I have a question.", example_ko: "끼어들어 죄송한데 질문이 있어요." },
+    { en: "do away with", ko: "없애다, 폐지하다", type: "phrasal", example_en: "They did away with the old policy.", example_ko: "그들은 낡은 정책을 없앴어요." },
+    { en: "drop off", ko: "내려주다, 갖다주다", type: "phrasal", example_en: "I'll drop off the documents tomorrow.", example_ko: "내일 서류를 갖다 드릴게요." },
+    { en: "drop out", ko: "중도에 그만두다", type: "phrasal", example_en: "Two members dropped out of the program.", example_ko: "두 명이 프로그램을 중도에 그만뒀어요." },
+    { en: "ease up", ko: "완화되다, 느슨해지다", type: "phrasal", example_en: "The workload should ease up next month.", example_ko: "다음 달엔 업무량이 좀 줄 거예요." },
+    { en: "fall apart", ko: "무너지다, 실패하다", type: "phrasal", example_en: "The deal fell apart at the last minute.", example_ko: "그 거래는 막판에 무산됐어요." },
+    { en: "fill in", ko: "채워 넣다, 대신하다", type: "phrasal", example_en: "Can you fill in for me on Friday?", example_ko: "금요일에 저 대신 좀 해 주실 수 있나요?" },
+    { en: "get by", ko: "그럭저럭 해내다", type: "phrasal", example_en: "We can get by with the current budget.", example_ko: "현재 예산으로 그럭저럭 될 것 같아요." },
+    { en: "get down to", ko: "본격적으로 착수하다", type: "phrasal", example_en: "Let's get down to the details.", example_ko: "이제 세부 사항으로 들어가죠." },
+    { en: "get rid of", ko: "없애다, 처분하다", type: "phrasal", example_en: "We need to get rid of these old files.", example_ko: "이 오래된 파일들을 정리해야 해요." },
+    { en: "give off", ko: "내뿜다, 풍기다", type: "phrasal", example_en: "The room gives off a professional vibe.", example_ko: "그 공간은 전문적인 분위기를 풍겨요." },
+    { en: "go after", ko: "쫓다, 추구하다", type: "phrasal", example_en: "We're going after a bigger market.", example_ko: "우리는 더 큰 시장을 노리고 있어요." },
+    { en: "go by", ko: "지나가다, ~에 따르다", type: "phrasal", example_en: "Two years went by very quickly.", example_ko: "2년이 정말 빨리 지나갔어요." },
+    { en: "go for", ko: "선택하다, 시도하다", type: "phrasal", example_en: "Let's go for the simpler option.", example_ko: "더 단순한 안으로 갑시다." },
+    { en: "hang on", ko: "잠시 기다리다", type: "phrasal", example_en: "Hang on, I'm pulling up the file.", example_ko: "잠깐만요, 파일 여는 중이에요." },
+    { en: "head for", ko: "~로 향하다", type: "phrasal", example_en: "We're heading for a record quarter.", example_ko: "이번 분기는 최고 기록을 향해 가고 있어요." },
+    { en: "hold back", ko: "억제하다, 망설이다", type: "phrasal", example_en: "Don't hold back your honest opinion.", example_ko: "솔직한 의견을 숨기지 마세요." },
+    { en: "keep away from", ko: "멀리하다", type: "phrasal", example_en: "Keep away from unverified sources.", example_ko: "검증되지 않은 출처는 멀리하세요." },
+    { en: "knock off", ko: "일을 마치다, 값을 깎다", type: "phrasal", example_en: "Let's knock off early today.", example_ko: "오늘은 일찍 마칩시다." },
+    { en: "lay out", ko: "제시하다, 배치하다", type: "phrasal", example_en: "She laid out the plan clearly.", example_ko: "그녀가 계획을 명확히 제시했어요." },
+    { en: "let down", ko: "실망시키다", type: "phrasal", example_en: "I don't want to let the team down.", example_ko: "팀을 실망시키고 싶지 않아요." },
+    { en: "look down on", ko: "얕보다", type: "phrasal", example_en: "Never look down on a small client.", example_ko: "작은 고객이라고 절대 얕보지 마세요." },
+    { en: "look out for", ko: "조심하다, 살피다", type: "phrasal", example_en: "Look out for hidden fees in the contract.", example_ko: "계약서의 숨은 비용을 잘 살펴보세요." },
+    { en: "look over", ko: "훑어보다", type: "phrasal", example_en: "Could you look over my draft?", example_ko: "제 초안 좀 봐 주시겠어요?" },
+    { en: "look up to", ko: "존경하다", type: "phrasal", example_en: "Many juniors look up to her.", example_ko: "많은 후배들이 그녀를 존경해요." },
+    { en: "make out", ko: "알아보다, 이해하다", type: "phrasal", example_en: "I can't make out his handwriting.", example_ko: "그의 글씨를 알아볼 수가 없어요." },
+    { en: "opt for", ko: "택하다", type: "phrasal", example_en: "We opted for the annual plan.", example_ko: "우리는 연간 플랜을 택했어요." },
+    { en: "pass on", ko: "전달하다, 사양하다", type: "phrasal", example_en: "I'll pass on your message to him.", example_ko: "그분께 메시지를 전달할게요." },
+    { en: "pick out", ko: "고르다", type: "phrasal", example_en: "Pick out three designs you like.", example_ko: "마음에 드는 디자인 세 개를 골라 주세요." },
+    { en: "put down", ko: "적어 두다, 내려놓다", type: "phrasal", example_en: "Put down your thoughts before the meeting.", example_ko: "회의 전에 생각을 적어 두세요." },
+    { en: "put forward", ko: "제안하다", type: "phrasal", example_en: "He put forward an interesting idea.", example_ko: "그가 흥미로운 아이디어를 제안했어요." },
+    { en: "put in", ko: "투입하다, 제출하다", type: "phrasal", example_en: "She put in a lot of extra hours.", example_ko: "그녀는 추가 근무를 많이 했어요." },
+    { en: "roll out", ko: "출시하다, 전개하다", type: "phrasal", example_en: "We'll roll out the update next week.", example_ko: "다음 주에 업데이트를 배포할 예정이에요." },
+    { en: "run by", ko: "의견을 구하다", type: "phrasal", example_en: "Let me run this by my manager.", example_ko: "이건 제 상사에게 확인해 볼게요." },
+    { en: "scale back", ko: "규모를 줄이다", type: "phrasal", example_en: "We had to scale back the campaign.", example_ko: "캠페인 규모를 줄여야 했어요." },
+    { en: "shut down", ko: "폐쇄하다, 종료하다", type: "phrasal", example_en: "They shut down the old server.", example_ko: "그들은 낡은 서버를 종료했어요." },
+    { en: "sign off on", ko: "승인하다", type: "phrasal", example_en: "The director signed off on the budget.", example_ko: "이사님이 예산을 승인했어요." },
+    { en: "sign up for", ko: "신청하다, 등록하다", type: "phrasal", example_en: "I signed up for the training session.", example_ko: "저는 교육 과정에 등록했어요." },
+    { en: "stand by", ko: "대기하다, 지지하다", type: "phrasal", example_en: "We stand by our original estimate.", example_ko: "저희는 처음 견적을 그대로 유지합니다." },
+    { en: "step up", ko: "나서다, 강화하다", type: "phrasal", example_en: "She stepped up when the lead resigned.", example_ko: "팀장이 그만두자 그녀가 나섰어요." },
+    { en: "take in", ko: "받아들이다, 이해하다", type: "phrasal", example_en: "That's a lot of information to take in.", example_ko: "한 번에 소화하기엔 정보가 많네요." },
+    { en: "watch out for", ko: "주의하다", type: "phrasal", example_en: "Watch out for the tight deadline.", example_ko: "촉박한 마감일을 조심하세요." },
+    { en: "stakeholder", ipa: "ˈsteɪkhoʊldər", ko: "이해관계자", type: "word", example_en: "We surveyed every stakeholder.", example_ko: "모든 이해관계자를 대상으로 조사했어요." },
+    { en: "agenda", ipa: "əˈdʒendə", ko: "안건, 의제", type: "word", example_en: "Please send the agenda in advance.", example_ko: "안건을 미리 보내 주세요." },
+    { en: "memo", ipa: "ˈmemoʊ", ko: "메모, 회람", type: "word", example_en: "A memo went out this morning.", example_ko: "오늘 아침에 회람이 나갔어요." },
+    { en: "briefing", ipa: "ˈbriːfɪŋ", ko: "브리핑", type: "word", example_en: "The briefing starts at nine.", example_ko: "브리핑은 9시에 시작합니다." },
+    { en: "appraisal", ipa: "əˈpreɪzl", ko: "인사 평가", type: "word", example_en: "My annual appraisal is next week.", example_ko: "제 연간 평가가 다음 주예요." },
+    { en: "incentive", ipa: "ɪnˈsentɪv", ko: "성과급, 유인책", type: "word", example_en: "The incentive plan boosted sales.", example_ko: "성과급 제도가 매출을 끌어올렸어요." },
+    { en: "turnover", ipa: "ˈtɜːrnoʊvər", ko: "이직률, 총매출", type: "word", example_en: "Employee turnover dropped this year.", example_ko: "올해 직원 이직률이 낮아졌어요." },
+    { en: "retention", ipa: "rɪˈtenʃn", ko: "유지, 잔존율", type: "word", example_en: "Customer retention is our top metric.", example_ko: "고객 유지율이 핵심 지표예요." },
+    { en: "onboarding", ipa: "ˈɑːnbɔːrdɪŋ", ko: "신규 적응 절차", type: "word", example_en: "Onboarding takes about two weeks.", example_ko: "적응 과정은 약 2주 걸려요." },
+    { en: "headcount", ipa: "ˈhedkaʊnt", ko: "인원수", type: "word", example_en: "We're increasing headcount next quarter.", example_ko: "다음 분기에 인원을 늘릴 예정이에요." },
+    { en: "workload", ipa: "ˈwɜːrkloʊd", ko: "업무량", type: "word", example_en: "His workload doubled this month.", example_ko: "이번 달 그의 업무량이 두 배가 됐어요." },
+    { en: "workflow", ipa: "ˈwɜːrkfloʊ", ko: "업무 흐름", type: "word", example_en: "We automated the approval workflow.", example_ko: "승인 절차를 자동화했어요." },
+    { en: "bottleneck", ipa: "ˈbɑːtlnek", ko: "병목", type: "word", example_en: "Testing is the main bottleneck.", example_ko: "테스트가 가장 큰 병목이에요." },
+    { en: "allocation", ipa: "ˌæləˈkeɪʃn", ko: "배분", type: "word", example_en: "Budget allocation is under review.", example_ko: "예산 배분을 검토 중이에요." },
+    { en: "expenditure", ipa: "ɪkˈspendɪtʃər", ko: "지출", type: "word", example_en: "We cut expenditure by ten percent.", example_ko: "지출을 10퍼센트 줄였어요." },
+    { en: "overhead", ipa: "ˈoʊvərhed", ko: "간접비", type: "word", example_en: "Remote work lowered our overhead.", example_ko: "재택근무로 간접비가 줄었어요." },
+    { en: "margin", ipa: "ˈmɑːrdʒɪn", ko: "이윤, 마진", type: "word", example_en: "Our profit margin improved slightly.", example_ko: "이윤율이 소폭 개선됐어요." },
+    { en: "valuation", ipa: "ˌvæljuˈeɪʃn", ko: "기업 가치 평가", type: "word", example_en: "The startup's valuation doubled.", example_ko: "그 스타트업의 기업가치가 두 배가 됐어요." },
+    { en: "dividend", ipa: "ˈdɪvɪdend", ko: "배당금", type: "word", example_en: "The board raised the dividend.", example_ko: "이사회가 배당금을 올렸어요." },
+    { en: "portfolio", ipa: "pɔːrtˈfoʊlioʊ", ko: "포트폴리오", type: "word", example_en: "Diversify your investment portfolio.", example_ko: "투자 포트폴리오를 분산하세요." },
+    { en: "equity", ipa: "ˈekwəti", ko: "지분, 자기자본", type: "word", example_en: "Employees receive equity after a year.", example_ko: "직원들은 1년 후 지분을 받아요." },
+    { en: "audit", ipa: "ˈɔːdɪt", ko: "감사", type: "word", example_en: "The annual audit starts in March.", example_ko: "연례 감사는 3월에 시작해요." },
+    { en: "invoice", ipa: "ˈɪnvɔɪs", ko: "청구서", type: "word", example_en: "Please send the invoice by email.", example_ko: "청구서를 이메일로 보내 주세요." },
+    { en: "subsidiary", ipa: "səbˈsɪdieri", ko: "자회사", type: "word", example_en: "They opened a subsidiary in Japan.", example_ko: "그들은 일본에 자회사를 세웠어요." },
+    { en: "franchise", ipa: "ˈfræntʃaɪz", ko: "가맹점 사업", type: "word", example_en: "He runs three franchise stores.", example_ko: "그는 가맹점 세 곳을 운영해요." },
+    { en: "patent", ipa: "ˈpætnt", ko: "특허", type: "word", example_en: "We filed a patent last month.", example_ko: "지난달에 특허를 출원했어요." },
+    { en: "trademark", ipa: "ˈtreɪdmɑːrk", ko: "상표", type: "word", example_en: "The logo is a registered trademark.", example_ko: "그 로고는 등록 상표예요." },
+    { en: "prototype", ipa: "ˈproʊtətaɪp", ko: "시제품", type: "word", example_en: "The prototype is ready for testing.", example_ko: "시제품이 테스트 준비를 마쳤어요." },
+    { en: "feasibility", ipa: "ˌfiːzəˈbɪləti", ko: "실현 가능성", type: "word", example_en: "We ran a feasibility study first.", example_ko: "먼저 타당성 조사를 했어요." },
+    { en: "benchmark", ipa: "ˈbentʃmɑːrk", ko: "기준, 비교 지표", type: "word", example_en: "Let's benchmark against the leader.", example_ko: "선두 업체를 기준으로 비교해 봅시다." },
+    { en: "metric", ipa: "ˈmetrɪk", ko: "측정 지표", type: "word", example_en: "Pick one metric that really matters.", example_ko: "정말 중요한 지표 하나를 고르세요." },
+    { en: "deliverable", ipa: "dɪˈlɪvərəbl", ko: "산출물", type: "word", example_en: "List the deliverables for phase one.", example_ko: "1단계 산출물을 정리해 주세요." },
+    { en: "scope", ipa: "skoʊp", ko: "범위", type: "word", example_en: "That request is outside our scope.", example_ko: "그 요청은 저희 범위를 벗어나요." },
+    { en: "timeline", ipa: "ˈtaɪmlaɪn", ko: "일정표", type: "word", example_en: "The timeline is tight but doable.", example_ko: "일정이 빠듯하지만 가능해요." },
+    { en: "contingency", ipa: "kənˈtɪndʒənsi", ko: "비상 대책", type: "word", example_en: "We need a contingency plan.", example_ko: "비상 계획이 필요해요." },
+    { en: "mitigation", ipa: "ˌmɪtɪˈɡeɪʃn", ko: "완화, 경감", type: "word", example_en: "Risk mitigation is part of the proposal.", example_ko: "위험 완화 방안도 제안서에 포함돼요." },
+    { en: "escalation", ipa: "ˌeskəˈleɪʃn", ko: "상부 보고, 격화", type: "word", example_en: "Follow the escalation process.", example_ko: "상부 보고 절차를 따르세요." },
+    { en: "arbitration", ipa: "ˌɑːrbɪˈtreɪʃn", ko: "중재", type: "word", example_en: "The dispute went to arbitration.", example_ko: "그 분쟁은 중재로 넘어갔어요." },
+    { en: "warranty", ipa: "ˈwɔːrənti", ko: "품질 보증", type: "word", example_en: "The warranty covers two years.", example_ko: "보증 기간은 2년이에요." },
+    { en: "liquidity", ipa: "lɪˈkwɪdəti", ko: "유동성", type: "word", example_en: "The firm has strong liquidity.", example_ko: "그 회사는 유동성이 탄탄해요." },
+    { en: "depreciation", ipa: "dɪˌpriːʃiˈeɪʃn", ko: "감가상각", type: "word", example_en: "Depreciation lowers taxable income.", example_ko: "감가상각은 과세 소득을 낮춰요." },
+    { en: "leverage", ipa: "ˈlevərɪdʒ", ko: "활용하다, 지렛대 효과", type: "word", example_en: "Let's leverage our existing users.", example_ko: "기존 사용자를 활용합시다." },
+    { en: "consolidate", ipa: "kənˈsɑːlɪdeɪt", ko: "통합하다", type: "word", example_en: "We consolidated three reports into one.", example_ko: "보고서 세 개를 하나로 통합했어요." },
+    { en: "diversify", ipa: "daɪˈvɜːrsɪfaɪ", ko: "다각화하다", type: "word", example_en: "They diversified into new markets.", example_ko: "그들은 신규 시장으로 다각화했어요." },
+    { en: "reimburse", ipa: "ˌriːɪmˈbɜːrs", ko: "환급하다", type: "word", example_en: "The company reimburses travel costs.", example_ko: "회사가 출장비를 환급해 줘요." },
+    { en: "compensation", ipa: "ˌkɑːmpenˈseɪʃn", ko: "보상, 급여", type: "word", example_en: "The compensation package is generous.", example_ko: "보상 패키지가 후한 편이에요." },
+    { en: "recruitment", ipa: "rɪˈkruːtmənt", ko: "채용", type: "word", example_en: "Recruitment slowed down this quarter.", example_ko: "이번 분기 채용이 둔화됐어요." },
+    { en: "expertise", ipa: "ˌekspɜːrˈtiːz", ko: "전문성", type: "word", example_en: "We lack in-house expertise.", example_ko: "사내 전문성이 부족해요." },
+    { en: "initiative", ipa: "ɪˈnɪʃətɪv", ko: "계획, 주도권", type: "word", example_en: "She led the green initiative.", example_ko: "그녀가 친환경 사업을 주도했어요." },
+    { en: "transparency", ipa: "trænsˈpærənsi", ko: "투명성", type: "word", example_en: "Transparency builds trust with clients.", example_ko: "투명성은 고객 신뢰를 만들어요." },
+    { en: "get down to business", ko: "본론으로 들어가다", type: "idiom", example_en: "Let's get down to business.", example_ko: "이제 본론으로 들어갑시다." },
+    { en: "the ball is in your court", ko: "결정은 당신에게 달렸다", type: "idiom", example_en: "I've sent the offer — the ball is in your court.", example_ko: "제안을 보냈으니 이제 결정은 그쪽에 달렸어요." },
+    { en: "cut to the chase", ko: "요점만 말하다", type: "idiom", example_en: "Let me cut to the chase.", example_ko: "요점만 말씀드릴게요." },
+    { en: "drop the ball", ko: "실수하다, 일을 그르치다", type: "idiom", example_en: "We dropped the ball on the follow-up.", example_ko: "후속 조치를 놓쳤어요." },
+    { en: "food for thought", ko: "생각할 거리", type: "idiom", example_en: "That's food for thought, thanks.", example_ko: "생각해 볼 거리네요, 고마워요." },
+    { en: "get a foot in the door", ko: "발을 들여놓다", type: "idiom", example_en: "The internship got her a foot in the door.", example_ko: "인턴십으로 그녀는 업계에 발을 들였어요." },
+    { en: "give the green light", ko: "승인하다", type: "idiom", example_en: "Management gave us the green light.", example_ko: "경영진이 승인해 줬어요." },
+    { en: "go the extra mile", ko: "한층 더 노력하다", type: "idiom", example_en: "She always goes the extra mile.", example_ko: "그녀는 늘 한 걸음 더 노력해요." },
+    { en: "hit the ground running", ko: "시작부터 전력을 다하다", type: "idiom", example_en: "He hit the ground running on day one.", example_ko: "그는 첫날부터 전력으로 뛰었어요." },
+    { en: "in a nutshell", ko: "요약하자면", type: "idiom", example_en: "In a nutshell, we need more time.", example_ko: "요약하자면 시간이 더 필요해요." },
+    { en: "keep your eye on the ball", ko: "핵심에 집중하다", type: "idiom", example_en: "Keep your eye on the ball this quarter.", example_ko: "이번 분기엔 핵심에 집중합시다." },
+    { en: "a long shot", ko: "성공 가능성이 낮은 시도", type: "idiom", example_en: "It's a long shot, but worth trying.", example_ko: "가능성은 낮지만 해볼 만해요." },
+    { en: "move the needle", ko: "눈에 띄는 변화를 만들다", type: "idiom", example_en: "This change won't move the needle much.", example_ko: "이 변화로는 큰 차이가 없을 거예요." },
+    { en: "a no-brainer", ko: "고민할 필요 없는 일", type: "idiom", example_en: "Renewing the contract is a no-brainer.", example_ko: "계약 갱신은 고민할 것도 없어요." },
+    { en: "off the top of my head", ko: "즉석에서 생각나는 대로", type: "idiom", example_en: "Off the top of my head, about thirty.", example_ko: "지금 바로 떠오르기로는 30개 정도요." },
+    { en: "on the back burner", ko: "뒤로 미뤄 둔", type: "idiom", example_en: "That project is on the back burner.", example_ko: "그 프로젝트는 잠시 미뤄 뒀어요." },
+    { en: "on the ball", ko: "빠릿빠릿한, 유능한", type: "idiom", example_en: "The new hire is really on the ball.", example_ko: "신입이 정말 빠릿빠릿해요." },
+    { en: "out of the loop", ko: "상황을 모르는", type: "idiom", example_en: "Sorry, I've been out of the loop.", example_ko: "죄송해요, 제가 상황을 몰랐네요." },
+    { en: "pull strings", ko: "인맥을 동원하다", type: "idiom", example_en: "He pulled some strings to get us in.", example_ko: "그가 인맥을 써서 우리를 넣어 줬어요." },
+    { en: "put all your eggs in one basket", ko: "한 곳에 모든 것을 걸다", type: "idiom", example_en: "Don't put all your eggs in one basket.", example_ko: "한 곳에 모든 걸 걸지 마세요." },
+    { en: "read between the lines", ko: "행간을 읽다", type: "idiom", example_en: "Read between the lines of his email.", example_ko: "그의 이메일의 행간을 읽어 보세요." },
+    { en: "ramp up", ko: "늘리다, 강화하다", type: "idiom", example_en: "We're ramping up production.", example_ko: "생산을 늘리고 있어요." },
+    { en: "roll with the punches", ko: "상황에 유연히 대처하다", type: "idiom", example_en: "In startups you learn to roll with the punches.", example_ko: "스타트업에서는 상황에 유연해지는 법을 배워요." },
+    { en: "see the big picture", ko: "큰 그림을 보다", type: "idiom", example_en: "Try to see the big picture here.", example_ko: "여기서는 큰 그림을 보려고 해 보세요." },
+    { en: "sell like hotcakes", ko: "날개 돋친 듯 팔리다", type: "idiom", example_en: "The new model sells like hotcakes.", example_ko: "신제품이 날개 돋친 듯 팔려요." },
+    { en: "take the bull by the horns", ko: "정면으로 부딪치다", type: "idiom", example_en: "She took the bull by the horns.", example_ko: "그녀는 문제에 정면으로 맞섰어요." },
+    { en: "throw in the towel", ko: "포기하다", type: "idiom", example_en: "We're not throwing in the towel yet.", example_ko: "아직 포기하지 않았어요." },
+    { en: "tighten our belts", ko: "허리띠를 졸라매다", type: "idiom", example_en: "We'll tighten our belts this year.", example_ko: "올해는 허리띠를 졸라매야 해요." },
+    { en: "twist someone's arm", ko: "억지로 설득하다", type: "idiom", example_en: "I had to twist his arm a little.", example_ko: "그를 좀 억지로 설득해야 했어요." },
+    { en: "an uphill battle", ko: "힘겨운 싸움", type: "idiom", example_en: "Entering that market is an uphill battle.", example_ko: "그 시장 진출은 힘겨운 싸움이에요." },
+    { en: "get your ducks in a row", ko: "만반의 준비를 하다", type: "idiom", example_en: "Get your ducks in a row before the pitch.", example_ko: "발표 전에 준비를 완벽히 해 두세요." },
+    { en: "at the end of the day", ko: "결국은", type: "idiom", example_en: "At the end of the day, results matter.", example_ko: "결국 중요한 건 결과예요." },
+    { en: "by the book", ko: "원칙대로", type: "idiom", example_en: "We do everything by the book.", example_ko: "저희는 모든 걸 원칙대로 합니다." },
+    { en: "call the shots", ko: "결정권을 쥐다", type: "idiom", example_en: "She calls the shots in this team.", example_ko: "이 팀에서는 그녀가 결정권을 쥐고 있어요." },
+    { en: "a cash cow", ko: "확실한 수익원", type: "idiom", example_en: "That product is our cash cow.", example_ko: "그 제품이 우리의 확실한 수익원이에요." },
+    { en: "cut our losses", ko: "손실을 감수하고 그만두다", type: "idiom", example_en: "It's time to cut our losses.", example_ko: "이제 손실을 감수하고 접을 때예요." },
+    { en: "the elephant in the room", ko: "모두가 알면서 언급하지 않는 문제", type: "idiom", example_en: "Let's address the elephant in the room.", example_ko: "다들 알면서 말 안 하는 그 문제를 짚어 봅시다." },
+    { en: "low-hanging fruit", ko: "쉽게 얻을 수 있는 성과", type: "idiom", example_en: "Start with the low-hanging fruit.", example_ko: "쉬운 것부터 시작합시다." },
+    { en: "a moving target", ko: "계속 바뀌는 목표", type: "idiom", example_en: "The requirements are a moving target.", example_ko: "요구사항이 계속 바뀌고 있어요." },
+    { en: "a ballpark figure", ko: "대략적인 수치", type: "idiom", example_en: "Can you give me a ballpark figure?", example_ko: "대략적인 수치를 알려 주실 수 있나요?" },
+    { en: "Would it be possible to ~?", ko: "~하는 것이 가능할까요?", type: "pattern", example_en: "Would it be possible to move the meeting?", example_ko: "회의를 옮기는 게 가능할까요?" },
+    { en: "I'm just checking in on ~", ko: "~ 진행 상황을 확인하려고요", type: "pattern", example_en: "I'm just checking in on the design draft.", example_ko: "디자인 초안 진행 상황을 확인하려고요." },
+    { en: "Do you happen to know ~?", ko: "혹시 ~를 아세요?", type: "pattern", example_en: "Do you happen to know who owns this file?", example_ko: "혹시 이 파일 담당자를 아세요?" },
+    { en: "I'd appreciate it if you could ~", ko: "~해 주시면 감사하겠습니다", type: "pattern", example_en: "I'd appreciate it if you could reply today.", example_ko: "오늘 중으로 답을 주시면 감사하겠습니다." },
+    { en: "As we discussed, ~", ko: "논의한 대로 ~", type: "pattern", example_en: "As we discussed, I'll handle the intro.", example_ko: "논의한 대로 제가 도입부를 맡을게요." },
+    { en: "Just to clarify, ~", ko: "확실히 하자면 ~", type: "pattern", example_en: "Just to clarify, the deadline is Friday?", example_ko: "확실히 하자면 마감이 금요일 맞나요?" },
+    { en: "If I understand correctly, ~", ko: "제가 제대로 이해했다면 ~", type: "pattern", example_en: "If I understand correctly, we're delaying launch.", example_ko: "제가 제대로 이해했다면 출시를 미루는 거죠." },
+    { en: "The reason I'm asking is ~", ko: "제가 여쭤보는 이유는 ~", type: "pattern", example_en: "The reason I'm asking is that budgets close soon.", example_ko: "여쭤보는 이유는 예산 마감이 곧이라서요." },
+    { en: "I'll do my best to ~", ko: "~하도록 최선을 다하겠습니다", type: "pattern", example_en: "I'll do my best to finish by noon.", example_ko: "정오까지 마치도록 최선을 다할게요." },
+    { en: "There's a chance that ~", ko: "~할 가능성이 있어요", type: "pattern", example_en: "There's a chance that the client cancels.", example_ko: "고객이 취소할 가능성이 있어요." },
+    { en: "It's up to you whether ~", ko: "~할지는 당신에게 달렸어요", type: "pattern", example_en: "It's up to you whether we go ahead.", example_ko: "진행할지는 당신 결정에 달렸어요." },
+    { en: "I'm inclined to ~", ko: "~하는 쪽으로 마음이 기울어요", type: "pattern", example_en: "I'm inclined to accept their offer.", example_ko: "그들의 제안을 받아들이는 쪽으로 기울어요." },
+    { en: "Chances are ~", ko: "아마 ~일 거예요", type: "pattern", example_en: "Chances are they'll ask for a discount.", example_ko: "아마 할인을 요구할 거예요." },
+    { en: "No wonder ~", ko: "어쩐지 ~하더라", type: "pattern", example_en: "No wonder the file wouldn't open.", example_ko: "어쩐지 파일이 안 열리더라니." },
+    { en: "The thing is, ~", ko: "문제는 ~예요", type: "pattern", example_en: "The thing is, we're short on staff.", example_ko: "문제는 인력이 부족하다는 거예요." },
+    { en: "What I mean is ~", ko: "제 말은 ~라는 거예요", type: "pattern", example_en: "What I mean is we should test first.", example_ko: "제 말은 먼저 테스트하자는 거예요." },
+    { en: "Come to think of it, ~", ko: "생각해 보니 ~", type: "pattern", example_en: "Come to think of it, we already have that data.", example_ko: "생각해 보니 그 자료는 이미 있어요." },
+    { en: "It never occurred to me that ~", ko: "~라는 생각은 못 했어요", type: "pattern", example_en: "It never occurred to me that it was optional.", example_ko: "그게 선택 사항인 줄은 생각도 못 했어요." },
+    { en: "I'm having trouble ~ing", ko: "~하는 데 어려움이 있어요", type: "pattern", example_en: "I'm having trouble accessing the folder.", example_ko: "폴더에 접근하는 데 어려움이 있어요." },
+    { en: "Is there any way we could ~?", ko: "~할 방법이 있을까요?", type: "pattern", example_en: "Is there any way we could extend the deadline?", example_ko: "마감을 연장할 방법이 있을까요?" },
+    { en: "I don't mean to ~, but ...", ko: "~하려는 건 아니지만 …", type: "pattern", example_en: "I don't mean to rush you, but we're late.", example_ko: "재촉하려는 건 아닌데 일정이 늦었어요." },
+    { en: "You might want to ~", ko: "~하시는 게 좋을 것 같아요", type: "pattern", example_en: "You might want to double-check the numbers.", example_ko: "숫자를 다시 확인하시는 게 좋겠어요." },
+    { en: "That's why I ~", ko: "그래서 제가 ~한 거예요", type: "pattern", example_en: "That's why I asked for an extra day.", example_ko: "그래서 제가 하루를 더 요청한 거예요." },
+    { en: "Once I ~, I'll ...", ko: "~하는 대로 …할게요", type: "pattern", example_en: "Once I get approval, I'll send it out.", example_ko: "승인받는 대로 보내 드릴게요." },
+    { en: "Whenever I ~, I ...", ko: "~할 때마다 저는 …해요", type: "pattern", example_en: "Whenever I travel, I take notes on the plane.", example_ko: "여행할 때마다 비행기에서 메모를 해요." },
+    { en: "The more I ~, the more ...", ko: "~할수록 더 …해요", type: "pattern", example_en: "The more I practice, the more confident I feel.", example_ko: "연습할수록 더 자신감이 생겨요." },
+    { en: "I'd hate to ~, but ...", ko: "~하고 싶지는 않지만 …", type: "pattern", example_en: "I'd hate to bother you, but I need a signature.", example_ko: "귀찮게 하고 싶진 않지만 서명이 필요해요." },
+    { en: "Not that I know of.", ko: "제가 아는 한은 아니에요.", type: "pattern", example_en: "Has the policy changed? Not that I know of.", example_ko: "정책이 바뀌었나요? 제가 아는 한은 아니에요." },
+    { en: "I'm afraid I have to ~", ko: "죄송하지만 ~해야 할 것 같아요", type: "pattern", example_en: "I'm afraid I have to leave early today.", example_ko: "죄송하지만 오늘은 일찍 나가 봐야 해요." },
+    { en: "Let's say ~", ko: "~라고 가정해 봅시다", type: "pattern", example_en: "Let's say the budget doubles — then what?", example_ko: "예산이 두 배가 된다고 해 봅시다. 그럼 어떻게 되죠?" },
+    { en: "Let's sync up tomorrow morning.", ko: "내일 오전에 상황을 맞춰 봅시다.", type: "business" },
+    { en: "I'll ping you once it's ready.", ko: "준비되면 바로 연락드릴게요.", type: "business" },
+    { en: "Can we do a quick stand-up?", ko: "짧게 스탠드업 회의 할까요?", type: "business" },
+    { en: "Let's park that idea for now.", ko: "그 아이디어는 일단 보류합시다.", type: "business" },
+    { en: "I'm swamped this week.", ko: "이번 주는 일이 너무 많아요.", type: "business" },
+    { en: "Could you give me a heads-up?", ko: "미리 좀 알려 주시겠어요?", type: "business" },
+    { en: "We're waiting on legal approval.", ko: "법무 승인을 기다리는 중이에요.", type: "business" },
+    { en: "That falls outside our scope.", ko: "그건 저희 업무 범위를 벗어납니다.", type: "business" },
+    { en: "I'll own that action item.", ko: "그 실행 항목은 제가 맡을게요.", type: "business" },
+    { en: "Let's do a post-mortem on the launch.", ko: "출시 후 회고를 해 봅시다.", type: "business" },
+    { en: "We need to manage expectations.", ko: "기대치를 조정할 필요가 있어요.", type: "business" },
+    { en: "Can you ballpark the cost?", ko: "비용을 대략 잡아 주실 수 있나요?", type: "business" },
+    { en: "Let's not reinvent the wheel.", ko: "이미 있는 걸 다시 만들지는 맙시다.", type: "business" },
+    { en: "I'll share my screen.", ko: "화면을 공유할게요.", type: "business" },
+    { en: "Sorry, you're on mute.", ko: "죄송한데 마이크가 꺼져 있어요.", type: "business" },
+    { en: "Can everyone hear me okay?", ko: "제 목소리 잘 들리시나요?", type: "business" },
+    { en: "Let's take five.", ko: "5분만 쉬었다 하죠.", type: "business" },
+    { en: "I'll send a calendar invite.", ko: "일정 초대를 보내 드릴게요.", type: "business" },
+    { en: "Please RSVP by Friday.", ko: "금요일까지 참석 여부를 알려 주세요.", type: "business" },
+    { en: "Let's keep this meeting to 30 minutes.", ko: "이 회의는 30분 안에 끝냅시다.", type: "business" },
+    { en: "I'd like to hear everyone's input.", ko: "모든 분의 의견을 듣고 싶어요.", type: "business" },
+    { en: "We're over budget this quarter.", ko: "이번 분기는 예산을 초과했어요.", type: "business" },
+    { en: "The numbers speak for themselves.", ko: "숫자가 모든 걸 말해 줍니다.", type: "business" },
+    { en: "I'll run it by my manager.", ko: "제 상사에게 확인해 볼게요.", type: "business" },
+    { en: "We're pivoting our strategy.", ko: "전략을 전환하는 중이에요.", type: "business" },
+    { en: "Can we revisit the timeline?", ko: "일정을 다시 검토해 볼까요?", type: "business" },
+    { en: "This is a top priority.", ko: "이건 최우선 과제입니다.", type: "business" },
+    { en: "Let's define the next steps.", ko: "다음 단계를 정합시다.", type: "business" },
+    { en: "Thanks for flagging that.", ko: "짚어 주셔서 감사합니다.", type: "business" },
+    { en: "I'll circle up with the team.", ko: "팀과 다시 논의해 볼게요.", type: "business" },
+  ],
+};
+
+</script>
+  <script>
+(() => {
+  const STORAGE_KEY = "wordquiz_state_v1";
+
+  const levelBtn = document.getElementById("levelBtn");
+  const levelLabel = document.getElementById("levelLabel");
+  const levelMenu = document.getElementById("levelMenu");
+  const categorySelect = document.getElementById("categorySelect");
+  const categoryBtn = document.getElementById("categoryBtn");
+  const categoryLabel = document.getElementById("categoryLabel");
+  const categoryMenu = document.getElementById("categoryMenu");
+  const wordCard = document.getElementById("wordCard");
+  const wordText = document.getElementById("wordText");
+  const idiomBadge = document.getElementById("idiomBadge");
+  const revealArea = document.getElementById("revealArea");
+  const ipaText = document.getElementById("ipaText");
+  const meaningText = document.getElementById("meaningText");
+  const exampleArea = document.getElementById("exampleArea");
+  const exampleEn = document.getElementById("exampleEn");
+  const exampleKo = document.getElementById("exampleKo");
+  const tapHint = document.getElementById("tapHint");
+  const soundBtn = document.getElementById("soundBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const progressLabel = document.getElementById("progress");
+  const teamList = document.getElementById("teamList");
+  const addTeamBtn = document.getElementById("addTeamBtn");
+  const resetScoreBtn = document.getElementById("resetScoreBtn");
+
+  const LEVEL_NAMES = {
+    2: "초등 2학년",
+    3: "초등 3학년",
+    4: "초등 4학년",
+    5: "초등 5학년",
+    6: "초등 6학년",
+    adult: "성인",
+  };
+
+  const CATEGORY_META = {
+    word: { label: "단어", color: "#7cd6c4" },
+    idiom: { label: "숙어", color: "#7cd6c4" },
+    phrasal: { label: "구동사", color: "#a78bfa" },
+    pattern: { label: "회화 패턴", color: "#6bc5f8" },
+    business: { label: "비즈니스 회화", color: "#ff9776" },
+  };
+
+  const WORD_SIZE_STEPS = [
+    { max: 9, size: 88 },
+    { max: 13, size: 70 },
+    { max: 18, size: 58 },
+    { max: 26, size: 46 },
+    { max: 36, size: 36 },
+    { max: 50, size: 28 },
+    { max: Infinity, size: 22 },
+  ];
+
+  const MEANING_SIZE_STEPS = [
+    { max: 6, size: 44 },
+    { max: 12, size: 36 },
+    { max: 20, size: 28 },
+    { max: 32, size: 24 },
+    { max: Infinity, size: 20 },
+  ];
+
+  let state = loadState();
+  let currentLevel = String(state.level || "2");
+  let currentCategory = state.category || "all";
+  let currentWord = null;
+  let lastWordEn = null;
+  let revealed = false;
+  let voices = [];
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return {
+      level: "2",
+      category: "all",
+      teams: [
+        { name: "참가자 1", score: 0 },
+        { name: "참가자 2", score: 0 },
+      ],
+    };
+  }
+
+  function saveState() {
+    state.level = currentLevel;
+    state.category = currentCategory;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function scaleFont(el, len, steps) {
+    const step = steps.find((s) => len <= s.max);
+    el.style.fontSize = step.size + "px";
+  }
+
+  if (!state.teams || state.teams.length === 0) {
+    state.teams = [
+      { name: "참가자 1", score: 0 },
+      { name: "참가자 2", score: 0 },
+    ];
+  }
+
+  // ---------- 발음 ----------
+  // 1) 구글 사전 원어민 음원 → 2) 구글 번역 TTS(자연스러운 합성음) → 3) 기기 내장 음성
+  function loadVoices() {
+    voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  }
+  if (window.speechSynthesis) {
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  let currentAudio = null;
+
+  function cleanForSpeech(text) {
+    return text
+      .replace(/~/g, " something ")
+      .replace(/\.\.\./g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function speakWithDevice(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-US";
+    utter.rate = 0.95;
+    utter.pitch = 1;
+    const preferred = [
+      "Samantha", "Google US English", "Ava", "Allison", "Alex", "Karen", "Daniel",
+    ];
+    const enVoices = voices.filter((v) => v.lang && v.lang.startsWith("en"));
+    const pick =
+      enVoices.find((v) => preferred.some((n) => v.name.includes(n))) ||
+      enVoices.find((v) => v.lang === "en-US") ||
+      enVoices[0];
+    if (pick) utter.voice = pick;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function buildAudioSources(raw) {
+    const text = cleanForSpeech(raw);
+    const list = [];
+    // 한 단어이면 구글 사전의 실제 원어민 녹음을 먼저 시도
+    if (/^[a-zA-Z']+$/.test(text)) {
+      const w = encodeURIComponent(text.toLowerCase());
+      list.push("https://ssl.gstatic.com/dictionary/static/sounds/oxford/" + w + "--_us_1.mp3");
+      list.push("https://ssl.gstatic.com/dictionary/static/sounds/20220808/" + w + "--_us_1.mp3");
+    }
+    // 문장·숙어는 구글 번역 TTS
+    list.push(
+      "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" +
+        encodeURIComponent(text.slice(0, 190))
+    );
+    return { list, text };
+  }
+
+  function speak(raw) {
+    if (!raw) return;
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.src = "";
+      currentAudio = null;
+    }
+
+    const { list, text } = buildAudioSources(raw);
+    let idx = 0;
+
+    const tryNext = () => {
+      if (idx >= list.length) {
+        speakWithDevice(text);
+        return;
+      }
+      const audio = new Audio();
+      audio.preload = "auto";
+      currentAudio = audio;
+      let done = false;
+
+      const fail = () => {
+        if (done) return;
+        done = true;
+        audio.onerror = audio.oncanplay = null;
+        tryNext();
+      };
+
+      audio.oncanplay = () => {
+        if (done) return;
+        done = true;
+        const p = audio.play();
+        // 자동재생이 막힌 경우에만 기기 음성으로 대체
+        if (p && p.catch) p.catch(() => speakWithDevice(text));
+      };
+      audio.onerror = fail;
+      // 음원 서버가 응답하지 않으면 다음 방법으로
+      setTimeout(() => {
+        if (!done && audio.readyState === 0) fail();
+      }, 2500);
+
+      audio.src = list[idx++];
+      audio.load();
+    };
+
+    tryNext();
+  }
+
+  // ---------- 레벨 · 카테고리 선택 ----------
+  function buildCategoryMenu() {
+    const types = Array.from(new Set(WORD_DATA[currentLevel].map((w) => w.type)));
+    categoryMenu.innerHTML = "";
+
+    if (types.length <= 1) {
+      categorySelect.classList.add("hidden");
+      currentCategory = "all";
+      return;
+    }
+
+    categorySelect.classList.remove("hidden");
+    if (!types.includes(currentCategory) && currentCategory !== "all") {
+      currentCategory = "all";
+    }
+
+    const allLi = document.createElement("li");
+    allLi.dataset.category = "all";
+    allLi.textContent = "전체";
+    categoryMenu.appendChild(allLi);
+
+    types.forEach((t) => {
+      const li = document.createElement("li");
+      li.dataset.category = t;
+      li.textContent = CATEGORY_META[t] ? CATEGORY_META[t].label : t;
+      categoryMenu.appendChild(li);
+    });
+  }
+
+  function refreshCategoryLabel() {
+    categoryLabel.textContent =
+      currentCategory === "all" ? "전체" : (CATEGORY_META[currentCategory] ? CATEGORY_META[currentCategory].label : currentCategory);
+    Array.from(categoryMenu.children).forEach((li) => {
+      li.classList.toggle("active", li.dataset.category === currentCategory);
+    });
+  }
+
+  function setLevel(level) {
+    currentLevel = level;
+    levelLabel.textContent = LEVEL_NAMES[level];
+    Array.from(levelMenu.children).forEach((li) => {
+      li.classList.toggle("active", li.dataset.level === level);
+    });
+    buildCategoryMenu();
+    refreshCategoryLabel();
+    saveState();
+    pickNewWord();
+  }
+
+  function setCategory(category) {
+    currentCategory = category;
+    refreshCategoryLabel();
+    saveState();
+    pickNewWord();
+  }
+
+  levelBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    categoryMenu.classList.add("hidden");
+    levelMenu.classList.toggle("hidden");
+  });
+
+  levelMenu.addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-level]");
+    if (!li) return;
+    setLevel(li.dataset.level);
+    levelMenu.classList.add("hidden");
+  });
+
+  categoryBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    levelMenu.classList.add("hidden");
+    categoryMenu.classList.toggle("hidden");
+  });
+
+  categoryMenu.addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-category]");
+    if (!li) return;
+    setCategory(li.dataset.category);
+    categoryMenu.classList.add("hidden");
+  });
+
+  document.addEventListener("click", () => {
+    levelMenu.classList.add("hidden");
+    categoryMenu.classList.add("hidden");
+  });
+
+  // ---------- 단어 카드 ----------
+  function getPool() {
+    const all = WORD_DATA[currentLevel];
+    if (currentCategory === "all") return all;
+    return all.filter((w) => w.type === currentCategory);
+  }
+
+  function pickNewWord() {
+    const pool = getPool();
+    let candidate;
+    if (pool.length === 1) {
+      candidate = pool[0];
+    } else {
+      do {
+        candidate = pool[Math.floor(Math.random() * pool.length)];
+      } while (candidate.en === lastWordEn);
+    }
+    currentWord = candidate;
+    lastWordEn = candidate.en;
+    revealed = false;
+    renderWord();
+  }
+
+  function renderWord() {
+    wordText.textContent = currentWord.en;
+    scaleFont(wordText, currentWord.en.length, WORD_SIZE_STEPS);
+
+    const badgeMeta = CATEGORY_META[currentWord.type];
+    const showBadge = currentWord.type !== "word" && badgeMeta;
+    idiomBadge.classList.toggle("hidden", !showBadge);
+    if (showBadge) {
+      idiomBadge.textContent = badgeMeta.label;
+      idiomBadge.style.background = badgeMeta.color;
+    }
+
+    revealArea.classList.add("hidden");
+    tapHint.classList.remove("hidden");
+
+    const levelName = LEVEL_NAMES[currentLevel];
+    const catName = currentCategory === "all" ? "" : ` · ${CATEGORY_META[currentCategory] ? CATEGORY_META[currentCategory].label : currentCategory}`;
+    progressLabel.textContent = `${levelName}${catName}`;
+
+    if (currentWord.ipa) {
+      ipaText.textContent = `/${currentWord.ipa}/`;
+      ipaText.style.display = "block";
+    } else {
+      ipaText.textContent = "";
+      ipaText.style.display = "none";
+    }
+
+    meaningText.textContent = currentWord.ko;
+    scaleFont(meaningText, currentWord.ko.length, MEANING_SIZE_STEPS);
+
+    if (currentWord.example_en) {
+      exampleEn.textContent = currentWord.example_en;
+      exampleKo.textContent = currentWord.example_ko || "";
+      exampleArea.classList.remove("hidden");
+    } else {
+      exampleArea.classList.add("hidden");
+    }
+  }
+
+  function revealWord() {
+    if (revealed) return;
+    revealed = true;
+    revealArea.classList.remove("hidden");
+    tapHint.classList.add("hidden");
+    speak(currentWord.en);
+  }
+
+  wordCard.addEventListener("click", revealWord);
+
+  soundBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    speak(currentWord.en);
+  });
+
+  nextBtn.addEventListener("click", () => {
+    pickNewWord();
+  });
+
+  // ---------- 점수판 ----------
+  function renderTeams() {
+    teamList.innerHTML = "";
+    state.teams.forEach((team, idx) => {
+      const row = document.createElement("div");
+      row.className = "team-row";
+
+      const nameInput = document.createElement("input");
+      nameInput.className = "team-name";
+      nameInput.value = team.name;
+      nameInput.addEventListener("change", () => {
+        state.teams[idx].name = nameInput.value.trim() || `참가자 ${idx + 1}`;
+        saveState();
+      });
+
+      const minusBtn = document.createElement("button");
+      minusBtn.className = "team-score-btn team-score-minus";
+      minusBtn.textContent = "−";
+      minusBtn.addEventListener("click", () => {
+        state.teams[idx].score -= 1;
+        saveState();
+        renderTeams();
+      });
+
+      const scoreEl = document.createElement("div");
+      scoreEl.className = "team-score";
+      scoreEl.textContent = team.score;
+      scoreEl.title = "클릭하면 점수가 올라가요";
+      scoreEl.addEventListener("click", () => {
+        state.teams[idx].score += 1;
+        saveState();
+        renderTeams();
+      });
+
+      const plusBtn = document.createElement("button");
+      plusBtn.className = "team-score-btn team-score-plus";
+      plusBtn.textContent = "+";
+      plusBtn.addEventListener("click", () => {
+        state.teams[idx].score += 1;
+        saveState();
+        renderTeams();
+      });
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "team-remove";
+      removeBtn.textContent = "✕";
+      removeBtn.style.visibility = state.teams.length > 1 ? "visible" : "hidden";
+      removeBtn.addEventListener("click", () => {
+        state.teams.splice(idx, 1);
+        saveState();
+        renderTeams();
+      });
+
+      const scoreControls = document.createElement("div");
+      scoreControls.className = "team-score-controls";
+      scoreControls.appendChild(minusBtn);
+      scoreControls.appendChild(scoreEl);
+      scoreControls.appendChild(plusBtn);
+
+      row.appendChild(removeBtn);
+      row.appendChild(nameInput);
+      row.appendChild(scoreControls);
+      teamList.appendChild(row);
+    });
+  }
+
+  addTeamBtn.addEventListener("click", () => {
+    state.teams.push({ name: `참가자 ${state.teams.length + 1}`, score: 0 });
+    saveState();
+    renderTeams();
+  });
+
+  resetScoreBtn.addEventListener("click", () => {
+    state.teams.forEach((t) => (t.score = 0));
+    saveState();
+    renderTeams();
+  });
+
+  // ---------- 초기화 ----------
+  setLevel(currentLevel);
+  renderTeams();
+})();
+
+</script>
+</body>
+</html>
