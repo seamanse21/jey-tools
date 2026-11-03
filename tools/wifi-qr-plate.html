@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>와이파이 QR 액자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#eef0f2; --panel:#ffffff; --ink:#1b2430; --muted:#5d6876; --line:#d5dae0;
+  --accent:#e0a100; --accent-ink:#1b2430; --bed:#2a3340; --warn:#b4471b; --ok:#2f7d4f;
+  --plate:#f4f4f1; --relief:#1b2430;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151a20; --panel:#1e252e; --ink:#e7ebef; --muted:#9aa5b2; --line:#323b46;
+  --accent:#f0b522; --accent-ink:#151a20; --bed:#0d1116; --warn:#f08a5d; --ok:#6cc790; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151a20; --panel:#1e252e; --ink:#e7ebef; --muted:#9aa5b2; --line:#323b46;
+  --accent:#f0b522; --accent-ink:#151a20; --bed:#0d1116; --warn:#f08a5d; --ok:#6cc790; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+img{max-width:100%}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+header h1{font-size:1.6rem;margin:0;text-wrap:balance;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.back{display:inline-block;margin-bottom:10px;font-size:.84rem;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0}
+.sec{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:500;margin:6px 0 -6px}
+label{display:grid;gap:4px;font-size:.88rem;font-weight:500}
+input[type=text],input[type=password],select{font:inherit;font-weight:400;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{display:flex;gap:8px;align-items:center;font-weight:400}
+.range{display:grid;gap:2px}
+.range .hd{display:flex;justify-content:space-between;font-size:.88rem;font-weight:500}
+.range .hd span{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted);font-weight:400}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.pw{display:flex;gap:6px}.pw input{flex:1}
+.ghost{font:inherit;font-size:.82rem;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);cursor:pointer}
+.note{font-size:.8rem;color:var(--muted);margin:0}
+.bed{background:var(--bed);border-radius:10px;padding:22px;display:grid;place-items:center;min-height:320px;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:20px 20px}
+canvas#prev{max-width:100%;height:auto;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{border-top:2px solid var(--line);padding-top:6px}
+.stat b{display:block;font-family:var(--f-mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:.76rem}
+.stat.warn{border-color:var(--warn)}.stat.warn b{color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-weight:700;padding:11px 16px;border-radius:7px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.sec2{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+#msg{font-size:.85rem;color:var(--muted)}
+ol.steps{margin:0;padding-left:1.2em;display:grid;gap:6px;max-width:68ch}
+ol.steps code{font-family:var(--f-mono);font-size:.85em;background:var(--bg);padding:1px 5px;border-radius:4px}
+.swatch{display:inline-block;width:.8em;height:.8em;border-radius:2px;vertical-align:-1px;border:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <a class="back" href="./index.html">← Jey Tools</a>
+    <h1>와이파이 QR 액자</h1>
+    <p>와이파이 정보를 넣으면 폰 카메라로 찍어 바로 접속되는 QR 명판을 3D 프린터용 STL로 만들어 줍니다. 입력한 비밀번호는 이 화면 안에서만 계산되고 어디에도 저장·전송되지 않습니다.</p>
+  </header>
+
+  <div class="grid">
+    <form class="panel" id="f" autocomplete="off">
+      <div class="sec">와이파이 정보</div>
+      <label>와이파이 이름 (SSID)
+        <input type="text" id="ssid" value="OFFICE-WIFI">
+      </label>
+      <label>비밀번호
+        <div class="pw"><input type="password" id="pass" value="example1234"><button type="button" class="ghost" id="eye">보기</button></div>
+      </label>
+      <div class="row">
+        <label>보안 방식
+          <select id="sec">
+            <option value="WPA" selected>WPA/WPA2/WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">비밀번호 없음</option>
+          </select>
+        </label>
+        <label class="check" style="align-self:end;padding-bottom:9px"><input type="checkbox" id="hidden"> 숨김 네트워크</label>
+      </div>
+      <p class="note">예시 값이 들어 있어요. 실제 SSID·비밀번호로 바꾸고, 오른쪽 QR을 폰으로 먼저 찍어 접속되는지 확인하세요.</p>
+
+      <div class="sec">명판 크기</div>
+      <div class="range"><div class="hd">가로 폭 <span id="vW"></span></div><input type="range" id="W" min="60" max="180" step="5" value="100"></div>
+      <div class="range"><div class="hd">바닥판 두께 <span id="vT"></span></div><input type="range" id="T" min="1.6" max="5" step="0.2" value="2.4"></div>
+      <div class="range"><div class="hd">QR 돌출 높이 <span id="vR"></span></div><input type="range" id="R" min="0.4" max="2" step="0.2" value="0.8"></div>
+      <label class="check"><input type="checkbox" id="rim" checked> 액자 테두리</label>
+      <label class="check"><input type="checkbox" id="holes" checked> 상단 걸이 구멍 3개 (Ø5)</label>
+      <label class="check"><input type="checkbox" id="logo" checked> QR 가운데 Wi-Fi 아이콘</label>
+      <label class="check"><input type="checkbox" id="lab" checked> 아래 안내 문구</label>
+      <label>안내 문구 1줄
+        <input type="text" id="l1" value="카메라로 찍으면 Wi-Fi 연결">
+      </label>
+      <label class="check"><input type="checkbox" id="l2" checked> 2줄에 와이파이 이름 표시</label>
+    </form>
+
+    <div style="display:grid;gap:16px;min-width:0">
+      <div class="bed"><canvas id="prev" width="600" height="700" aria-label="명판 미리보기"></canvas></div>
+      <div class="stats" id="stats"></div>
+      <div class="actions">
+        <button class="btn" id="dl" type="button">STL 묶음 받기 (.zip)</button>
+        <button class="btn sec2" id="dlpng" type="button">QR 이미지만 (.png)</button>
+        <span id="msg"></span>
+      </div>
+      <div class="panel">
+        <div class="sec">출력 방법</div>
+        <ol class="steps">
+          <li>zip 안의 <code>wifi_plate_all.stl</code>을 슬라이서에 넣습니다. 파일 3개가 들어 있어요: 전체 / 바닥판만 / QR·테두리·글자만.</li>
+          <li><b>단색 프린터</b>: 바닥판을 흰색 <span class="swatch" style="background:#f4f4f1"></span>으로 뽑다가, 아래 표시된 <b>필라멘트 교체 높이</b>에서 일시정지(M600 / Pause at height)를 넣고 검정 <span class="swatch" style="background:#1b2430"></span>으로 바꿉니다.</li>
+          <li><b>멀티컬러(AMS 등)</b>: <code>base</code>와 <code>relief</code> 두 파일을 한 객체의 파트로 불러와 각각 색을 지정합니다.</li>
+          <li>윗면은 레이어 높이 0.2mm, 노즐 0.4mm 기준이면 충분합니다. QR 한 칸이 2mm 이상이면 대부분 폰에서 잘 인식돼요.</li>
+          <li>상단 Ø5 구멍 3개(좌·중앙·우)로 못이나 훅에 걸 수 있고, 가운데 하나만 써도 됩니다. 붙이는 경우엔 양면 폼테이프나 커맨드 스트립을 쓰세요.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const ids=["ssid","pass","sec","hidden","W","T","R","rim","holes","logo","lab","l1","l2"];
+let model=null, qrMatrix=null;
+
+$("eye").onclick=()=>{const p=$("pass");p.type=p.type==="password"?"text":"password";$("eye").textContent=p.type==="password"?"보기":"숨김";};
+
+function esc(s){return s.replace(/([\;,:"])/g,"\\$1");}
+function wifiString(){
+  const sec=$("sec").value, ssid=$("ssid").value, pw=$("pass").value;
+  let s="WIFI:T:"+sec+";S:"+esc(ssid)+";";
+  if(sec!=="nopass") s+="P:"+esc(pw)+";";
+  if($("hidden").checked) s+="H:true;";
+  return s+";";
+}
+function makeQR(text,ecl){
+  qrcode.stringToBytes=qrcode.stringToBytesFuncs["UTF-8"];
+  const q=qrcode(0,ecl||"M"); q.addData(text,"Byte"); q.make();
+  const n=q.getModuleCount(), m=[];
+  for(let r=0;r<n;r++){m.push([]);for(let c=0;c<n;c++)m[r].push(q.isDark(r,c));}
+  return m;
+}
+
+// rasterize label text into dark cells (mm grid)
+function rasterText(lines,wMM,hMM,res){
+  const cw=Math.round(wMM/res), ch=Math.round(hMM/res);
+  const cv=document.createElement("canvas"); cv.width=cw; cv.height=ch;
+  const g=cv.getContext("2d"); g.fillStyle="#000"; g.textAlign="center"; g.textBaseline="middle";
+  const fam='"IBM Plex Sans KR","Apple SD Gothic Neo",sans-serif';
+  const lh=ch/lines.length;
+  lines.forEach((t,i)=>{
+    let size=Math.min(lh*0.62, 6.2/res);
+    g.font=`700 ${size}px ${fam}`;
+    while(g.measureText(t).width>cw*0.96 && size>4){size-=1;g.font=`700 ${size}px ${fam}`;}
+    g.fillText(t,cw/2,lh*(i+0.5));
+  });
+  const d=g.getImageData(0,0,cw,ch).data, rows=[];
+  for(let y=0;y<ch;y++){const row=[];for(let x=0;x<cw;x++)row.push(d[(y*cw+x)*4+3]>110);rows.push(row);}
+  return rows;
+}
+
+// Wi-Fi fan symbol: three arcs + dot
+function rasterIcon(sizeMM,res){
+  const cs=Math.round(sizeMM/res), cv=document.createElement("canvas"); cv.width=cv.height=cs;
+  const g=cv.getContext("2d"), cx=cs/2, cy=cs*0.8, lw=cs*0.1;
+  g.strokeStyle=g.fillStyle="#000"; g.lineWidth=lw; g.lineCap="round";
+  for(const r of [0.22,0.45,0.68]){g.beginPath();g.arc(cx,cy,cs*r,-Math.PI*0.75,-Math.PI*0.25);g.stroke();}
+  g.beginPath();g.arc(cx,cy,cs*0.075,0,Math.PI*2);g.fill();
+  const d=g.getImageData(0,0,cs,cs).data, rows=[];
+  for(let y=0;y<cs;y++){const row=[];for(let x=0;x<cs;x++)row.push(d[(y*cs+x)*4+3]>110);rows.push(row);}
+  return rows;
+}
+function pushRaster(rects,grid,x0,y0,res){
+  for(let y=0;y<grid.length;y++){let x=0;const row=grid[y];while(x<row.length){if(!row[x]){x++;continue;}let s=x;while(x<row.length&&row[x])x++;
+    rects.push([x0+s*res,y0+y*res,x0+x*res,y0+(y+1)*res]);}}
+}
+function build(){
+  const W=+$("W").value, T=+$("T").value, R=+$("R").value;
+  const rimOn=$("rim").checked, labOn=$("lab").checked;
+  const rimW=rimOn?2.4:0, pad=rimOn?2:0;
+  const m=qrMatrix, n=m.length, q=2;
+  const inner=W-2*rimW-2*pad;
+  const mod=inner/(n+2*q);
+  const lines=[];
+  if(labOn){ if($("l1").value.trim())lines.push($("l1").value.trim()); if($("l2").checked&&$("ssid").value.trim())lines.push("Wi-Fi  "+$("ssid").value.trim()); }
+  const labH=lines.length? Math.max(9, lines.length*8.5) : 0;
+  const holesOn=$("holes").checked, top=holesOn?12:0, holeR=2.5;
+  const holeX=holesOn?[8,W/2,W-8]:[];
+  const H=W+labH+top;
+  const rects=[]; // relief rects in canvas coords (y down), mm
+  const ox=rimW+pad+q*mod, oy=top+rimW+pad+q*mod;
+  const logoOn=$("logo").checked;
+  let k=Math.round(n*0.24); if((n-k)%2)k++;
+  const c0=(n-k)/2, c1=c0+k;
+  const hole=(r,c)=>logoOn&&r>=c0&&r<c1&&c>=c0&&c<c1;
+  for(let r=0;r<n;r++){let c=0;while(c<n){if(!m[r][c]||hole(r,c)){c++;continue;}let s=c;while(c<n&&m[r][c]&&!hole(r,c))c++;
+    rects.push([ox+s*mod,oy+r*mod,ox+c*mod,oy+(r+1)*mod]);}}
+  if(logoOn){const res=0.2, mg=mod*0.6, sz=k*mod-2*mg; pushRaster(rects,rasterIcon(sz,res),ox+c0*mod+mg,oy+c0*mod+mg,res);}
+  if(rimOn){rects.push([0,0,W,rimW],[0,H-rimW,W,H],[0,rimW,rimW,H-rimW],[W-rimW,rimW,W,H-rimW]);}
+  if(lines.length){
+    const res=0.25, lx=rimW+pad+1, ly=top+W-rimW-pad- q*mod*0.5, lw=W-2*(rimW+pad+1), lh=labH-1;
+    const g=rasterText(lines,lw,lh,res);
+    for(let y=0;y<g.length;y++){let x=0;const row=g[y];while(x<row.length){if(!row[x]){x++;continue;}let s=x;while(x<row.length&&row[x])x++;
+      rects.push([lx+s*res,ly+y*res,lx+x*res,ly+(y+1)*res]);}}
+  }
+  model={W,H,T,R,mod,rects,n,lines,top,holeX,holeR};
+}
+
+function boxTris(out,x0,y0,x1,y1,z0,z1){
+  const v=[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0],[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]];
+  const f=[[0,2,1],[0,3,2],[4,5,6],[4,6,7],[0,1,5],[0,5,4],[1,2,6],[1,6,5],[2,3,7],[2,7,6],[3,0,4],[3,4,7]];
+  for(const t of f)out.push(v[t[0]],v[t[1]],v[t[2]]);
+}
+function stl(tris,name){
+  const cnt=tris.length/3, buf=new ArrayBuffer(84+cnt*50), dv=new DataView(buf);
+  const hdr="wifi qr plate "+name; for(let i=0;i<80;i++)dv.setUint8(i,i<hdr.length?hdr.charCodeAt(i)&127:32);
+  dv.setUint32(80,cnt,true); let o=84;
+  for(let i=0;i<tris.length;i+=3){
+    const a=tris[i],b=tris[i+1],c=tris[i+2];
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;const l=Math.hypot(nx,ny,nz)||1;
+    for(const x of [nx/l,ny/l,nz/l])dv.setFloat32(o,x,true),o+=4;
+    for(const p of [a,b,c]){for(const x of p){dv.setFloat32(o,x,true);o+=4;}}
+    dv.setUint16(o,0,true);o+=2;
+  }
+  return new Uint8Array(buf);
+}
+// square cell (half-size h) with a round through-hole, STL coords
+function holeCell(out,cx,cy,h,r,z0,z1){
+  const N=48, C=[], S=[];
+  for(let i=0;i<=N;i++){const a=Math.PI/4+2*Math.PI*i/N, co=Math.cos(a), si=Math.sin(a), d=h/Math.max(Math.abs(co),Math.abs(si));
+    C.push([cx+r*co,cy+r*si]); S.push([cx+d*co,cy+d*si]);}
+  const P=(p,z)=>[p[0],p[1],z];
+  for(let i=0;i<N;i++){
+    const c0=C[i],c1=C[i+1],s0=S[i],s1=S[i+1];
+    out.push(P(c0,z1),P(s0,z1),P(s1,z1), P(c0,z1),P(s1,z1),P(c1,z1));
+    out.push(P(c0,z0),P(s1,z0),P(s0,z0), P(c0,z0),P(c1,z0),P(s1,z0));
+    out.push(P(s0,z0),P(s1,z0),P(s1,z1), P(s0,z0),P(s1,z1),P(s0,z1));
+    out.push(P(c0,z0),P(c0,z1),P(c1,z1), P(c0,z0),P(c1,z1),P(c1,z0));
+  }
+}
+function meshes(){
+  const {W,H,T,R,rects,top,holeX,holeR}=model, base=[], rel=[];
+  if(!top){ boxTris(base,0,0,W,H,0,T); }
+  else{
+    boxTris(base,0,0,W,H-top,0,T);
+    const h=top/2, cy=H-h; let x=0;
+    for(const cx of holeX){ if(cx-h-x>0.01)boxTris(base,x,H-top,cx-h,H,0,T); holeCell(base,cx,cy,h,holeR,0,T); x=cx+h; }
+    if(W-x>0.01)boxTris(base,x,H-top,W,H,0,T);
+  }
+  for(const r of rects)boxTris(rel,r[0],H-r[3],r[2],H-r[1],T,T+R); // flip y
+  return {base,rel};
+}
+
+// minimal zip (store)
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC[(c^u[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function zip(files){
+  const enc=new TextEncoder(), parts=[], cen=[]; let off=0;
+  for(const f of files){
+    const nm=enc.encode(f.name), crc=crc32(f.data), sz=f.data.length;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);
+    lh.setUint32(14,crc,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(lh.buffer),nm,f.data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);
+    ch.setUint32(16,crc,true);ch.setUint32(20,sz,true);ch.setUint32(24,sz,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+    cen.push(new Uint8Array(ch.buffer),nm);
+    off+=30+nm.length+sz;
+  }
+  const cs=cen.reduce((a,b)=>a+b.length,0), e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cen,new Uint8Array(e.buffer)]);
+}
+
+function draw(){
+  const cv=$("prev"), {W,H,rects}=model, cs=getComputedStyle(document.documentElement);
+  const s=Math.min(560/W,640/H); cv.width=Math.round(W*s)+20; cv.height=Math.round(H*s)+20;
+  const g=cv.getContext("2d"); g.clearRect(0,0,cv.width,cv.height);
+  g.save();g.translate(10,10);
+  g.fillStyle=cs.getPropertyValue("--plate").trim(); g.fillRect(0,0,W*s,H*s);
+  g.fillStyle=cs.getPropertyValue("--relief").trim();
+  for(const r of rects)g.fillRect(r[0]*s,r[1]*s,(r[2]-r[0])*s+0.35,(r[3]-r[1])*s+0.35);
+  g.fillStyle=cs.getPropertyValue("--bed").trim();
+  for(const cx of model.holeX){g.beginPath();g.arc(cx*s,model.top/2*s,model.holeR*s,0,Math.PI*2);g.fill();}
+  g.restore();
+}
+function stats(){
+  const {W,H,T,R,mod,n,rects}=model, tri=12*(rects.length+1);
+  const small=mod<2;
+  $("stats").innerHTML=
+   `<div class="stat"><b>${W} × ${H.toFixed(0)} mm</b><small>명판 크기</small></div>`+
+   `<div class="stat ${small?"warn":""}"><b>${mod.toFixed(2)} mm</b><small>QR 한 칸 (${n}×${n})${small?" · 폭을 키우세요":""}</small></div>`+
+   `<div class="stat"><b>${T.toFixed(1)} mm</b><small>필라멘트 교체 높이</small></div>`+
+   `<div class="stat"><b>${(T+R).toFixed(1)} mm</b><small>전체 높이 · 삼각형 ${tri.toLocaleString()}</small></div>`;
+}
+function update(){
+  $("vW").textContent=$("W").value+" mm";$("vT").textContent=(+$("T").value).toFixed(1)+" mm";$("vR").textContent=(+$("R").value).toFixed(1)+" mm";
+  $("pass").disabled=$("sec").value==="nopass";
+  try{qrMatrix=makeQR(wifiString(),$("logo").checked?"H":"M");}catch(e){$("msg").textContent="QR을 만들 수 없어요. 이름이나 비밀번호가 너무 깁니다.";return;}
+  build();draw();stats();
+}
+ids.forEach(i=>{$(i).addEventListener("input",update);$(i).addEventListener("change",update);});
+$("f").addEventListener("submit",e=>e.preventDefault());
+if(window.matchMedia)matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>draw());
+
+// 일반 브라우저 다운로드
+function saveBlob(blob,filename){
+  const a=document.createElement("a"), url=URL.createObjectURL(blob);
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1500);
+}
+$("dl").onclick=()=>{
+  const {base,rel}=meshes();
+  const blob=zip([
+    {name:"wifi_plate_all.stl",data:stl(base.concat(rel),"all")},
+    {name:"wifi_plate_base.stl",data:stl(base,"base")},
+    {name:"wifi_plate_relief.stl",data:stl(rel,"relief")},
+  ]);
+  saveBlob(blob,"wifi_qr_plate.zip");
+  $("msg").textContent="내려받았어요.";
+};
+$("dlpng").onclick=()=>{
+  const m=qrMatrix,n=m.length,px=16,q=4,cv=document.createElement("canvas");cv.width=cv.height=(n+2*q)*px;
+  const g=cv.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,cv.width,cv.height);g.fillStyle="#000";
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(m[r][c])g.fillRect((c+q)*px,(r+q)*px,px,px);
+  cv.toBlob(b=>{saveBlob(b,"wifi_qr.png");$("msg").textContent="내려받았어요.";},"image/png");
+};
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(update);
+update();
+})();
+</script>
+
+</body>
+</html>
