@@ -2497,7 +2497,7 @@ function build(){
   const inner=W-2*rimW-2*pad;
   const mod=inner/(n+2*q);
   const lines=[];
-  if(labOn){ if($("l1").value.trim())lines.push($("l1").value.trim()); if($("l2").checked&&$("ssid").value.trim())lines.push("Wi-Fi  "+$("ssid").value.trim()); }
+  if(labOn){ if($("l1").value.trim())lines.push($("l1").value.trim()); if($("l2").checked&&$("ssid").value.trim())lines.push("Wi-Fi : "+$("ssid").value.trim()); }
   const labH=lines.length? Math.max(9, lines.length*8.5) : 0;
   const holesOn=$("holes").checked, top=holesOn?12:0, holeR=2.5;
   const holeX=holesOn?[8,W/2,W-8]:[];
