@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jey Tools</title>
+<style>
+  :root { --bg:#fafaf9; --fg:#1c1c1a; --muted:#6b6b66; --card:#fff; --line:#e5e4e1; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#191918; --fg:#f0efec; --muted:#9a9995; --card:#222221; --line:#333331; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:48px 16px; background:var(--bg); color:var(--fg);
+         font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  .wrap { max-width:640px; margin:0 auto; }
+  h1 { font-size:1.6rem; margin:0 0 6px; letter-spacing:-.02em; }
+  p.sub { color:var(--muted); margin:0 0 32px; font-size:.92rem; }
+  ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+  a.card { display:block; padding:16px 18px; background:var(--card); border:1px solid var(--line);
+           border-radius:12px; text-decoration:none; color:inherit; }
+  a.card:hover { border-color:var(--muted); }
+  .name { font-weight:600; }
+  .desc { color:var(--muted); font-size:.86rem; margin-top:3px; }
+  .empty { color:var(--muted); font-size:.9rem; padding:18px; border:1px dashed var(--line); border-radius:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Jey Tools</h1>
+  <p class="sub">일상용 도구 모음</p>
+  <ul>
+    <li><div class="empty">아직 도구가 없습니다. <code>tools/</code> 에 HTML 파일을 추가하고 이 목록에 링크를 넣으세요.</div></li>
+  </ul>
+</div>
+</body>
+</html>
