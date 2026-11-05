@@ -2404,11 +2404,11 @@ ol.steps code{font-family:var(--f-mono);font-size:.85em;background:var(--bg);pad
       <label class="check"><input type="checkbox" id="rim" checked> 액자 테두리</label>
       <label class="check"><input type="checkbox" id="holes" checked> 상단 걸이 구멍 3개 (Ø5)</label>
       <label class="check"><input type="checkbox" id="logo" checked> QR 가운데 Wi-Fi 아이콘</label>
-      <label class="check"><input type="checkbox" id="lab" checked> 아래 안내 문구</label>
-      <label>안내 문구 1줄
-        <input type="text" id="l1" value="카메라로 찍으면 Wi-Fi 연결">
+      <label class="check"><input type="checkbox" id="lab" checked> QR 위에 장소 이름</label>
+      <label>장소 이름
+        <input type="text" id="l1" value="" placeholder="예: RUN AND GYM / 사무실 2층">
       </label>
-      <label class="check"><input type="checkbox" id="l2" checked> 2줄에 와이파이 이름 표시</label>
+      <label class="check"><input type="checkbox" id="l2" checked> QR 아래에 와이파이 이름</label>
     </form>
 
     <div style="display:grid;gap:16px;min-width:0">
@@ -2477,14 +2477,16 @@ function makeQR(text,ecl){
 }
 
 // rasterize label text into dark cells (mm grid)
-function rasterText(lines,wMM,hMM,res){
+// 하단 안내 문구 글자 크기 배율 (1.0 = 2026-11-05 이전 크기)
+const LABEL_SCALE=1.2;
+function rasterText(lines,wMM,hMM,res,capMM){
   const cw=Math.round(wMM/res), ch=Math.round(hMM/res);
   const cv=document.createElement("canvas"); cv.width=cw; cv.height=ch;
   const g=cv.getContext("2d"); g.fillStyle="#000"; g.textAlign="center"; g.textBaseline="middle";
   const fam='"IBM Plex Sans KR","Apple SD Gothic Neo",sans-serif';
   const lh=ch/lines.length;
   lines.forEach((t,i)=>{
-    let size=Math.min(lh*0.62, 6.2/res);
+    let size=Math.min(lh*0.62, (capMM||6.2*LABEL_SCALE)/res);
     g.font=`700 ${size}px ${fam}`;
     while(g.measureText(t).width>cw*0.96 && size>4){size-=1;g.font=`700 ${size}px ${fam}`;}
     g.fillText(t,cw/2,lh*(i+0.5));
@@ -2516,14 +2518,19 @@ function build(){
   const m=qrMatrix, n=m.length, q=2;
   const inner=W-2*rimW-2*pad;
   const mod=inner/(n+2*q);
+  // QR 위: 장소 이름 / QR 아래: 와이파이 이름
+  const title=labOn? $("l1").value.trim() : "";
+  const titleH=title? 12*LABEL_SCALE : 0;
   const lines=[];
-  if(labOn){ if($("l1").value.trim())lines.push($("l1").value.trim()); if($("l2").checked&&$("ssid").value.trim())lines.push("Wi-Fi : "+$("ssid").value.trim()); }
-  const labH=lines.length? Math.max(9, lines.length*8.5) : 0;
+  if($("l2").checked&&$("ssid").value.trim()) lines.push("Wi-Fi : "+$("ssid").value.trim());
+  const labH=lines.length? Math.max(9, lines.length*8.5)*LABEL_SCALE : 0;
   const holesOn=$("holes").checked, top=holesOn?12:0, holeR=2.5;
   const holeX=holesOn?[8,W/2,W-8]:[];
-  const H=W+labH+top;
+  const tGap=(titleH&&!top)? rimW+pad : 0;      // 걸이 구멍이 없을 때 위쪽 여유
+  const yQR=top+tGap+titleH+rimW+pad;           // QR 블록(여백 포함) 윗선
+  const H=yQR+inner+pad+rimW+labH;
   const rects=[]; // relief rects in canvas coords (y down), mm
-  const ox=rimW+pad+q*mod, oy=top+rimW+pad+q*mod;
+  const ox=rimW+pad+q*mod, oy=yQR+q*mod;
   const logoOn=$("logo").checked;
   let k=Math.round(n*0.24); if((n-k)%2)k++;
   const c0=(n-k)/2, c1=c0+k;
@@ -2532,13 +2539,15 @@ function build(){
     rects.push([ox+s*mod,oy+r*mod,ox+c*mod,oy+(r+1)*mod]);}}
   if(logoOn){const res=0.2, mg=mod*0.6, sz=k*mod-2*mg; pushRaster(rects,rasterIcon(sz,res),ox+c0*mod+mg,oy+c0*mod+mg,res);}
   if(rimOn){rects.push([0,0,W,rimW],[0,H-rimW,W,H],[0,rimW,rimW,H-rimW],[W-rimW,rimW,W,H-rimW]);}
-  if(lines.length){
-    const res=0.25, lx=rimW+pad+1, ly=top+W-rimW-pad- q*mod*0.5, lw=W-2*(rimW+pad+1), lh=labH-1;
-    const g=rasterText(lines,lw,lh,res);
+  const res=0.25, lx=rimW+pad+1, lw=W-2*(rimW+pad+1);
+  const putText=(arr,y0,h,cap)=>{
+    const g=rasterText(arr,lw,h,res,cap);
     for(let y=0;y<g.length;y++){let x=0;const row=g[y];while(x<row.length){if(!row[x]){x++;continue;}let s=x;while(x<row.length&&row[x])x++;
-      rects.push([lx+s*res,ly+y*res,lx+x*res,ly+(y+1)*res]);}}
-  }
-  model={W,H,T,R,mod,rects,n,lines,top,holeX,holeR};
+      rects.push([lx+s*res,y0+y*res,lx+x*res,y0+(y+1)*res]);}}
+  };
+  if(title) putText([title], top+tGap, titleH-1, 9);   // 장소 이름은 제목처럼 크게
+  if(lines.length) putText(lines, yQR+inner+pad+rimW- q*mod*0.5, labH-1);
+  model={W,H,T,R,mod,rects,n,lines,title,top,holeX,holeR};
 }
 
 function boxTris(out,x0,y0,x1,y1,z0,z1){
