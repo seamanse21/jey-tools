@@ -2387,7 +2387,8 @@ ol.steps code{font-family:var(--f-mono);font-size:.85em;background:var(--bg);pad
       <div class="row">
         <label>보안 방식
           <select id="sec">
-            <option value="WPA" selected>WPA/WPA2/WPA3</option>
+            <option value="WPA" selected>WPA / WPA2 (대부분 여기)</option>
+            <option value="SAE">WPA3 전용</option>
             <option value="WEP">WEP</option>
             <option value="nopass">비밀번호 없음</option>
           </select>
@@ -2413,6 +2414,12 @@ ol.steps code{font-family:var(--f-mono);font-size:.85em;background:var(--bg);pad
     <div style="display:grid;gap:16px;min-width:0">
       <div class="bed"><canvas id="prev" width="600" height="700" aria-label="명판 미리보기"></canvas></div>
       <div class="stats" id="stats"></div>
+      <div class="panel" style="gap:8px">
+        <div class="sec">QR에 실제로 담기는 내용</div>
+        <p class="note" id="raw" style="font-family:var(--f-mono);word-break:break-all;color:var(--ink);margin:0"></p>
+        <p class="note" id="rawwarn" hidden></p>
+        <p class="note">연결이 안 되면 이 줄의 이름(<code>S:</code>)이 공유기 목록에 보이는 이름과 <b>대소문자·공백까지</b> 같은지 확인하세요. 비밀번호는 위 "보기"를 누르면 함께 보입니다.</p>
+      </div>
       <div class="actions">
         <button class="btn" id="dl" type="button">STL 묶음 받기 (.zip)</button>
         <button class="btn sec2" id="dlpng" type="button">QR 이미지만 (.png)</button>
@@ -2438,11 +2445,16 @@ const $=id=>document.getElementById(id);
 const ids=["ssid","pass","sec","hidden","W","T","R","rim","holes","logo","lab","l1","l2"];
 let model=null, qrMatrix=null;
 
-$("eye").onclick=()=>{const p=$("pass");p.type=p.type==="password"?"text":"password";$("eye").textContent=p.type==="password"?"보기":"숨김";};
+$("eye").onclick=()=>{const p=$("pass");p.type=p.type==="password"?"text":"password";$("eye").textContent=p.type==="password"?"보기":"숨김";showRaw();};
 
-function esc(s){return s.replace(/([\;,:"])/g,"\\$1");}
+function esc(s){return s.replace(/([\\;,:"])/g,"\\$1");}
+function trimmedInputs(){
+  const rs=$("ssid").value, rp=$("pass").value;
+  const ssid=rs.trim(), pw=rp.trim();
+  return {ssid,pw,trimmed:(ssid!==rs)||(pw!==rp&&$("sec").value!=="nopass")};
+}
 function wifiString(){
-  const sec=$("sec").value, ssid=$("ssid").value, pw=$("pass").value;
+  const sec=$("sec").value, {ssid,pw}=trimmedInputs();
   let s="WIFI:T:"+sec+";S:"+esc(ssid)+";";
   if(sec!=="nopass") s+="P:"+esc(pw)+";";
   if($("hidden").checked) s+="H:true;";
@@ -2610,10 +2622,21 @@ function stats(){
    `<div class="stat"><b>${T.toFixed(1)} mm</b><small>필라멘트 교체 높이</small></div>`+
    `<div class="stat"><b>${(T+R).toFixed(1)} mm</b><small>전체 높이 · 삼각형 ${tri.toLocaleString()}</small></div>`;
 }
+function showRaw(){
+  const t=trimmedInputs(); let txt=wifiString();
+  if($("pass").type==="password" && $("sec").value!=="nopass" && t.pw){
+    txt=txt.replace("P:"+esc(t.pw)+";","P:"+"•".repeat(Math.min(12,t.pw.length))+";");
+  }
+  $("raw").textContent=txt;
+  const w=$("rawwarn");
+  w.hidden=!t.trimmed;
+  if(t.trimmed) w.innerHTML='<b style="color:var(--warn)">앞뒤 공백을 지우고 QR을 만들었습니다.</b> 공백이 비밀번호의 일부라면 지금 QR은 연결되지 않습니다.';
+}
 function update(){
   $("vW").textContent=$("W").value+" mm";$("vT").textContent=(+$("T").value).toFixed(1)+" mm";$("vR").textContent=(+$("R").value).toFixed(1)+" mm";
   $("pass").disabled=$("sec").value==="nopass";
   try{qrMatrix=makeQR(wifiString(),$("logo").checked?"H":"M");}catch(e){$("msg").textContent="QR을 만들 수 없어요. 이름이나 비밀번호가 너무 깁니다.";return;}
+  showRaw();
   build();draw();stats();
 }
 ids.forEach(i=>{$(i).addEventListener("input",update);$(i).addEventListener("change",update);});
