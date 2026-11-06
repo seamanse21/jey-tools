@@ -2514,6 +2514,7 @@ details[open] summary{margin-bottom:8px}
           <option value="1">100%</option>
           <option value="1.2">120%</option>
           <option value="1.5">150%</option>
+          <option value="1.75">175% · 0.4노즐 여유</option>
         </select></div>
         <span>판 두께</span>
         <div class="unit"><select id="s_base">
@@ -2527,7 +2528,7 @@ details[open] summary{margin-bottom:8px}
         <div class="unit"><select id="s_radius">
           <option>0</option><option>1</option><option>2</option><option>3</option>
         </select><em>mm</em></div>
-        <span>획 굵기</span>
+        <span>획 굵기<br><small style="font-weight:400;opacity:.7">이름만</small></span>
         <div class="unit"><select id="s_bold">
           <option value="0">원본</option>
           <option value="1">굵게 (0.4 노즐 권장)</option>
@@ -2642,6 +2643,9 @@ const NS_BASE=8.8, NSP=1.1;      // 이름   (2026-11-06: 8.0 → 8.8, +10%)
 const TS_BASE=4.2, TSP=0.6;      // 직급   (4.0 → 4.2, +5%, 자간 추가)
 const MS_BASE=3.4;               // 팀     (기준값, 아래에서 폭에 맞춰 키움)
 const TEAM_MAX=1.3;              // 팀 글자 최대 확대 배율
+// '획 굵기' 설정은 이름에만 적용한다. 직급·팀은 보통 두께로 고정 —
+// 획을 부풀리면 글자 속 빈틈이 좁아져 0.4mm 노즐로는 메워져 버린다.
+const TW_W=500;
 
 // 팀 줄은 글자 영역 오른쪽 끝까지 차도록 크기를 키운다
 function teamFit(t,base,w,TW){
@@ -2652,16 +2656,16 @@ function teamFit(t,base,w,TW){
 // 세 줄 중 가장 넓은 폭 = 점 줄이 맞출 기준선
 function textBlockW(p,W,TW,ms){
   let aw=Math.min(textW(p.name||'',NS_BASE,W(700),NSP),TW);
-  if(st.settings.showTitle&&p.title) aw=Math.max(aw,Math.min(textW(p.title,TS_BASE,W(500),TSP),TW));
-  if(p.team) aw=Math.max(aw,Math.min(textW(p.team,ms,W(500),0),TW));
+  if(st.settings.showTitle&&p.title) aw=Math.max(aw,Math.min(textW(p.title,TS_BASE,TW_W,TSP),TW));
+  if(p.team) aw=Math.max(aw,Math.min(textW(p.team,ms,TW_W,0),TW));
   return aw||TW;
 }
 // QR 테두리(링)와 SECO 로고는 더 이상 넣지 않는다
 function textItems(p,W,v,TW,ms){
   const it=[];
   it.push({t:p.name||'',x:LM,y:v.yN,size:NS_BASE,w:W(700),sp:NSP,max:TW,layer:'acc'});
-  if(st.settings.showTitle&&p.title) it.push({t:p.title,x:LM,y:v.yT,size:TS_BASE,w:W(500),sp:TSP,max:TW,layer:'text'});
-  if(p.team) it.push({t:p.team,x:LM,y:v.yM,size:ms,w:W(500),max:TW,layer:'text'});
+  if(st.settings.showTitle&&p.title) it.push({t:p.title,x:LM,y:v.yT,size:TS_BASE,w:TW_W,sp:TSP,max:TW,layer:'text'});
+  if(p.team) it.push({t:p.team,x:LM,y:v.yM,size:ms,w:TW_W,max:TW,layer:'text'});
   return it;
 }
 // 위는 좌우 여백과 같은 LM 에서 시작하고, 아래는 BOT 에 점 줄 아랫선을 맞춘다.
@@ -2689,7 +2693,7 @@ function layout(p,c,boldLv){
   recalcGeom(QR_S_BASE);
   const wb=[0,100,200][boldLv]||0, W=w=>Math.min(900,w+wb);
   const qrMax=qrMaxSide(), TW=textMaxW();
-  const ms=teamFit(p.team,MS_BASE,W(500),TW);
+  const ms=teamFit(p.team,MS_BASE,TW_W,TW);
   const aw=textBlockW(p,W,TW,ms);
   // QR은 오른쪽(CW-LM)에 고정하고 왼쪽으로 늘린다. 세로가 허용하는 크기에서 멈춘다.
   recalcGeom(Math.max(QR_S_BASE, Math.min(qrMax, CW-2*LM-aw)));
@@ -2702,7 +2706,7 @@ function layoutPortrait(p,c,boldLv){
   recalcGeom();
   const wb=[0,100,200][boldLv]||0, W=w=>Math.min(900,w+wb);
   const TW=CW-2*LM;
-  const ms=teamFit(p.team,MS_BASE,W(500),TW);
+  const ms=teamFit(p.team,MS_BASE,TW_W,TW);
   const aw=textBlockW(p,W,TW,ms);
   const adj={t:TS_BASE/5};                              // 직급만 조금 내린다
   const dots={n:3, scale:1.5};                          // 점 3개, 가운데 정렬, 간격 1.5배
@@ -2832,9 +2836,9 @@ async function renderPreview(){
       ctx.fillRect((g.x0+c*g.cell)*k+ox,(g.y0+r*g.cell)*k+oy,g.cell*k+0.7,g.cell*k+0.7)};
   // 그림자(측면) → 윗면
   ctx.save(); ctx.translate(lift*0.5,lift);
-  drawLayer(ctx,items,'text',k,shadowCol,dil); drawLayer(ctx,items,'acc',k,shadowCol,dil); if(qr) drawQR(shadowCol,0,0);
+  drawLayer(ctx,items,'text',k,shadowCol,0); drawLayer(ctx,items,'acc',k,shadowCol,dil); if(qr) drawQR(shadowCol,0,0);
   ctx.restore();
-  drawLayer(ctx,items,'text',k,st.colors.text,dil); drawLayer(ctx,items,'acc',k,st.colors.acc,dil);
+  drawLayer(ctx,items,'text',k,st.colors.text,0); drawLayer(ctx,items,'acc',k,st.colors.acc,dil);
   // 받침대에 가려지는 부분 표시 (미리보기 전용)
   ctx.save(); ctx.fillStyle='rgba(255,255,255,.05)'; ctx.fillRect(0,(CH-STAND)*k,CW*k,STAND*k);
   ctx.strokeStyle='rgba(255,255,255,.28)'; ctx.setLineDash([k*1.2,k*1]); ctx.lineWidth=Math.max(1,k*0.15);
@@ -2999,7 +3003,7 @@ async function buildFiles(p){
   const g=qrGeom(qr);
   items.push(qrFrameItem(g));   // QR 모서리 라운드 띠
   // 글자·테두리는 S 해상도, QR은 칸(모듈) 단위 격자로 따로 → 삼각형 대폭 감소
-  const grT=maskGrid(rasterLayer(items,'text',dil));
+  const grT=maskGrid(rasterLayer(items,'text',0));
   const mt=new Mesh(); extrudeGrid(mt,grT.f,grT.W,grT.H,posR,zb,zt);
   { const T=g.tot, fq=new Uint8Array(T*T); for(let r=0;r<T;r++)for(let c=0;c<T;c++) if(g.light(r,c)) fq[r*T+c]=1;
     extrudeGrid(mt,fq,T,T,(gx,gy)=>[(g.x0+gx*g.cell)*sc,(CH-(g.y0+gy*g.cell))*sc],zb,zt); }
