@@ -2507,7 +2507,7 @@ details[open] summary{margin-bottom:8px}
         <span>방향</span>
         <div class="unit"><select id="s_orient">
           <option value="land">가로 (95 × 54)</option>
-          <option value="port">세로 (54 × 86)</option>
+          <option value="port">세로 (54 × 90)</option>
         </select></div>
         <span>크기</span>
         <div class="unit"><select id="s_scale">
@@ -2565,7 +2565,9 @@ details[open] summary{margin-bottom:8px}
 (function(){
 const S=12;                       // raster px per design-mm
 const CARD_L=95, CARD_S=54;       // 가로 방향: 95 × 54
-const PORT_W=54, PORT_H=86;       // 세로 방향: 54 × 86 (SECO 가 없어 그만큼 짧다)
+const PORT_W=54, PORT_H=90;       // 세로 방향: 54 × 90
+// 폭 54 는 QR(= PORT_W - 2*LM = 46mm)을 정하므로 건드리지 않는다.
+// 높이는 글자 줄간격을 벌리려고 86 → 90 으로 늘렸다 (2026-11-06).
 let CW=CARD_L, CH=CARD_S;         // 현재 방향의 가로·세로
 const isPortrait=()=>((typeof st!=='undefined'&&st.settings&&st.settings.orient)==='port');
 function applyOrient(){ if(isPortrait()){CW=PORT_W;CH=PORT_H;} else {CW=CARD_L;CH=CARD_S;} }
