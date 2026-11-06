@@ -2666,14 +2666,20 @@ function textItems(p,W,v,TW,ms){
 }
 // 위는 좌우 여백과 같은 LM 에서 시작하고, 아래는 BOT 에 점 줄 아랫선을 맞춘다.
 // 남는 높이는 줄간격 3개(이름-직급, 직급-팀, 팀-점)로 균등 분배.
-function vLayoutBlock(aw,TW,ms,BOT){
-  const TOP=LM;
+// adj: 각 줄의 추가 오프셋(mm, 아래가 +). 기준 위치에서 독립적으로 더한다.
+// dots: 생략하면 왼쪽 정렬 HOLE_N개. {n,scale} 이면 그만큼만 가운데 정렬.
+function vLayoutBlock(aw,TW,ms,BOT,adj,dots){
+  const TOP=LM, a=adj||{};
   const capN=0.85*NS_BASE, capT=0.85*TS_BASE, capM=0.85*ms;
   const free=(BOT-TOP)-(capN+capT+capM)-2*HOLE_R;
   const g=Math.max(1.2, free/3);
-  const yN=TOP+capN, yT=yN+g+capT, yM=yT+g+capM, yHole=yM+g+HOLE_R;
-  const AW=(aw==null?TW:aw), pitch=(AW-2*HOLE_R)/(HOLE_N-1);
-  HOLES.length=0; for(let i=0;i<HOLE_N;i++) HOLES.push([LM+HOLE_R+i*pitch,yHole]);
+  const yN0=TOP+capN, yT0=yN0+g+capT, yM0=yT0+g+capM, yH0=yM0+g+HOLE_R;
+  const yN=yN0+(a.n||0), yT=yT0+(a.t||0), yM=yM0+(a.m||0), yHole=yH0+(a.h||0);
+  const AW=(aw==null?TW:aw), basePitch=(AW-2*HOLE_R)/(HOLE_N-1);
+  HOLES.length=0;
+  if(dots){ const n=dots.n, pitch=basePitch*(dots.scale||1), cx=CW/2;
+    for(let i=0;i<n;i++) HOLES.push([cx+(i-(n-1)/2)*pitch,yHole]); }
+  else for(let i=0;i<HOLE_N;i++) HOLES.push([LM+HOLE_R+i*basePitch,yHole]);
   return {yN,yT,yM,yHole};
 }
 
@@ -2687,7 +2693,8 @@ function layout(p,c,boldLv){
   const aw=textBlockW(p,W,TW,ms);
   // QR은 오른쪽(CW-LM)에 고정하고 왼쪽으로 늘린다. 세로가 허용하는 크기에서 멈춘다.
   recalcGeom(Math.max(QR_S_BASE, Math.min(qrMax, CW-2*LM-aw)));
-  return textItems(p,W,vLayoutBlock(aw,TW,ms,QR_BOX[3]),TW,ms);  // 아래 기준 = QR 하단
+  const adj={n:NS_BASE/5, t:TS_BASE, m:0, h:-HOLE_R};   // 2026-11-06 미세 조정
+  return textItems(p,W,vLayoutBlock(aw,TW,ms,QR_BOX[3],adj),TW,ms);  // 아래 기준 = QR 하단
 }
 
 /* ---------- 세로 배치 (54 × 90) : 위 글자 + 아래 QR ---------- */
@@ -2697,7 +2704,9 @@ function layoutPortrait(p,c,boldLv){
   const TW=CW-2*LM;
   const ms=teamFit(p.team,MS_BASE,W(500),TW);
   const aw=textBlockW(p,W,TW,ms);
-  return textItems(p,W,vLayoutBlock(aw,TW,ms,QR_OUT[1]-LM),TW,ms);  // 아래 기준 = QR 윗선 위
+  const adj={t:TS_BASE/5};                              // 직급만 조금 내린다
+  const dots={n:3, scale:1.5};                          // 점 3개, 가운데 정렬, 간격 1.5배
+  return textItems(p,W,vLayoutBlock(aw,TW,ms,QR_OUT[1]-LM,adj,dots),TW,ms);  // 아래 기준 = QR 윗선 위
 }
 const TITLES=['책임연구원','선임연구원','연구원','책임매니저','선임매니저','매니저','이사','전무','상무','대표이사'];
 function holePath(ctx,k){ // 판을 관통하는 구멍 3개 + 가로 슬롯
@@ -2735,10 +2744,16 @@ function makeQR(p){
   return {n,m};
 }
 const QZ=2; // QR 바깥 밝은 여백 칸 수 (그 바깥은 어두운 틈 + 밝은 테두리)
+const QR_R=1;   // QR 네 모서리 라운드 반지름 (mm)
 function qrGeom(qr){
   const tot=qr.n+2*QZ, cell=(QR_BOX[2]-QR_BOX[0])/tot;
-  return {cell,tot,x0:QR_BOX[0],y0:QR_BOX[1],light:(r,c)=>{const rr=r-QZ,cc=c-QZ;return !(rr>=0&&cc>=0&&rr<qr.n&&cc<qr.n&&qr.m[rr][cc])}};
+  return {cell,tot,x0:QR_BOX[0],y0:QR_BOX[1],light:(r,c)=>{
+    // 바깥 한 줄은 격자에서 빼고 라운드 프레임(qrFrameItem)이 대신 채운다
+    if(r===0||c===0||r===tot-1||c===tot-1) return false;
+    const rr=r-QZ,cc=c-QZ;return !(rr>=0&&cc>=0&&rr<qr.n&&cc<qr.n&&qr.m[rr][cc])}};
 }
+// QR 바깥 한 줄 = 모서리가 둥근 띠. 여백 색과 같으므로 따로 보이지 않고 모서리만 둥글어진다.
+function qrFrameItem(g){ return {ring:[QR_BOX[0],QR_BOX[1],QR_BOX[2],QR_BOX[3]],t:g.cell,r:QR_R,layer:'text'}; }
 const _mc=document.createElement('canvas').getContext('2d');
 function textW(t,size,w,sp,fam){const ch=[...t];return ch.reduce((a,c)=>a+charW(_mc,c,size,w,100,fam),0)+sp*Math.max(0,ch.length-1)}
 const fontOf=(w,px,fam)=>fam==='mont'?`${w} ${px}px "Montserrat", "Noto Sans KR", sans-serif`:`${w} ${px}px "Noto Sans KR", sans-serif`;
@@ -2811,6 +2826,7 @@ async function renderPreview(){
   ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(0,0,CW*k,k*0.5);
   const shadowCol='rgba(0,0,0,.55)';
   const qr=makeQR(p);
+  if(qr) items.push(qrFrameItem(qrGeom(qr)));   // QR 모서리 라운드 띠
   const drawQR=(col,ox,oy,pad)=>{const g=qrGeom(qr);ctx.fillStyle=col;
     for(let r=0;r<g.tot;r++)for(let c=0;c<g.tot;c++) if(g.light(r,c))
       ctx.fillRect((g.x0+c*g.cell)*k+ox,(g.y0+r*g.cell)*k+oy,g.cell*k+0.7,g.cell*k+0.7)};
@@ -2981,6 +2997,7 @@ async function buildFiles(p){
     prismWithHoles(mb,outer,holes,0,zb); }
   const qr=makeQR(p); if(!qr) throw new Error('QR 라이브러리를 불러오지 못했습니다');
   const g=qrGeom(qr);
+  items.push(qrFrameItem(g));   // QR 모서리 라운드 띠
   // 글자·테두리는 S 해상도, QR은 칸(모듈) 단위 격자로 따로 → 삼각형 대폭 감소
   const grT=maskGrid(rasterLayer(items,'text',dil));
   const mt=new Mesh(); extrudeGrid(mt,grT.f,grT.W,grT.H,posR,zb,zt);
