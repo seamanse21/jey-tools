@@ -2507,7 +2507,7 @@ details[open] summary{margin-bottom:8px}
         <span>방향</span>
         <div class="unit"><select id="s_orient">
           <option value="land">가로 (95 × 54)</option>
-          <option value="port">세로 (54 × 95)</option>
+          <option value="port">세로 (54 × 86)</option>
         </select></div>
         <span>크기</span>
         <div class="unit"><select id="s_scale">
@@ -2564,10 +2564,11 @@ details[open] summary{margin-bottom:8px}
 <script>
 (function(){
 const S=12;                       // raster px per design-mm
-const CARD_L=95, CARD_S=54;       // 카드 긴 변 / 짧은 변 (mm)
+const CARD_L=95, CARD_S=54;       // 가로 방향: 95 × 54
+const PORT_W=54, PORT_H=86;       // 세로 방향: 54 × 86 (SECO 가 없어 그만큼 짧다)
 let CW=CARD_L, CH=CARD_S;         // 현재 방향의 가로·세로
 const isPortrait=()=>((typeof st!=='undefined'&&st.settings&&st.settings.orient)==='port');
-function applyOrient(){ if(isPortrait()){CW=CARD_S;CH=CARD_L;} else {CW=CARD_L;CH=CARD_S;} }
+function applyOrient(){ if(isPortrait()){CW=PORT_W;CH=PORT_H;} else {CW=CARD_L;CH=CARD_S;} }
 const KEY='seco3dcard.v4';
 const defaults={
   // 예시값입니다. 실제 정보로 바꾸면 이 브라우저에만 저장되고 어디에도 전송되지 않습니다.
@@ -2674,8 +2675,7 @@ function layoutPortrait(p,c,boldLv){
     aw=Math.max(aw, Math.min(textW(t,size,w,sp), TW)); }
   if(!aw) aw=TW;
   const v=vLayoutPortrait(aw,TW);
-  const it=[];
-  it.push({ci:'seco',x:LM,y:v.yS,h:v.hS,layer:'acc'});
+  const it=[];   // 세로에는 SECO 로고를 넣지 않는다
   it.push({t:p.name||'',x:LM,y:v.yN,size:v.NS,w:W(700),sp:v.NSP,max:TW,layer:'acc'});
   if(st.settings.showTitle&&p.title) it.push({t:p.title,x:LM,y:v.yT,size:v.TS,w:W(500),max:TW,layer:'text'});
   if(p.team) it.push({t:p.team,x:LM,y:v.yM,size:v.MS,w:W(500),max:TW,layer:'text'});
@@ -2686,14 +2686,14 @@ function vLayoutPortrait(aw,tw){
   const TW=tw, TOP=LM, BOT=QR_OUT[1]-LM;      // 글자 영역: 위 여백 ~ QR 윗선 위
   const NS=8.0, NSP=1.1, TS=4.0, MS=3.4;      // 가로 버전과 같은 글자 크기
   const capN=0.85*NS, capT=0.85*TS, capM=0.85*MS;
-  const hS=TW/CI_AR.seco*0.5, yS=BOT-hS;       // SECO 아랫선 = 글자 영역 맨 아래 (y 는 로고 윗선)
-  // 남는 세로를 줄간격 2개 + 점 줄 위아래 2개로 나눠 쓴다
-  const free=(BOT-hS-TOP)-(capN+capT+capM)-2*HOLE_R;
-  const g=Math.max(1.2, free/4);
+  // 남는 세로를 줄간격 3개(이름-직급, 직급-팀, 팀-점)로 균등 분배.
+  // 점 줄의 아랫선이 글자 영역 맨 아래에 떨어진다.
+  const free=(BOT-TOP)-(capN+capT+capM)-2*HOLE_R;
+  const g=Math.max(1.2, free/3);
   const yN=TOP+capN, yT=yN+g+capT, yM=yT+g+capM, yHole=yM+g+HOLE_R;
   const AW=(aw==null?TW:aw), pitch=(AW-2*HOLE_R)/(HOLE_N-1);
   HOLES.length=0; for(let i=0;i<HOLE_N;i++) HOLES.push([LM+HOLE_R+i*pitch,yHole]);
-  return {TW,NS,NSP,TS,MS,yN,yT,yM,hS,yS};
+  return {TW,NS,NSP,TS,MS,yN,yT,yM};
 }
 const TITLES=['책임연구원','선임연구원','연구원','책임매니저','선임매니저','매니저','이사','전무','상무','대표이사'];
 function vLayout(aw,tw){
