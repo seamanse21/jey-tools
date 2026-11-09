@@ -236,6 +236,7 @@ ul.papers .nm{font-weight:700;flex:1}
       <p class="note" id="verdict"></p>
       <div class="row" style="margin-top:10px">
         <button class="btn" id="next">다음 →</button>
+        <button class="btn ghost" id="restart">처음부터</button>
         <button class="btn ghost" id="quit">그만</button>
       </div>
     </div>
@@ -691,6 +692,10 @@ function renderHome(){
                  (w?`<span class="pill bad">오답 ${w}</span>`:'');
     const b=document.createElement('button'); b.className='btn sm'; b.textContent='풀기';
     b.onclick=()=>startPlay(k); li.appendChild(b);
+    const r=document.createElement('button'); r.className='btn ghost sm'; r.textContent='기록 지우기';
+    r.onclick=()=>{ if(!confirm(`"${p.title}" 의 정답률·오답 기록을 지울까요?\n잘라 둔 문항은 그대로 있습니다.`))return;
+      p.stats={}; save(); renderHome(); };
+    li.appendChild(r);
     const d=document.createElement('button'); d.className='btn ghost sm'; d.textContent='삭제';
     d.onclick=async()=>{ if(!confirm(`"${p.title}"을(를) 지울까요? 되돌릴 수 없습니다.`))return;
       await dbDel(k+'#'); delete st.papers[k]; save(); renderHome(); };
@@ -776,6 +781,8 @@ $('saveAll').onclick=saveAll;
 $('expRecipe').onclick=exportRecipe;
 $('choices').onclick=e=>{const b=e.target.closest('.ch'); if(b) pick(+b.dataset.v)};
 $('next').onclick=()=>{play.i++;nextQ()};
+$('restart').onclick=()=>{ if(!paper())return;
+  $('resultCard').classList.add('hide'); buildQueue(); nextQ(); };
 $('quit').onclick=()=>{renderHome();show('vHome')};
 $('again').onclick=()=>{buildQueue();$('resultCard').classList.add('hide');nextQ()};
 $('toHome').onclick=()=>{renderHome();show('vHome')};
