@@ -156,7 +156,12 @@ ul.papers .nm{font-weight:700;flex:1}
   <!-- ───────── 추가: PDF 투입 ───────── -->
   <div id="vAdd" class="hide">
     <div class="card">
-      <div class="sec">1 · 문제지 PDF</div>
+      <div class="sec">1 · 준비된 경계 고르기</div>
+      <select id="recipeSel" style="width:100%"><option value="">직접 자르기</option></select>
+      <p class="note" id="recipeNote">회차를 고르면 문항 경계가 이미 맞춰진 상태로 시작합니다. 목록에 없으면 직접 자르면 됩니다.</p>
+    </div>
+    <div class="card">
+      <div class="sec">2 · 문제지 PDF</div>
       <div class="drop" id="dropQ"><b>문제지 PDF를 끌어다 놓으세요</b>눌러서 선택할 수도 있습니다</div>
       <input type="file" id="fileQ" accept="application/pdf" class="hide">
       <div id="qProg" class="hide" style="margin-top:12px">
@@ -170,7 +175,7 @@ ul.papers .nm{font-weight:700;flex:1}
   <!-- ───────── 편집 ───────── -->
   <div id="vEdit" class="hide">
     <div class="card">
-      <div class="sec">2 · 문항 경계 확인</div>
+      <div class="sec">3 · 문항 경계 확인</div>
       <p class="note" style="margin:0 0 10px">
         파란 선이 문항 경계입니다. <b>선을 끌어</b> 옮기고, <b>선을 두 번 눌러</b> 지우고(= 위아래 문항 합치기),
         <b>빈 곳을 눌러</b> 새 경계를 넣습니다. 번호는 자동으로 다시 매겨집니다.
@@ -180,6 +185,7 @@ ul.papers .nm{font-weight:700;flex:1}
         <label>목표 <input type="text" id="targetN" value="50" style="width:64px;display:inline-block"></label>
         <button class="btn ghost sm" id="reAuto">자동 분할 다시</button>
         <button class="btn ghost sm" id="colMode">단 단위로 (분할 안 함)</button>
+        <button class="btn ghost sm" id="expRecipe">레시피 내보내기</button>
       </div>
     </div>
     <div id="pages"></div>
@@ -192,7 +198,7 @@ ul.papers .nm{font-weight:700;flex:1}
   <!-- ───────── 정답 ───────── -->
   <div id="vAns" class="hide">
     <div class="card">
-      <div class="sec">3 · 이름과 정답표</div>
+      <div class="sec">4 · 이름과 정답표</div>
       <label style="display:block;margin-bottom:12px">시험지 이름
         <input type="text" id="paperName" placeholder="예: 79회 기본"></label>
       <div class="drop" id="dropA"><b>정답표 PDF를 끌어다 놓으세요</b>자동으로 읽습니다</div>
@@ -381,7 +387,12 @@ async function loadQuestionPdf(file){
     await new Promise(r=>setTimeout(r));
   }
   work={name:file.name.replace(/\.pdf$/i,''),pdf:buf,pages,answers:[]};
-  mergeToTarget(work.pages,parseInt($('targetN').value)||50);
+  const rid=$('recipeSel').value;
+  let used=false;
+  if(rid){ const rec=await getRecipe(rid);
+    if(rec && applyRecipe(rec)){ used=true; work.name=rec.title||work.name; }
+    else alert('고른 회차와 쪽 수가 다릅니다. 자동 분할로 진행합니다.'); }
+  if(!used) mergeToTarget(work.pages,parseInt($('targetN').value)||50);
   $('qStat').textContent='';$('qProg').classList.add('hide');
   renderEditor(); show('vEdit');
 }
@@ -631,10 +642,57 @@ function renderHome(){
   $('hdrSub').textContent='';
 }
 
+/* ---------- 레시피 ---------- */
+const RKEY='hxquiz.recipes';
+let recipeIndex=[];
+function cacheGet(k){try{return JSON.parse(localStorage.getItem(RKEY)||'{}')[k]}catch(e){return null}}
+function cachePut(k,v){try{const o=JSON.parse(localStorage.getItem(RKEY)||'{}');o[k]=v;
+  localStorage.setItem(RKEY,JSON.stringify(o))}catch(e){}}
+async function loadRecipeIndex(){
+  const cached=cacheGet('__index');
+  try{
+    const r=await fetch('./kr-history/index.json',{cache:'no-cache'});
+    if(r.ok){recipeIndex=await r.json(); cachePut('__index',recipeIndex);}
+    else if(cached) recipeIndex=cached;
+  }catch(e){ if(cached) recipeIndex=cached; }
+  const sel=$('recipeSel');
+  sel.innerHTML='<option value="">직접 자르기</option>'+
+    recipeIndex.map(r=>`<option value="${r.id}">${r.title} · ${r.n}문항 (경계 준비됨)</option>`).join('');
+}
+async function getRecipe(id){
+  const hit=recipeIndex.find(r=>r.id===id); if(!hit) return null;
+  const cached=cacheGet(id); 
+  try{
+    const r=await fetch('./kr-history/'+hit.file,{cache:'no-cache'});
+    if(r.ok){const j=await r.json(); cachePut(id,j); return j;}
+  }catch(e){}
+  return cached;
+}
+function applyRecipe(rec){
+  if(rec.pages!==work.pages.length) return false;
+  work.pages.forEach((pg,i)=>{
+    const L=rec.layout[i];
+    pg.div=L.div; pg.top=L.top; pg.bot=L.bot; pg.twoCol=true;
+    pg.segs=L.segs.map(s=>({col:s.c,y0:s.a,y1:s.b}));
+  });
+  return true;
+}
+function exportRecipe(){
+  const rec={id:(work.name||'recipe').replace(/\s+/g,'-'), title:work.name,
+    n:allSegs().length, pages:work.pages.length,
+    note:'문제지 PDF 는 포함되어 있지 않습니다. 정답은 정답표 PDF 로 자동 입력됩니다.',
+    layout:work.pages.map(p=>({div:+p.div.toFixed(5),top:+p.top.toFixed(5),bot:+p.bot.toFixed(5),
+      segs:p.segs.map(s=>({c:s.col,a:+s.y0.toFixed(5),b:+s.y1.toFixed(5)}))}))};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(rec)],{type:'application/json'}));
+  a.download=(work.name||'recipe')+'.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
 /* ---------- 연결 ---------- */
 hookDrop($('dropQ'),$('fileQ'),loadQuestionPdf);
 hookDrop($('dropA'),$('fileA'),loadAnswerPdf);
-$('goAdd').onclick=()=>{show('vAdd')};
+$('goAdd').onclick=()=>{loadRecipeIndex();show('vAdd')};
 $('addCancel').onclick=$('editCancel').onclick=()=>{work=null;renderHome();show('vHome')};
 $('reAuto').onclick=()=>{ if(!work)return;
   work.pages.forEach(p=>{const a=analyze(p.cv);p.div=a.div;p.twoCol=a.twoCol;p.segs=a.segs;p.top=a.top;p.bot=a.bot});
@@ -650,6 +708,7 @@ $('ansText').oninput=e=>{
   work.answers=v; paintAnsGrid();
 };
 $('saveAll').onclick=saveAll;
+$('expRecipe').onclick=exportRecipe;
 $('choices').onclick=e=>{const b=e.target.closest('.ch'); if(b) pick(+b.dataset.v)};
 $('next').onclick=()=>{play.i++;nextQ()};
 $('quit').onclick=()=>{renderHome();show('vHome')};
