@@ -164,6 +164,7 @@ ul.papers .nm{font-weight:700;flex:1}
       <div class="sec">2 · 문제지 PDF</div>
       <div class="drop" id="dropQ"><b>문제지 PDF를 끌어다 놓으세요</b>ZIP 으로 묶어 넣어도 됩니다 (문제지+정답표 한 번에)</div>
       <input type="file" id="fileQ" accept=".pdf,.zip,application/pdf,application/zip" class="hide">
+      <div id="zipPickQ" class="hide" style="margin-top:12px"></div>
       <div id="qProg" class="hide" style="margin-top:12px">
         <progress id="pbar" max="100" value="0"></progress>
         <p class="note" id="qStat"></p>
@@ -204,6 +205,7 @@ ul.papers .nm{font-weight:700;flex:1}
         <input type="text" id="paperName" placeholder="예: 79회 기본"></label>
       <div class="drop" id="dropA"><b>정답표 PDF를 끌어다 놓으세요</b>ZIP 도 됩니다 · 자동으로 읽습니다</div>
       <input type="file" id="fileA" accept=".pdf,.zip,application/pdf,application/zip" class="hide">
+      <div id="zipPickA" class="hide" style="margin-top:12px"></div>
       <p class="note" id="aStat"></p>
       <p class="note">직접 입력도 됩니다 — 숫자만 이어서 쓰세요 (예: <code>4324213221…</code>)</p>
       <input type="text" id="ansText" placeholder="1번부터 차례대로 1~4 숫자만">
@@ -387,7 +389,7 @@ function hookDrop(zone,input,fn){
   zone.addEventListener('drop',ev=>{const f=ev.dataTransfer.files[0]; if(f) fn(f);});
 }
 /* ---------- ZIP 묶음 받기 ---------- */
-let pendingAns=null;
+let pendingAns=null, zipFrom='';
 function isZip(f){ return /\.zip$/i.test(f.name||'')||/zip/i.test(f.type||''); }
 async function unzipPdfs(file){
   const z=await JSZip.loadAsync(file), out=[];
@@ -402,10 +404,30 @@ async function unzipPdfs(file){
 }
 function splitQA(list){
   const ans=[],q=[];
-  list.forEach(f=>{ (/정답|답안|answer|key/i.test(f.name)?ans:q).push(f); });
-  if(!ans.length&&q.length>1){ q.sort((a,b)=>a.size-b.size); ans.push(q.shift()); }
-  q.sort((a,b)=>b.size-a.size); ans.sort((a,b)=>a.size-b.size);
-  return {q:q[0]||null, a:ans[0]||null};
+  list.forEach(f=>{ (/정답|답안|answer|key/i.test(f.name)||f.size<2*1024*1024 ? ans:q).push(f); });
+  q.sort((a,b)=>a.name.localeCompare(b.name)); ans.sort((a,b)=>a.name.localeCompare(b.name));
+  return {qs:q, as:ans};
+}
+function recipeNum(){ const m=/^(\d+)/.exec($('recipeSel').value||''); return m?m[1]:''; }
+function byNum(list,num){ return num? list.filter(f=>f.name.indexOf(num)>=0) : []; }
+function askPick(hostId,list,title){
+  return new Promise(res=>{
+    const host=$(hostId); host.classList.remove('hide'); host.innerHTML='';
+    const p=document.createElement('p'); p.className='note'; p.innerHTML='<b>'+title+'</b>';
+    host.appendChild(p);
+    list.forEach(f=>{ const b=document.createElement('button'); b.className='btn ghost sm';
+      b.style.cssText='display:block;width:100%;text-align:left;margin:6px 0';
+      b.textContent=f.name+'  ·  '+(f.size>1048576?Math.round(f.size/1048576)+'MB':Math.round(f.size/1024)+'KB');
+      b.onclick=()=>{host.classList.add('hide');host.innerHTML='';res(f)};
+      host.appendChild(b); });
+  });
+}
+async function pickOne(hostId,list,num,title){
+  if(!list.length) return null;
+  if(list.length===1) return list[0];
+  const m=byNum(list,num);
+  if(m.length===1) return m[0];
+  return await askPick(hostId, m.length?m:list, title);
 }
 async function routeFile(file,which){
   if(!isZip(file)) return which==='q'?loadQuestionPdf(file):loadAnswerPdf(file);
@@ -416,16 +438,25 @@ async function routeFile(file,which){
   try{ pdfs=await unzipPdfs(file); }
   catch(e){ stat.innerHTML='<span class="warn">ZIP 을 열지 못했습니다: '+e.message+'</span>'; return; }
   if(!pdfs.length){ stat.innerHTML='<span class="warn">ZIP 안에 PDF 가 없습니다.</span>'; return; }
-  const sp=splitQA(pdfs);
+  const sp=splitQA(pdfs), num=recipeNum();
   if(which==='a'){
-    const f=sp.a||sp.q;
+    const f=await pickOne('zipPickA', sp.as.length?sp.as:sp.qs, num, 'ZIP 안에 정답표가 여럿입니다. 하나를 고르세요.');
     if(f) return loadAnswerPdf(f);
     stat.innerHTML='<span class="warn">ZIP 안에 정답표 PDF 가 없습니다.</span>'; return;
   }
-  if(!sp.q){ stat.innerHTML='<span class="warn">ZIP 안에서 문제지 PDF 를 찾지 못했습니다.</span>'; return; }
-  pendingAns=sp.a;
-  await loadQuestionPdf(sp.q);
-  if(sp.a) $('aStat').textContent='ZIP 의 '+sp.a.name+' 을 정답표로 읽을 준비가 됐습니다.';
+  stat.textContent='';
+  const q=await pickOne('zipPickQ', sp.qs, num, 'ZIP 안에 문제지가 여럿입니다. 풀 회차를 고르세요.');
+  if(!q){ $('qProg').classList.add('hide');
+    stat.innerHTML='<span class="warn">ZIP 안에서 문제지 PDF 를 찾지 못했습니다.</span>'; return; }
+  $('qProg').classList.remove('hide');
+  // 정답표는 고른 문제지와 같은 회차 번호를 가진 것만 자동으로 쓴다
+  const am=byNum(sp.as,num);
+  pendingAns = am.length===1 ? am[0] : (sp.as.length===1 ? sp.as[0] : null);
+  zipFrom=q.name;
+  await loadQuestionPdf(q);
+  $('aStat').textContent = pendingAns
+    ? 'ZIP 의 '+pendingAns.name+' 을 정답표로 읽을 준비가 됐습니다.'
+    : 'ZIP 안의 정답표를 고르지 못했습니다. 아래에 정답표 PDF 나 ZIP 을 다시 넣어 주세요.';
 }
 
 const RENDER_DPI=110;
@@ -446,17 +477,21 @@ async function loadQuestionPdf(file){
     await new Promise(r=>setTimeout(r));
   }
   work={name:file.name.replace(/\.pdf$/i,''),pdf:buf,pages,answers:[]};
-  const rid=$('recipeSel').value;
+  let rid=$('recipeSel').value, guessed=false;
+  if(!rid){ const g=guessRecipeId(file.name); if(g){rid=g; guessed=true;} }
   let used=false;
   if(rid){ const rec=await getRecipe(rid);
     if(rec && applyRecipe(rec)){ used=true; work.name=rec.title||work.name; }
     else alert('고른 회차와 쪽 수가 다릅니다. 자동 분할로 진행합니다.'); }
   if(!used) mergeToTarget(work.pages,parseInt($('targetN').value)||50);
   const es=$('editSrc'); es.classList.remove('hide');
-  es.innerHTML = used
-    ? '<b style="color:var(--ok)">준비된 경계</b>를 적용했습니다. 그대로 두고 다음으로 넘어가면 됩니다.'
+  const from = zipFrom ? '<b>'+zipFrom+'</b> 을 열었습니다. ' : '';
+  zipFrom='';
+  es.innerHTML = from + (used
+    ? (guessed?'파일 이름을 보고 <b>'+rid.replace('-basic','회 기본')+'</b> 의 ':'')
+      +'<b style="color:var(--ok)">준비된 경계</b>를 적용했습니다. 그대로 두고 다음으로 넘어가면 됩니다.'
     : '<span class="warn"><b>자동으로 자른 결과입니다.</b> 목록에 없는 회차라 경계가 어긋난 곳이 있을 수 있습니다 — 한 번 훑어보고 고쳐 주세요. '
-      + '고친 뒤 <b>레시피 내보내기</b>로 받은 파일을 보내 주시면 목록에 넣어 드립니다.</span>';
+      + '고친 뒤 <b>레시피 내보내기</b>로 받은 파일을 보내 주시면 목록에 넣어 드립니다.</span>');
   $('qStat').textContent='';$('qProg').classList.add('hide');
   renderEditor(); show('vEdit');
 }
@@ -499,7 +534,7 @@ function paintOverlays(){
         [['y0',s.y0],['y1',s.y1]].forEach(([k,y])=>{
           const b=document.createElement('div'); b.className='bnd';
           b.style.cssText=`left:${cx0*100}%;width:${(cx1-cx0)*100}%;top:${y*100}%`;
-          b.onmousedown=b.ontouchstart=ev=>startDrag(ev,pi,s,k,b);
+          b.onmousedown=b.ontouchstart=ev=>startDrag(ev,pi,s,k,b,c,y);
           b.ondblclick=ev=>{ev.stopPropagation();removeBoundary(pi,c,y)};
           ov.appendChild(b);
         });
@@ -511,16 +546,30 @@ function paintOverlays(){
     }
   });
 }
-function startDrag(ev,pi,seg,key,el){
+let lastTap=null;   // 선을 두 번 눌렀는지 직접 센다
+function startDrag(ev,pi,seg,key,el,col,y0){
   ev.preventDefault(); el.classList.add('drag');
   const ov=el.parentElement, r=ov.getBoundingClientRect();
+  const sy=(ev.touches?ev.touches[0].clientY:ev.clientY);
+  let moved=false;
   const move=e=>{const cy=(e.touches?e.touches[0].clientY:e.clientY);
+    if(Math.abs(cy-sy)>3) moved=true;
+    if(!moved) return;
     let y=(cy-r.top)/r.height; y=Math.max(.02,Math.min(.98,y));
     if(key==='y0') seg.y0=Math.min(y,seg.y1-.01); else seg.y1=Math.max(y,seg.y0+.01);
     el.style.top=(y*100)+'%';};
   const up=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('touchmove',move);
     document.removeEventListener('mouseup',up);document.removeEventListener('touchend',up);
-    el.classList.remove('drag'); work.pages[pi].segs.sort((a,b)=>a.col-b.col||a.y0-b.y0); seal(work.pages[pi]); paintOverlays();};
+    el.classList.remove('drag');
+    if(moved){ lastTap=null;
+      work.pages[pi].segs.sort((a,b)=>a.col-b.col||a.y0-b.y0); seal(work.pages[pi]); paintOverlays(); return; }
+    // 움직이지 않았다 = 그냥 누른 것. 400ms 안에 같은 선을 다시 누르면 지운다.
+    // (지우고 나면 화면을 다시 그리는데, 그 때문에 브라우저의 dblclick 이 안 먹어서 직접 센다)
+    const now=Date.now();
+    if(lastTap && lastTap.pi===pi && lastTap.col===col && Math.abs(lastTap.y-y0)<1e-6 && now-lastTap.t<400){
+      lastTap=null; removeBoundary(pi,col,y0);
+    } else lastTap={pi,col,y:y0,t:now};
+  };
   document.addEventListener('mousemove',move);document.addEventListener('touchmove',move,{passive:false});
   document.addEventListener('mouseup',up);document.addEventListener('touchend',up);
 }
@@ -733,6 +782,16 @@ function showRecipeNote(){
   $('recipeNote').innerHTML = r
     ? (r.warn? '<b class="warn">'+r.warn+'</b>' : '경계가 모두 확인된 회차입니다. 문제지 PDF 만 넣으면 바로 풀 수 있습니다.')
     : '회차를 고르면 문항 경계가 이미 맞춰진 상태로 시작합니다. 목록에 없으면 직접 자르면 됩니다.';
+}
+// 파일 이름에 든 회차 번호로 레시피를 알아본다 (한글이 깨져도 숫자는 남는다)
+function guessRecipeId(name){
+  if(!recipeIndex||!recipeIndex.length) return '';
+  const nums=(name.match(/\d+/g)||[]);
+  for(const r of recipeIndex){
+    const m=/^(\d+)/.exec(r.id); if(!m) continue;
+    if(nums.indexOf(m[1])>=0) return r.id;
+  }
+  return '';
 }
 async function getRecipe(id){
   const hit=recipeIndex.find(r=>r.id===id); if(!hit) return null;
