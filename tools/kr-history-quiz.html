@@ -153,6 +153,25 @@ ul.papers .nm{font-weight:700;flex:1}
     </div>
   </div>
 
+  <!-- ───────── 정답만 따로 넣기 ───────── -->
+  <div id="vKey" class="hide">
+    <div class="card">
+      <div class="sec">정답 채우기</div>
+      <p class="note" id="keyTitle" style="margin:0 0 12px"></p>
+      <div class="drop" id="dropK"><b>정답표 PDF를 끌어다 놓으세요</b>ZIP 도 됩니다 · 자동으로 읽습니다</div>
+      <input type="file" id="fileK" accept=".pdf,.zip,application/pdf,application/zip" class="hide">
+      <div id="zipPickK" class="hide" style="margin-top:12px"></div>
+      <p class="note" id="kStat"></p>
+      <p class="note">직접 입력도 됩니다 — 숫자만 이어서 쓰세요 (모르는 번호는 <code>·</code>)</p>
+      <input type="text" id="keyText" placeholder="1번부터 차례대로 1~4 숫자만">
+      <div id="keyGrid" style="margin-top:12px"></div>
+    </div>
+    <div class="card"><div class="row">
+      <button class="btn" id="keySave">저장</button>
+      <button class="btn ghost" id="keyCancel">취소</button>
+    </div></div>
+  </div>
+
   <!-- ───────── 추가: PDF 투입 ───────── -->
   <div id="vAdd" class="hide">
     <div class="card">
@@ -272,7 +291,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 (()=>{
 "use strict";
 const $=id=>document.getElementById(id);
-const show=v=>['vHome','vAdd','vEdit','vAns','vPlay'].forEach(k=>$(k).classList.toggle('hide',k!==v));
+const show=v=>['vHome','vAdd','vEdit','vAns','vPlay','vKey'].forEach(k=>$(k).classList.toggle('hide',k!==v));
 
 /* ---------- PDF.js 준비 ---------- */
 const pdfjsLib = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
@@ -430,15 +449,22 @@ async function pickOne(hostId,list,num,title){
   return await askPick(hostId, m.length?m:list, title);
 }
 async function routeFile(file,which){
-  if(!isZip(file)) return which==='q'?loadQuestionPdf(file):loadAnswerPdf(file);
-  const stat=$(which==='q'?'qStat':'aStat');
+  if(!isZip(file)) return which==='q'?loadQuestionPdf(file):which==='k'?loadKeyPdf(file):loadAnswerPdf(file);
+  const stat=$(which==='q'?'qStat':which==='k'?'kStat':'aStat');
   if(which==='q') $('qProg').classList.remove('hide');
   stat.textContent='ZIP 푸는 중…';
   let pdfs=[];
   try{ pdfs=await unzipPdfs(file); }
   catch(e){ stat.innerHTML='<span class="warn">ZIP 을 열지 못했습니다: '+e.message+'</span>'; return; }
   if(!pdfs.length){ stat.innerHTML='<span class="warn">ZIP 안에 PDF 가 없습니다.</span>'; return; }
-  const sp=splitQA(pdfs), num=recipeNum();
+  const sp=splitQA(pdfs);
+  let num=recipeNum();
+  if(which==='k'){
+    const m=/^(\d+)/.exec(st.papers[keyFor].title||''); if(m) num=m[1];
+    const f=await pickOne('zipPickK', sp.as.length?sp.as:sp.qs, num, 'ZIP 안에 정답표가 여럿입니다. 하나를 고르세요.');
+    if(f) return loadKeyPdf(f);
+    stat.innerHTML='<span class="warn">ZIP 안에 정답표 PDF 가 없습니다.</span>'; return;
+  }
   if(which==='a'){
     const f=await pickOne('zipPickA', sp.as.length?sp.as:sp.qs, num, 'ZIP 안에 정답표가 여럿입니다. 하나를 고르세요.');
     if(f) return loadAnswerPdf(f);
@@ -593,9 +619,7 @@ function removeBoundary(pi,col,y){
 
 /* ---------- 3) 정답표 ---------- */
 const CIRC={'①':1,'②':2,'③':3,'④':4,'⑤':5};
-async function loadAnswerPdf(file){
-  $('aStat').textContent='읽는 중…';
-  try{
+async function parseAnswerPdf(file){
     const doc=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
     let toks=[];
     for(let i=1;i<=doc.numPages;i++){
@@ -612,13 +636,50 @@ async function loadAnswerPdf(file){
       }
     }
     const arr=[]; pairs.forEach(([q,v])=>{if(!arr[q-1])arr[q-1]=v});
+    if(!arr.filter(Boolean).length) throw new Error('정답 기호(①~④)를 찾지 못했습니다');
+    return arr;
+}
+async function loadAnswerPdf(file){
+  $('aStat').textContent='읽는 중…';
+  try{
+    const arr=await parseAnswerPdf(file);
     const got=arr.filter(Boolean).length;
-    if(!got) throw new Error('정답 기호(①~④)를 찾지 못했습니다');
     work.answers=arr;
     $('ansText').value=arr.map(v=>v||'·').join('');
     $('aStat').innerHTML=`<b>${got}문항</b> 읽었습니다.`+(got<50?' <span class="warn">빠진 번호는 직접 채워주세요.</span>':'');
     paintAnsGrid();
   }catch(e){ $('aStat').innerHTML='<span class="warn">읽지 못했습니다: '+e.message+'</span>'; }
+}
+/* ---------- 저장된 시험지에 정답만 채우기 ---------- */
+let keyFor=null, keyArr=[];
+function missingCount(p){ let m=0; for(let i=0;i<p.n;i++) if(!p.answers[i]) m++; return m; }
+function openKey(id){
+  keyFor=id; const p=st.papers[id];
+  keyArr=(p.answers||[]).slice(0,p.n);
+  $('keyTitle').innerHTML=`<b>${p.title}</b> · ${p.n}문항 · 지금 비어 있는 번호 <b>${missingCount(p)}개</b>`;
+  $('kStat').textContent=''; $('zipPickK').classList.add('hide');
+  syncKeyText(); paintKeyGrid(); show('vKey');
+}
+function syncKeyText(){ $('keyText').value=keyArr.map(v=>v||'·').join(''); }
+function paintKeyGrid(){
+  const n=st.papers[keyFor].n; let h='<table class="ans">';
+  for(let s0=0;s0<n;s0+=10){
+    h+='<tr>'; for(let i=s0;i<Math.min(s0+10,n);i++) h+=`<td class="n">${i+1}</td>`; h+='</tr><tr>';
+    for(let i=s0;i<Math.min(s0+10,n);i++) h+=`<td>${keyArr[i]?'①②③④'[keyArr[i]-1]:'–'}</td>`;
+    h+='</tr>';
+  }
+  $('keyGrid').innerHTML=h+'</table>';
+}
+async function loadKeyPdf(file){
+  $('kStat').textContent='읽는 중…';
+  try{
+    const arr=await parseAnswerPdf(file);
+    const n=st.papers[keyFor].n;
+    keyArr=arr.slice(0,n);
+    const got=keyArr.filter(Boolean).length;
+    $('kStat').innerHTML=`<b>${got}문항</b> 읽었습니다.`+(got<n?' <span class="warn">빠진 번호는 직접 채워주세요.</span>':'');
+    syncKeyText(); paintKeyGrid();
+  }catch(e){ $('kStat').innerHTML='<span class="warn">읽지 못했습니다: '+e.message+'</span>'; }
 }
 function paintAnsGrid(){
   const n=allSegs().length||50, a=work.answers;
@@ -741,12 +802,17 @@ function renderHome(){
   const ks=Object.keys(st.papers);
   $('noPaper').classList.toggle('hide',ks.length>0);
   ks.forEach(k=>{
-    const p=st.papers[k], li=document.createElement('li');
+    const p=st.papers[k], k2id=k, li=document.createElement('li');
     const w=Object.keys(p.stats).filter(i=>p.stats[i].wrong>0&&p.stats[i].streak<2).length;
     li.innerHTML=`<span class="nm">${p.title}</span><span class="pill">${p.n}문항</span>`+
                  (w?`<span class="pill bad">오답 ${w}</span>`:'');
     const b=document.createElement('button'); b.className='btn sm'; b.textContent='풀기';
     b.onclick=()=>startPlay(k); li.appendChild(b);
+    const miss=missingCount(p);
+    if(miss) li.querySelector('.nm').insertAdjacentHTML('afterend',
+      `<span class="pill bad">정답 없음 ${miss}</span>`);
+    const kb=document.createElement('button'); kb.className='btn ghost sm'; kb.textContent='정답 채우기';
+    kb.onclick=()=>openKey(k2id); li.appendChild(kb);
     const r=document.createElement('button'); r.className='btn ghost sm'; r.textContent='기록 지우기';
     r.onclick=()=>{ if(!confirm(`"${p.title}" 의 정답률·오답 기록을 지울까요?\n잘라 둔 문항은 그대로 있습니다.`))return;
       p.stats={}; save(); renderHome(); };
@@ -824,6 +890,19 @@ function exportRecipe(){
 }
 
 /* ---------- 연결 ---------- */
+hookDrop($('dropK'),$('fileK'),f=>routeFile(f,'k'));
+$('keyText').oninput=()=>{
+  const n=st.papers[keyFor].n, t=$('keyText').value;
+  keyArr=[]; let j=0;
+  for(const ch of t){ if(j>=n) break;
+    if(ch>='1'&&ch<='4'){keyArr[j++]=+ch;} else if(ch==='·'||ch==='.'||ch==='-'){keyArr[j++]=0;} }
+  paintKeyGrid();
+};
+$('keySave').onclick=()=>{
+  const p=st.papers[keyFor];
+  p.answers=keyArr.map(v=>v||0); save(); renderHome(); show('vHome');
+};
+$('keyCancel').onclick=()=>{keyFor=null;renderHome();show('vHome')};
 hookDrop($('dropQ'),$('fileQ'),f=>routeFile(f,'q'));
 hookDrop($('dropA'),$('fileA'),f=>routeFile(f,'a'));
 $('goAdd').onclick=()=>{loadRecipeIndex();show('vAdd')};
