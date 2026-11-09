@@ -14,6 +14,27 @@
   "file": "77-basic.json"
  },
  {
+  "id": "75-basic",
+  "title": "75회 기본",
+  "n": 50,
+  "pages": 12,
+  "file": "75-basic.json"
+ },
+ {
+  "id": "73-basic",
+  "title": "73회 기본",
+  "n": 50,
+  "pages": 12,
+  "file": "73-basic.json"
+ },
+ {
+  "id": "71-basic",
+  "title": "71회 기본",
+  "n": 50,
+  "pages": 12,
+  "file": "71-basic.json"
+ },
+ {
   "id": "69-basic",
   "title": "69회 기본",
   "n": 50,
