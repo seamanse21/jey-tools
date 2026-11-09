@@ -5,5 +5,27 @@
   "n": 50,
   "pages": 12,
   "file": "79-basic.json"
+ },
+ {
+  "id": "77-basic",
+  "title": "77회 기본",
+  "n": 50,
+  "pages": 12,
+  "file": "77-basic.json"
+ },
+ {
+  "id": "69-basic",
+  "title": "69회 기본",
+  "n": 50,
+  "pages": 12,
+  "file": "69-basic.json"
+ },
+ {
+  "id": "67-basic",
+  "title": "67회 기본",
+  "n": 50,
+  "pages": 12,
+  "file": "67-basic.json",
+  "warn": "26·28번 경계 2곳이 조금 어긋나 있습니다. 편집 화면에서 확인해 주세요."
  }
 ]
