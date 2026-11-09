@@ -147,7 +147,8 @@ ul.papers .nm{font-weight:700;flex:1}
       <div class="sec">내 시험지</div>
       <ul class="papers" id="paperList"></ul>
       <p class="note" id="noPaper">아직 등록된 시험지가 없습니다.</p>
-      <div class="row" style="margin-top:12px"><button class="btn" id="goAdd">+ 시험지 추가</button></div>
+      <div class="row" style="margin-top:12px"><button class="btn" id="goAdd">+ 시험지 추가</button>
+        <button class="btn ghost hide" id="goMix">전체 섞어 풀기</button></div>
     </div>
     <div class="card">
       <div class="sec">시험지 구하기</div>
@@ -257,13 +258,14 @@ ul.papers .nm{font-weight:700;flex:1}
         <span><select id="mode">
           <option value="practice">연습 (즉시 채점)</option>
           <option value="set20">20문항</option>
-          <option value="full">전체 50문항</option>
+          <option value="full">전체 문항</option>
           <option value="wrong">오답만</option>
         </select></span>
         <span><span class="pill" id="prog">0 / 0</span>
         <span class="pill" id="rate">정답률 –</span>
         <span class="pill bad" id="wrongCnt">오답 0</span></span>
       </div>
+      <p class="note" id="qSrc" style="margin:0 0 8px"></p>
       <img class="qimg" id="qimg" alt="문항">
       <div class="choices" id="choices">
         <button class="ch" data-v="1">①</button><button class="ch" data-v="2">②</button>
@@ -813,34 +815,55 @@ async function batchImport(qs,as){
 function ridTitle(rid){ const r=recipeIndex.find(x=>x.id===rid); return r?r.title:rid.replace('-basic','회 기본'); }
 
 /* ---------- 4) 퀴즈 ---------- */
-let play=null;
+let play=null, mixed=false;
 function paper(){return st.papers[st.cur]}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function poolItems(){
+  if(!mixed){ const n=paper().n, r=[]; for(let i=0;i<n;i++) r.push({pid:st.cur,i}); return r; }
+  const r=[]; Object.keys(st.papers).forEach(pid=>{ const p=st.papers[pid];
+    for(let i=0;i<p.n;i++) r.push({pid,i}); }); return r;
+}
+function statOf(it){ return st.papers[it.pid].stats[it.i]; }
 async function startPlay(id){
-  st.cur=id; save(); show('vPlay');
+  mixed=false; st.cur=id; save(); show('vPlay');
   $('hdrSub').textContent=paper().title;
   $('resultCard').classList.add('hide');
   buildQueue(); nextQ();
 }
+async function startMixed(){
+  const ids=Object.keys(st.papers);
+  if(!ids.length) return;
+  mixed=true; st.cur=ids[0]; save(); show('vPlay');
+  $('hdrSub').textContent=`전체 섞어 풀기 · ${ids.length}개 시험지`;
+  $('resultCard').classList.add('hide');
+  if($('mode').value==='full') $('mode').value='set20';
+  buildQueue(); nextQ();
+}
 function buildQueue(){
-  const p=paper(), m=$('mode').value, all=[...Array(p.n).keys()];
+  const m=$('mode').value, all=poolItems();
   let q=all;
-  if(m==='wrong') q=all.filter(i=>{const s=p.stats[i]; return s&&s.streak<2&&s.wrong>0});
-  if(m==='set20') q=all.sort(()=>Math.random()-.5).slice(0,20).sort((a,b)=>a-b);
+  if(m==='wrong') q=all.filter(it=>{const s=statOf(it); return s&&s.streak<2&&s.wrong>0});
+  else if(m==='set20') q=shuffle(all.slice()).slice(0,20);
   if(!q.length) q=all;
+  q=q.slice();
+  if(mixed) shuffle(q);
+  else if(m!=='set20') q.sort((a,b)=>a.i-b.i);
+  else q.sort((a,b)=>a.i-b.i);
   play={q,i:0,ok:0,done:0,answered:false,log:[]};
   updBar();
 }
 function updBar(){
-  const p=paper();
   $('prog').textContent=`${Math.min(play.i+1,play.q.length)} / ${play.q.length}`;
   $('rate').textContent= play.done?`정답률 ${Math.round(play.ok/play.done*100)}%`:'정답률 –';
-  const w=Object.keys(p.stats).filter(k=>{const s=p.stats[k];return s.wrong>0&&s.streak<2}).length;
+  const w=poolItems().filter(it=>{const s=statOf(it);return s&&s.wrong>0&&s.streak<2}).length;
   $('wrongCnt').textContent='오답 '+w;
+  const it=play.q[Math.min(play.i,play.q.length-1)];
+  $('qSrc').textContent = (mixed&&it)? st.papers[it.pid].title+' · '+(it.i+1)+'번' : '';
 }
 async function nextQ(){
   if(play.i>=play.q.length){ return finish(); }
-  const idx=play.q[play.i];
-  const blob=await dbGet(st.cur+'#'+idx);
+  const it=play.q[play.i];
+  const blob=await dbGet(it.pid+'#'+it.i);
   $('qimg').src= blob? URL.createObjectURL(blob) : '';
   [...$('choices').children].forEach(b=>{b.className='ch';b.disabled=false});
   $('verdict').textContent=''; play.answered=false; updBar();
@@ -848,7 +871,7 @@ async function nextQ(){
 function pick(v){
   if(play.answered) return;
   play.answered=true;
-  const p=paper(), idx=play.q[play.i], ans=p.answers[idx]||0;
+  const it=play.q[play.i], p=st.papers[it.pid], idx=it.i, ans=p.answers[idx]||0;
   const s=p.stats[idx]||(p.stats[idx]={tries:0,wrong:0,streak:0});
   s.tries++;
   const good=(v===ans);
@@ -875,6 +898,8 @@ function renderHome(){
   const ul=$('paperList'); ul.innerHTML='';
   const ks=Object.keys(st.papers);
   $('noPaper').classList.toggle('hide',ks.length>0);
+  $('goMix').classList.toggle('hide',ks.length<2);
+  $('goMix').textContent=`전체 섞어 풀기 · ${ks.length}개 ${ks.reduce((a,k)=>a+st.papers[k].n,0)}문항`;
   ks.forEach(k=>{
     const p=st.papers[k], k2id=k, li=document.createElement('li');
     const w=Object.keys(p.stats).filter(i=>p.stats[i].wrong>0&&p.stats[i].streak<2).length;
@@ -980,6 +1005,7 @@ $('keyCancel').onclick=()=>{keyFor=null;renderHome();show('vHome')};
 hookDrop($('dropQ'),$('fileQ'),f=>routeFile(f,'q'));
 hookDrop($('dropA'),$('fileA'),f=>routeFile(f,'a'));
 $('goAdd').onclick=()=>{loadRecipeIndex();show('vAdd')};
+$('goMix').onclick=()=>startMixed();
 $('addCancel').onclick=$('editCancel').onclick=()=>{work=null;pendingAns=null;renderHome();show('vHome')};
 $('reAuto').onclick=()=>{ if(!work)return;
   work.pages.forEach(p=>{const a=analyze(p.cv);p.div=a.div;p.twoCol=a.twoCol;p.segs=a.segs;p.top=a.top;p.bot=a.bot});
