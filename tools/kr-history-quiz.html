@@ -158,7 +158,7 @@ ul.papers .nm{font-weight:700;flex:1}
     <div class="card">
       <div class="sec">1 · 준비된 경계 고르기</div>
       <select id="recipeSel" style="width:100%"><option value="">직접 자르기</option></select>
-      <p class="note" id="recipeNote">회차를 고르면 문항 경계가 이미 맞춰진 상태로 시작합니다. 목록에 없으면 직접 자르면 됩니다.</p>
+      <p class="note" id="recipeNote">회차를 고르면 문항 경계가 이미 맞춰진 상태로 시작합니다. <b>목록에 없는 회차</b>는 자동으로 자른 뒤 직접 고쳐야 합니다.</p>
     </div>
     <div class="card">
       <div class="sec">2 · 문제지 PDF</div>
@@ -176,6 +176,7 @@ ul.papers .nm{font-weight:700;flex:1}
   <div id="vEdit" class="hide">
     <div class="card">
       <div class="sec">3 · 문항 경계 확인</div>
+      <p class="note hide" id="editSrc" style="margin:0 0 10px"></p>
       <p class="note" style="margin:0 0 10px">
         파란 선이 문항 경계입니다. <b>선을 끌어</b> 옮기고, <b>선을 두 번 눌러</b> 지우고(= 위아래 문항 합치기),
         <b>빈 곳을 눌러</b> 새 경계를 넣습니다. 번호는 자동으로 다시 매겨집니다.
@@ -190,7 +191,7 @@ ul.papers .nm{font-weight:700;flex:1}
     </div>
     <div id="pages"></div>
     <div class="card"><div class="row">
-      <button class="btn" id="toAns">다음 · 정답 입력 →</button>
+      <button class="btn" id="toAns">경계 확인 끝 · 정답 입력으로 →</button>
       <button class="btn ghost" id="editCancel">취소</button>
     </div></div>
   </div>
@@ -451,6 +452,11 @@ async function loadQuestionPdf(file){
     if(rec && applyRecipe(rec)){ used=true; work.name=rec.title||work.name; }
     else alert('고른 회차와 쪽 수가 다릅니다. 자동 분할로 진행합니다.'); }
   if(!used) mergeToTarget(work.pages,parseInt($('targetN').value)||50);
+  const es=$('editSrc'); es.classList.remove('hide');
+  es.innerHTML = used
+    ? '<b style="color:var(--ok)">준비된 경계</b>를 적용했습니다. 그대로 두고 다음으로 넘어가면 됩니다.'
+    : '<span class="warn"><b>자동으로 자른 결과입니다.</b> 목록에 없는 회차라 경계가 어긋난 곳이 있을 수 있습니다 — 한 번 훑어보고 고쳐 주세요. '
+      + '고친 뒤 <b>레시피 내보내기</b>로 받은 파일을 보내 주시면 목록에 넣어 드립니다.</span>';
   $('qStat').textContent='';$('qProg').classList.add('hide');
   renderEditor(); show('vEdit');
 }
