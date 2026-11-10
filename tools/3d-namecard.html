@@ -2549,6 +2549,20 @@ details[open] summary{margin-bottom:8px}
     </div>
 
     <div class="panel">
+      <h2>제작 이력</h2>
+      <p class="note" id="hNone" style="margin:0 0 10px">아직 저장한 이력이 없습니다. 아래 <b>지금 상태 저장</b>을 누르거나 STL을 내려받으면 쌓입니다.</p>
+      <div id="hist" style="display:grid;gap:8px"></div>
+      <div class="row" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost" id="hSave" type="button">지금 상태 저장</button>
+        <button class="btn ghost" id="hClear" type="button">전체 지우기</button>
+      </div>
+      <p class="note" style="margin:10px 0 0">
+        명단·회사 정보·설정·색을 통째로 담아 둡니다. 불러오면 그때 상태로 되돌아갑니다.
+        이 브라우저 안에만 저장되고 어디에도 올라가지 않습니다.
+      </p>
+    </div>
+
+    <div class="panel">
       <details>
         <summary>회사 공통 정보</summary>
         <div class="form" style="grid-template-columns:minmax(0,1fr)">
@@ -3065,9 +3079,58 @@ async function exportPeople(list){
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
     const fname=list.length>1?`SECO_3D명함_${list.length}명.zip`:`SECO_3D명함_${list[0].name||'이름없음'}.zip`;
     saveBlob(blob,fname);
-    status(`저장됨: ${fname} · 삼각형 ${tris.toLocaleString()}개 · ${(blob.size/1048576).toFixed(1)}MB`);
+    histAdd();
+    status(`저장됨: ${fname} · 삼각형 ${tris.toLocaleString()}개 · ${(blob.size/1048576).toFixed(1)}MB · 제작 이력에 남겼습니다`);
   }catch(e){status('모델 생성 오류: '+e.message,true)}
   finally{btns.forEach(b=>b.disabled=false)}
+}
+
+/* ---------- 제작 이력 ---------- */
+const HKEY='seco3dcard.history.v1';
+function histLoad(){ try{ return JSON.parse(localStorage.getItem(HKEY)||'[]'); }catch(e){ return []; } }
+function histSave(l){ try{ localStorage.setItem(HKEY,JSON.stringify(l.slice(0,30))); }catch(e){} }
+function histLabel(){
+  const ns=st.people.map(p=>(p.name||'').trim()).filter(Boolean);
+  if(!ns.length) return '(이름 없음)';
+  return ns.length===1? ns[0] : ns[0]+' 외 '+(ns.length-1)+'명';
+}
+function histAdd(){
+  const label=histLabel();
+  const snap={company:st.company,people:st.people,settings:st.settings,colors:st.colors};
+  const list=histLoad().filter(e=>e.label!==label);
+  list.unshift({label, at:Date.now(), n:st.people.length,
+    orient:st.settings.orient, scale:st.settings.scale,
+    snap:JSON.parse(JSON.stringify(snap))});
+  histSave(list); renderHist();
+}
+function fmtDate(t){ const d=new Date(t);
+  return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0'); }
+function renderHist(){
+  const list=histLoad(), host=$('hist'); host.innerHTML='';
+  $('hNone').hidden=list.length>0;
+  $('hClear').disabled=!list.length;
+  list.forEach((e,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);border-radius:9px;padding:9px 11px';
+    const nm=document.createElement('div'); nm.style.cssText='flex:1;min-width:0';
+    nm.innerHTML='<b style="word-break:break-all">'+e.label+'</b>'
+      +'<div class="note" style="margin:2px 0 0">'+fmtDate(e.at)+' · '+e.n+'명 · '
+      +(e.orient==='port'?'세로':'가로')+' · '+(e.scale||'1.5')+'배</div>';
+    const b1=document.createElement('button'); b1.className='btn ghost'; b1.type='button'; b1.textContent='불러오기';
+    b1.onclick=()=>{
+      const sn=JSON.parse(JSON.stringify(e.snap));
+      st.company=Object.assign({},defaults.company,sn.company);
+      st.people=sn.people; st.sel=(sn.people[0]||{}).id||'p1';
+      st.settings=Object.assign({},defaults.settings,sn.settings);
+      st.settings.qr=Object.assign({},defaults.settings.qr,sn.settings&&sn.settings.qr);
+      st.colors=Object.assign({},defaults.colors,sn.colors);
+      save(); syncControls(); renderAll();
+      status('불러왔습니다 — '+e.label);
+    };
+    const b2=document.createElement('button'); b2.className='btn ghost'; b2.type='button'; b2.textContent='삭제';
+    b2.onclick=()=>{ const l=histLoad(); l.splice(i,1); histSave(l); renderHist(); };
+    row.append(nm,b1,b2); host.appendChild(row);
+  });
 }
 
 /* ---------- UI ---------- */
@@ -3121,6 +3184,16 @@ $('goBulk').onclick=()=>{$('bulkPanel').scrollIntoView({behavior:'smooth',block:
 $('bulk').addEventListener('input',()=>{const n=$('bulk').value.split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!/^이름[\t,]/.test(l)).length;$('bulkCount').textContent=n?`${n}명 인식됨`:''});
 $('expOne').onclick=()=>exportPeople([cur()]);
 $('expAll').onclick=()=>exportPeople(st.people.slice());
+function syncControls(){
+  Object.entries(cf).forEach(([k,id])=>{$(id).value=st.company[k]||''});
+  Object.entries(sf).forEach(([k,id])=>{$(id).value=st.settings[k]});
+  ['mobile','tel','email','team','fax','addr'].forEach(k=>{$('q_'+k).checked=!!st.settings.qr[k]});
+  $('q_showTitle').checked=!!st.settings.showTitle;
+  Object.entries(cc).forEach(([k,id])=>{$(id).value=st.colors[k]});
+}
+$('hSave').onclick=()=>{histAdd();status('제작 이력에 저장했습니다 — '+histLabel())};
+$('hClear').onclick=()=>{if(!histLoad().length)return;histSave([]);renderHist();status('제작 이력을 비웠습니다')};
+renderHist();
 function renderAll(){delArmed=null;$('delConfirm').hidden=true;renderList();fillForm();schedulePreview()}
 window.addEventListener('resize',schedulePreview);
 renderAll();
