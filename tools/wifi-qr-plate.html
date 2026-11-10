@@ -2430,6 +2430,19 @@ ol.steps code{font-family:var(--f-mono);font-size:.85em;background:var(--bg);pad
         <p class="note" id="rawwarn" hidden></p>
         <p class="note">연결이 안 되면 이 줄의 이름(<code>S:</code>)이 공유기 목록에 보이는 이름과 <b>대소문자·공백까지</b> 같은지 확인하세요. 비밀번호는 위 "보기"를 누르면 함께 보입니다.</p>
       </div>
+      <div class="panel" style="gap:10px">
+        <div class="sec">연결이 안 될 때 — 현장에서 가려내기</div>
+        <p class="note" style="margin:0">
+          출력하기 전에 <b>이 화면을 폰으로 스캔</b>해 보세요. 어느 것이 연결되는지 보면 원인을 알 수 있습니다.
+          연결되는 것을 찾으면 위 설정을 거기에 맞춰 놓고 출력하세요.
+        </p>
+        <div id="tests" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px"></div>
+        <p class="note" style="margin:0">
+          <b>B가 되면</b> 비밀번호가 16진수로 읽힌 것 · <b>C가 되면</b> 공유기가 WPA3 전용 ·
+          <b>D가 되면</b> 이름을 숨긴 네트워크입니다. <b>전부 안 되면</b> 이름이 실제와 다르거나,
+          접속 후 로그인 창이 뜨는 방식(게스트 와이파이)일 수 있습니다.
+        </p>
+      </div>
       <div class="actions">
         <button class="btn" id="dl" type="button">STL 묶음 받기 (.zip)</button>
         <button class="btn sec2" id="dlpng" type="button">QR 이미지만 (.png)</button>
@@ -2466,16 +2479,24 @@ let model=null, qrMatrix=null;
 $("eye").onclick=()=>{const p=$("pass");p.type=p.type==="password"?"text":"password";$("eye").textContent=p.type==="password"?"보기":"숨김";showRaw();};
 
 function esc(s){return s.replace(/([\\;,:"])/g,"\\$1");}
+// 숫자와 A~F 로만 이루어진 값은 읽는 쪽에서 16진수로 해석해 버린다.
+// (예: 비밀번호 12345678 → 바이트 0x12 0x34 0x56 0x78 로 접속 시도 → 실패)
+// 규격대로 따옴표로 감싸 글자 그대로임을 알린다.
+function looksHex(v){ return /^[0-9A-Fa-f]+$/.test(v); }
+function wrapHex(v){ return looksHex(v) ? '"'+v+'"' : esc(v); }
 function trimmedInputs(){
   const rs=$("ssid").value, rp=$("pass").value;
   const ssid=rs.trim(), pw=rp.trim();
   return {ssid,pw,trimmed:(ssid!==rs)||(pw!==rp&&$("sec").value!=="nopass")};
 }
-function wifiString(){
-  const sec=$("sec").value, {ssid,pw}=trimmedInputs();
-  let s="WIFI:T:"+sec+";S:"+esc(ssid)+";";
-  if(sec!=="nopass") s+="P:"+esc(pw)+";";
-  if($("hidden").checked) s+="H:true;";
+function wifiString(o){
+  o=o||{};
+  const sec=o.sec||$("sec").value, {ssid,pw}=trimmedInputs();
+  const q = o.quote===undefined ? true : o.quote;
+  const hid = o.hidden===undefined ? $("hidden").checked : o.hidden;
+  let s="WIFI:T:"+sec+";S:"+(q?wrapHex(ssid):esc(ssid))+";";
+  if(sec!=="nopass") s+="P:"+(q?wrapHex(pw):esc(pw))+";";
+  if(hid) s+="H:true;";
   return s+";";
 }
 function makeQR(text,ecl){
@@ -2660,12 +2681,50 @@ try{const c=JSON.parse(localStorage.getItem(CKEY)||"null");
 function showRaw(){
   const t=trimmedInputs(); let txt=wifiString();
   if($("pass").type==="password" && $("sec").value!=="nopass" && t.pw){
-    txt=txt.replace("P:"+esc(t.pw)+";","P:"+"•".repeat(Math.min(12,t.pw.length))+";");
+    txt=txt.replace("P:"+wrapHex(t.pw)+";","P:"+"•".repeat(Math.min(12,t.pw.length))+";");
   }
   $("raw").textContent=txt;
   const w=$("rawwarn");
   w.hidden=!t.trimmed;
-  if(t.trimmed) w.innerHTML='<b style="color:var(--warn)">앞뒤 공백을 지우고 QR을 만들었습니다.</b> 공백이 비밀번호의 일부라면 지금 QR은 연결되지 않습니다.';
+  const msgs=[];
+  if(t.trimmed) msgs.push('<b style="color:var(--warn)">앞뒤 공백을 지우고 QR을 만들었습니다.</b> 공백이 비밀번호의 일부라면 지금 QR은 연결되지 않습니다.');
+  if(looksHex(t.pw)&&$("sec").value!=="nopass") msgs.push('비밀번호가 숫자·A~F 로만 되어 있어 <b>따옴표로 감쌌습니다</b>. 이렇게 하지 않으면 폰이 16진수로 잘못 읽어 연결에 실패합니다.');
+  if(looksHex(t.ssid)) msgs.push('이름이 숫자·A~F 로만 되어 있어 따옴표로 감쌌습니다.');
+  w.hidden=!msgs.length; w.innerHTML=msgs.join('<br>');
+  drawTests();
+}
+/* ---------- 현장 진단용 QR ---------- */
+function qrToCanvas(cv,text,px){
+  let m; try{ m=makeQR(text,"M"); }catch(e){ return false; }
+  const n=m.length, s=Math.max(2,Math.floor(px/(n+8))), pad=s*4, size=n*s+pad*2;
+  cv.width=size; cv.height=size;
+  const g=cv.getContext("2d");
+  g.fillStyle="#fff"; g.fillRect(0,0,size,size); g.fillStyle="#000";
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(m[r][c]) g.fillRect(pad+c*s,pad+r*s,s,s);
+  return true;
+}
+function drawTests(){
+  const host=$("tests"); if(!host) return;
+  const sec=$("sec").value;
+  const list=[
+    ["A · 지금 설정 그대로", {}],
+    ["B · 따옴표 없이", {quote:false}],
+    ["C · WPA3 (SAE)", {sec:"SAE"}],
+    ["D · 숨김 네트워크로", {hidden:true}],
+  ];
+  if(sec==="SAE"){ list[2]=["C · WPA/WPA2 로", {sec:"WPA"}]; }
+  host.innerHTML="";
+  list.forEach(([label,opt])=>{
+    const box=document.createElement("div");
+    box.style.cssText="text-align:center;min-width:0";
+    const cv=document.createElement("canvas");
+    cv.style.cssText="width:100%;max-width:170px;height:auto;image-rendering:pixelated;border:1px solid var(--line);border-radius:8px;background:#fff";
+    if(!qrToCanvas(cv,wifiString(opt),340)) return;
+    const t=document.createElement("div");
+    t.className="note"; t.style.cssText="margin:6px 0 0;font-weight:600";
+    t.textContent=label;
+    box.appendChild(cv); box.appendChild(t); host.appendChild(box);
+  });
 }
 function update(){
   $("vW").textContent=$("W").value+" mm";$("vT").textContent=(+$("T").value).toFixed(1)+" mm";$("vR").textContent=(+$("R").value).toFixed(1)+" mm";
