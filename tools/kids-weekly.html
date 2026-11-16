@@ -647,9 +647,14 @@ function fit(){
   });
 }
 window.addEventListener("resize", fit);
+/* CSS columns 는 넘친 글이 세로가 아니라 '다음 단'으로 밀려나므로 가로도 함께 본다 */
+function flowed(e){ return e.scrollHeight>e.clientHeight+2 || e.scrollWidth>e.clientWidth+2; }
 function checkOverflow(){
   let over=false;
-  PAGES.forEach(p=>{ p.page.querySelectorAll('[data-flow]').forEach(e=>{ if(e.scrollHeight>e.clientHeight+2) over=true; }); });
+  PAGES.forEach(p=>{
+    if(p.wrap.classList.contains("off")) return;
+    p.page.querySelectorAll('[data-flow]').forEach(e=>{ if(flowed(e)) over=true; });
+  });
   $("warn").classList.toggle("on", over);
 }
 
@@ -657,10 +662,10 @@ function autoFit(){
   PAGES.forEach(p=>{
     if(p.tag.kind!=="art") return;
     const flow=p.page.querySelector('[data-flow]'); if(!flow) return;
-    let best=9;
-    for(let v=9; v<=11.4; v+=0.2){
+    let best=8;
+    for(let v=8; v<=11.4; v+=0.2){
       p.page.style.setProperty("--fs", v.toFixed(1)+"pt");
-      if(flow.scrollHeight<=flow.clientHeight+1) best=v; else break;
+      if(!flowed(flow)) best=v; else break;
     }
     p.page.style.setProperty("--fs", best.toFixed(1)+"pt");
     S.days[p.tag.i].fs=Math.round(best*10)/10;
