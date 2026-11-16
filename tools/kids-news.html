@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>하루한장 키즈신문</title>
+<style>
+:root{
+  --bg:#f3f2ef; --fg:#1c1c1a; --muted:#6b6b66; --card:#fff; --line:#e0dfdb; --accent:#c4145b;
+  --field:#fff; --fieldline:#d6d5d1;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#191918; --fg:#f0efec; --muted:#9a9995; --card:#222221; --line:#333331; --accent:#ec3d82;
+    --field:#2b2b29; --fieldline:#3d3d3a;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",system-ui,sans-serif;
+  font-size:15px;line-height:1.55}
+
+/* ================= 화면 레이아웃 ================= */
+.app{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:0;min-height:100vh}
+.editor{border-right:1px solid var(--line);background:var(--card);padding:22px 20px 90px;
+  max-height:100vh;overflow-y:auto}
+.stage{padding:22px 20px 60px;min-width:0}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .editor{border-right:none;border-bottom:1px solid var(--line);max-height:none;overflow:visible;padding-bottom:28px}
+  .stage{padding:16px 12px 70px}
+}
+
+h1.apptitle{font-size:1.35rem;margin:0 0 4px;letter-spacing:-.02em}
+p.sub{color:var(--muted);font-size:.86rem;margin:0 0 16px;line-height:1.5}
+
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+button{font:inherit;font-size:.86rem;padding:9px 13px;border-radius:9px;border:1px solid var(--fieldline);
+  background:var(--field);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{filter:brightness(1.08)}
+button.tiny{font-size:.76rem;padding:5px 9px;border-radius:7px}
+
+details{border:1px solid var(--line);border-radius:11px;margin-bottom:10px;background:var(--card)}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;padding:11px 13px;font-weight:600;font-size:.9rem;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸";display:inline-block;width:1em;color:var(--muted)}
+details[open] summary::before{content:"▾"}
+.fields{padding:2px 13px 0}
+label{display:block;font-size:.76rem;color:var(--muted);margin:10px 0 4px;letter-spacing:.01em}
+input[type=text],input[type=date],textarea,select{width:100%;font:inherit;font-size:.88rem;
+  padding:8px 10px;border-radius:8px;border:1px solid var(--fieldline);background:var(--field);color:var(--fg)}
+textarea{resize:vertical;line-height:1.6}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:.74rem;color:var(--muted);margin:6px 0 0;line-height:1.5}
+.chk{display:flex;align-items:center;gap:7px;font-size:.84rem;color:var(--fg);margin-top:12px}
+.chk input{width:auto;margin:0}
+
+/* 소재 모음 */
+.bank{max-height:320px;overflow-y:auto;margin-top:10px;border-top:1px solid var(--line)}
+.bankitem{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.bankitem .bt{flex:1;min-width:0;font-size:.84rem;line-height:1.4}
+.bankitem .bt small{display:block;color:var(--muted);font-size:.73rem;margin-top:2px}
+
+/* 보관함 */
+.saved{margin-top:8px}
+.saveditem{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.84rem}
+.saveditem .si{flex:1;min-width:0}
+.saveditem .si small{display:block;color:var(--muted);font-size:.73rem;margin-top:2px}
+.empty{color:var(--muted);font-size:.8rem;padding:14px 0;line-height:1.6}
+
+/* 미리보기 상단 바 */
+.stagebar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:14px;font-size:.82rem;color:var(--muted)}
+.stagebar .seg{display:flex;align-items:center;gap:7px}
+.stagebar input[type=range]{width:110px}
+.warn{display:none;background:#fdecef;color:#9b1239;border:1px solid #f6c6d2;
+  padding:7px 11px;border-radius:8px;font-size:.78rem;font-weight:600}
+.warn.on{display:block}
+
+.scaler{position:relative;width:100%}
+.scaler .paper{position:absolute;top:0;left:0;transform-origin:top left}
+
+/* ================= 신문 한 장 (A4) ================= */
+.paper{width:210mm;height:297mm;background:#fff;color:#141412;padding:11mm 11mm 9mm;
+  box-shadow:0 2px 18px rgba(0,0,0,.18);display:flex;flex-direction:column;
+  font-family:"Apple SD Gothic Neo","Nanum Gothic","Malgun Gothic","맑은 고딕",sans-serif;
+  --fs:11pt}
+.serif{font-family:"AppleMyungjo","Apple SD Gothic Neo","Nanum Myeongjo","Batang","바탕",serif}
+
+.masthead{border-bottom:3px double #141412;padding-bottom:3mm;margin-bottom:4mm;flex:0 0 auto}
+.mh-top{display:flex;justify-content:space-between;font-size:8.5pt;color:#55544f;letter-spacing:.02em}
+.paper h1.title{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;
+  font-size:34pt;font-weight:800;text-align:center;margin:1mm 0 2mm;letter-spacing:.06em;line-height:1.1}
+.mh-bot{display:flex;justify-content:space-between;align-items:center;font-size:8.5pt;color:#333;
+  border-top:1px solid #141412;padding-top:1.6mm}
+.mh-bot .tag{letter-spacing:.3em;color:#7a7974;font-size:7.5pt}
+
+.grid{flex:1 1 auto;min-height:0;display:grid;
+  grid-template-columns:minmax(0,2.05fr) minmax(0,1fr);
+  grid-template-rows:minmax(0,1.5fr) minmax(0,1fr);
+  grid-template-areas:"lead side" "subs side";
+  gap:4mm 5mm}
+.grid>.lead{grid-area:lead;min-width:0;min-height:0;border-right:1px solid #ddd9d0;padding-right:5mm}
+.grid>.side{grid-area:side;min-width:0;min-height:0;display:flex;flex-direction:column;gap:4mm}
+.grid>.subs{grid-area:subs;min-width:0;min-height:0;display:grid;
+  grid-template-columns:1fr 1fr;gap:4mm;border-top:1px solid #141412;padding-top:3mm;padding-right:5mm;
+  border-right:1px solid #ddd9d0}
+
+.paper h2{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;
+  font-weight:800;line-height:1.25;margin:0 0 2.5mm;letter-spacing:-.01em}
+.lead h2{font-size:21pt}
+.subs h2{font-size:12.5pt;margin-bottom:2mm}
+.paper .body{font-size:var(--fs);line-height:1.78;text-align:justify;word-break:keep-all;white-space:pre-wrap}
+.subs .body{font-size:calc(var(--fs) - 1pt);line-height:1.7;text-align:left}
+.flow{overflow:hidden}
+
+.figure{margin:0 0 3mm}
+.figure img{width:100%;max-height:62mm;object-fit:cover;display:block;background:#eee}
+.figure .draw{height:46mm;border:1.5px dashed #b9b6ad;display:flex;align-items:center;justify-content:center;
+  color:#9c9a92;font-size:9pt;letter-spacing:.05em}
+.figure .cap{font-size:8pt;color:#55544f;margin-top:1.3mm;line-height:1.45}
+.figure.hide{display:none}
+
+.box{border:1px solid #141412;padding:3mm 3.2mm;min-width:0}
+.box h3{margin:0 0 2mm;font-size:9pt;letter-spacing:.14em;color:#141412;
+  border-bottom:1px solid #d8d5cc;padding-bottom:1.4mm;font-weight:700}
+.box.word .w{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;
+  font-size:15pt;font-weight:800;margin:0 0 1.4mm}
+.box.word .m{font-size:9pt;line-height:1.65;margin:0;word-break:keep-all}
+.box.think{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.box.think ol{margin:0;padding-left:4.5mm;font-size:9pt;line-height:1.6}
+.box.think ol li{margin-bottom:1.5mm;word-break:keep-all}
+.box.think .lines{flex:1 1 auto;min-height:12mm;margin-top:1.5mm}
+
+.lines{background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(7mm - 1px),#cfccc3 calc(7mm - 1px),#cfccc3 7mm);
+  background-position:0 0}
+.lines.l3{height:21mm}
+
+.diary{flex:0 0 auto;border-top:3px double #141412;margin-top:4mm;padding-top:2.5mm}
+.diary h3{margin:0 0 1.5mm;font-size:9pt;letter-spacing:.14em;font-weight:700}
+.diary .foot{display:flex;justify-content:space-between;font-size:7.5pt;color:#7a7974;margin-top:1.5mm}
+
+/* 도구 모음으로 돌아가기 (jey-tools) */
+.jey-back{position:fixed;left:12px;bottom:12px;z-index:9999;font-size:12px;opacity:.5;
+  text-decoration:none;color:inherit;padding:6px 10px;border-radius:8px;
+  background:rgba(128,128,128,.14);backdrop-filter:blur(4px)}
+.jey-back:hover,.jey-back:focus-visible{opacity:1}
+
+/* ================= 인쇄 ================= */
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff}
+  .jey-back,.editor,.stagebar{display:none !important}
+  .app{display:block}
+  .stage{padding:0}
+  .scaler{height:auto !important}
+  .scaler .paper{position:static;transform:none !important;box-shadow:none;margin:0}
+  .paper{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<a class="jey-back" href="./index.html">← Jey Tools</a>
+
+<div class="app">
+
+  <!-- ===================== 편집 패널 ===================== -->
+  <aside class="editor">
+    <h1 class="apptitle">📰 하루한장 키즈신문</h1>
+    <p class="sub">하루 한 장짜리 어린이 신문을 만들어 A4로 인쇄합니다. 소재 모음에서 골라 넣고, 빈칸은 아이가 직접 채우게 두면 됩니다.</p>
+
+    <div class="btnrow">
+      <button class="primary" id="btnPrint">🖨 인쇄 / PDF 저장</button>
+      <button id="btnSave">보관함에 저장</button>
+      <button id="btnNew">새 호 만들기</button>
+    </div>
+
+    <details open>
+      <summary>신문 머리</summary>
+      <div class="fields">
+        <div class="two">
+          <div><label for="fPaper">신문 이름</label><input type="text" id="fPaper" maxlength="14"></div>
+          <div><label for="fReporter">기자 이름</label><input type="text" id="fReporter" maxlength="12"></div>
+        </div>
+        <div class="two">
+          <div><label for="fDate">날짜</label><input type="date" id="fDate"></div>
+          <div><label for="fIssue">제 몇 호</label><input type="text" id="fIssue" inputmode="numeric"></div>
+        </div>
+        <label for="fWeather">날씨</label>
+        <select id="fWeather">
+          <option>☀️ 맑음</option><option>⛅ 구름 조금</option><option>☁️ 흐림</option>
+          <option>🌧 비</option><option>❄️ 눈</option><option>🌬 바람</option><option>🌫 안개</option>
+        </select>
+      </div>
+    </details>
+
+    <details open>
+      <summary>머리기사</summary>
+      <div class="fields">
+        <label for="fLeadT">제목</label>
+        <input type="text" id="fLeadT" maxlength="40">
+        <label for="fLeadB">본문</label>
+        <textarea id="fLeadB" rows="7"></textarea>
+        <label for="fImg">사진 넣기 (선택)</label>
+        <input type="file" id="fImg" accept="image/*">
+        <p class="hint">사진은 이 브라우저 안에서만 쓰이고 어디에도 올라가지 않습니다.</p>
+        <label for="fCap">사진 설명 / 그림칸 안내문</label>
+        <input type="text" id="fCap" maxlength="60">
+        <label class="chk"><input type="checkbox" id="fDraw" checked> 사진이 없으면 <b>그림 그리는 칸</b>으로 둡니다</label>
+        <button class="tiny" id="btnImgClear" style="margin-top:10px">사진 지우기</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>작은 기사 두 개</summary>
+      <div class="fields">
+        <label for="fS1T">왼쪽 기사 제목</label>
+        <input type="text" id="fS1T" maxlength="30">
+        <label for="fS1B">왼쪽 기사 본문</label>
+        <textarea id="fS1B" rows="4"></textarea>
+        <label for="fS2T">오른쪽 기사 제목</label>
+        <input type="text" id="fS2T" maxlength="30">
+        <label for="fS2B">오른쪽 기사 본문</label>
+        <textarea id="fS2B" rows="4"></textarea>
+      </div>
+    </details>
+
+    <details>
+      <summary>오늘의 낱말 · 생각해 보기</summary>
+      <div class="fields">
+        <div class="two">
+          <div><label for="fW">낱말</label><input type="text" id="fW" maxlength="12"></div>
+          <div><label for="fQ1">질문 1</label><input type="text" id="fQ1" maxlength="60"></div>
+        </div>
+        <label for="fM">낱말 뜻</label>
+        <textarea id="fM" rows="3"></textarea>
+        <label for="fQ2">질문 2</label>
+        <input type="text" id="fQ2" maxlength="60">
+        <label for="fDiary">아래 칸 제목</label>
+        <input type="text" id="fDiary" maxlength="24">
+      </div>
+    </details>
+
+    <details>
+      <summary>소재 모음 (클릭해서 넣기)</summary>
+      <div class="fields">
+        <input type="text" id="fSearch" placeholder="낱말로 찾기 (예: 달, 꿀벌, 한글)">
+        <p class="hint">[머리]는 머리기사·낱말·질문까지 한 번에 채우고, [작은]은 작은 기사 칸에 넣습니다.</p>
+        <div class="bank" id="bank"></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>보관함</summary>
+      <div class="fields">
+        <div class="saved" id="saved"></div>
+      </div>
+    </details>
+  </aside>
+
+  <!-- ===================== 미리보기 ===================== -->
+  <main class="stage">
+    <div class="stagebar">
+      <div class="seg"><label for="fFs" style="margin:0">본문 크기</label>
+        <input type="range" id="fFs" min="9" max="14" step="0.5" value="11">
+        <span id="fsVal">11pt</span></div>
+      <div class="seg"><button class="tiny" id="btnRead">🔊 머리기사 읽어주기</button></div>
+      <div class="warn" id="warn">내용이 한 장을 넘습니다 — 본문 크기를 줄이거나 문장을 덜어 주세요</div>
+    </div>
+
+    <div class="scaler" id="scaler">
+      <div class="paper" id="paper">
+        <header class="masthead">
+          <div class="mh-top"><span id="pvDate"></span><span id="pvIssue"></span></div>
+          <h1 class="title" id="pvPaper"></h1>
+          <div class="mh-bot">
+            <span id="pvWeather"></span>
+            <span class="tag">하루 한 장 어린이 신문</span>
+            <span id="pvReporter"></span>
+          </div>
+        </header>
+
+        <div class="grid">
+          <section class="lead flow" id="leadFlow">
+            <h2 id="pvLeadT"></h2>
+            <div class="figure" id="pvFig">
+              <img id="pvImg" alt="" style="display:none">
+              <div class="draw" id="pvDraw">여기에 오늘의 그림을 그려요</div>
+              <div class="cap" id="pvCap"></div>
+            </div>
+            <div class="body" id="pvLeadB"></div>
+          </section>
+
+          <aside class="side">
+            <div class="box word">
+              <h3>오늘의 낱말</h3>
+              <p class="w" id="pvW"></p>
+              <p class="m" id="pvM"></p>
+            </div>
+            <div class="box think">
+              <h3>생각해 보기</h3>
+              <ol><li id="pvQ1"></li><li id="pvQ2"></li></ol>
+              <div class="lines"></div>
+            </div>
+          </aside>
+
+          <div class="subs">
+            <section class="flow" id="s1Flow"><h2 id="pvS1T"></h2><div class="body" id="pvS1B"></div></section>
+            <section class="flow" id="s2Flow"><h2 id="pvS2T"></h2><div class="body" id="pvS2B"></div></section>
+          </div>
+        </div>
+
+        <footer class="diary">
+          <h3 id="pvDiary">오늘 읽고 한 줄</h3>
+          <div class="lines l3"></div>
+          <div class="foot"><span id="pvFoot1"></span><span>하루한장 키즈신문</span></div>
+        </footer>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   소재 모음 — 날짜와 상관없이 쓸 수 있는 초등 눈높이 읽을거리
+   t 제목 / b 본문 / w 낱말 / m 뜻 / q1,q2 생각해 보기
+   ============================================================ */
+const BANK = [
+{t:"꿀 한 숟갈에 꽃 수천 송이",
+ b:"꿀벌 한 마리가 평생 모으는 꿀은 작은 숟가락 하나도 채우기 어렵습니다. 그래서 우리가 먹는 꿀 한 병에는 수많은 벌이 수백만 송이의 꽃을 찾아다닌 시간이 담겨 있습니다. 꿀벌은 꽃가루를 옮겨 주기 때문에 사과와 딸기 같은 열매도 꿀벌 덕분에 열립니다. 꿀벌이 줄어들면 꿀만 사라지는 게 아니라 우리 밥상도 함께 줄어듭니다.",
+ w:"꽃가루받이", m:"꽃가루가 다른 꽃으로 옮겨져 열매가 맺히는 일. 벌과 나비가 이 일을 돕는다.",
+ q1:"꿀벌이 모두 사라지면 내 밥상에서 어떤 음식이 먼저 사라질까요?", q2:"우리 동네에서 꿀벌이 좋아할 꽃을 어디에 심으면 좋을까요?"},
+{t:"달은 늘 같은 얼굴만 보여 준다",
+ b:"달은 지구에서 약 38만 킬로미터 떨어져 있습니다. 달도 스스로 돌지만 지구를 한 바퀴 도는 시간과 제자리에서 한 바퀴 도는 시간이 똑같아서, 지구에서는 언제나 달의 같은 면만 보입니다. 사람이 달의 뒷면을 처음 본 것은 우주선이 달 뒤로 날아간 뒤였습니다. 달에는 공기가 없어서 소리가 전해지지 않고 하늘은 낮에도 검습니다.",
+ w:"자전", m:"행성이나 위성이 제자리에서 스스로 한 바퀴 도는 일.",
+ q1:"달의 뒷면에는 무엇이 있을 것 같나요?", q2:"공기가 없는 달에서는 어떤 일이 불편할까요?"},
+{t:"심장은 하루에 십만 번 뛴다",
+ b:"사람의 심장은 1분에 예순 번에서 여든 번쯤 뛰고, 하루를 모으면 약 십만 번입니다. 심장은 주먹만 한 크기지만 한 번 뛸 때마다 온몸으로 피를 밀어 보냅니다. 우리가 잠든 밤에도 심장은 쉬지 않고 일합니다. 뛰거나 놀라면 몸이 더 많은 피를 필요로 해서 심장이 더 빨리 뜁니다.",
+ w:"맥박", m:"심장이 뛸 때 혈관에서 느껴지는 울림. 손목이나 목에서 짚어 볼 수 있다.",
+ q1:"가만히 앉아 있을 때와 뛴 다음의 맥박은 얼마나 다를까요?", q2:"심장을 튼튼하게 하려면 무엇을 하면 좋을까요?"},
+{t:"아기 때는 뼈가 더 많았어요",
+ b:"어른 몸의 뼈는 206개입니다. 그런데 갓 태어난 아기의 뼈는 300개가 넘습니다. 자라면서 작은 뼈들이 서로 붙어 하나가 되기 때문에 개수가 줄어듭니다. 뼈는 몸을 세워 주고 뇌와 심장처럼 중요한 곳을 지켜 주는 단단한 울타리입니다.",
+ w:"관절", m:"뼈와 뼈가 만나 구부러지는 곳. 무릎과 팔꿈치가 관절이다.",
+ q1:"내 몸에서 구부러지는 곳을 몇 군데 찾을 수 있나요?", q2:"뼈가 하나도 없다면 몸은 어떤 모습일까요?"},
+{t:"빛은 1초에 지구를 일곱 바퀴 반",
+ b:"빛은 1초에 약 30만 킬로미터를 달립니다. 지구 둘레가 약 4만 킬로미터니까 1초에 지구를 일곱 바퀴 반 도는 셈입니다. 세상에서 빛보다 빠른 것은 없습니다. 멀리 있는 별빛은 아주 오래전에 출발한 빛이어서, 우리는 별의 옛 모습을 보고 있는 것입니다.",
+ w:"광년", m:"빛이 1년 동안 가는 거리. 별까지의 먼 거리를 나타낼 때 쓴다.",
+ q1:"빛보다 빠른 자동차가 있다면 어디에 가 보고 싶나요?", q2:"별빛이 옛 모습이라는 말은 무슨 뜻일까요?"},
+{t:"만든 사람과 날짜를 아는 글자",
+ b:"세상의 글자 대부분은 누가 언제 만들었는지 알 수 없습니다. 한글은 1443년 세종대왕과 학자들이 만들고 1446년에 훈민정음이라는 이름으로 백성에게 알린, 만든 때와 까닭이 분명한 글자입니다. 자음은 소리를 내는 입과 혀의 모양을, 모음은 하늘과 땅과 사람의 모양을 본떠 만들었습니다. 글자 수가 적고 규칙이 또렷해서 배우기 쉽습니다.",
+ w:"훈민정음", m:"한글을 처음 알릴 때 쓴 이름. '백성을 가르치는 바른 소리'라는 뜻이다.",
+ q1:"한글이 없었다면 우리는 무엇으로 글을 썼을까요?", q2:"ㄱ과 ㅁ은 어떤 모양을 본뜬 것 같나요?"},
+{t:"공룡은 아직 우리 곁에 있다",
+ b:"공룡은 약 6600만 년 전에 대부분 사라졌습니다. 그런데 과학자들은 새가 공룡의 한 갈래에서 이어져 내려왔다고 봅니다. 공룡 화석에서 깃털 흔적이 나오고 뼈의 생김새도 새와 많이 닮았기 때문입니다. 아침에 우는 참새도 아주 먼 공룡의 친척입니다.",
+ w:"화석", m:"아주 오랜 옛날 생물의 뼈나 자취가 돌처럼 굳어 남은 것.",
+ q1:"새와 공룡은 어떤 점이 닮았을까요?", q2:"공룡이 사라지지 않았다면 지금 세상은 어떨까요?"},
+{t:"펭귄은 북극에 살지 않는다",
+ b:"펭귄은 남극과 남쪽 바다에 살고 북극에는 한 마리도 살지 않습니다. 북극에는 대신 북극곰이 있습니다. 그래서 북극곰과 펭귄이 함께 있는 그림은 실제로는 볼 수 없는 장면입니다. 펭귄은 날지 못하지만 날개를 지느러미처럼 써서 물속을 빠르게 헤엄칩니다.",
+ w:"남극", m:"지구의 가장 남쪽 땅. 두꺼운 얼음으로 덮여 있다.",
+ q1:"펭귄과 북극곰이 같이 있는 그림, 어디가 잘못되었을까요?", q2:"날지 못하는 새를 또 알고 있나요?"},
+{t:"북극곰의 털은 흰색이 아니다",
+ b:"북극곰의 털은 하나하나가 속이 빈 투명한 관처럼 생겼습니다. 그 속에서 빛이 여러 번 꺾이며 흩어져 우리 눈에는 하얗게 보입니다. 털 아래 피부는 오히려 검은색인데, 검은색이 햇빛의 열을 잘 받아들여 몸을 따뜻하게 합니다. 눈밭에서 하얗게 보이는 덕분에 사냥할 때 몸을 숨기기도 좋습니다.",
+ w:"보호색", m:"주변과 비슷해 보여서 몸을 숨기는 데 도움이 되는 몸 색깔.",
+ q1:"하얗게 보이는 것이 북극곰에게 어떤 점에서 좋을까요?", q2:"보호색을 쓰는 동물을 또 떠올려 볼까요?"},
+{t:"자기 몸무게의 서른 배를 드는 힘",
+ b:"개미는 자기 몸무게의 스무 배에서 오십 배쯤 되는 것을 물고 나를 수 있습니다. 몸이 작을수록 몸무게에 비해 근육이 힘을 더 잘 쓰기 때문입니다. 개미는 혼자 힘으로 사는 대신 수천 마리가 역할을 나눠 집을 짓고 먹이를 모읍니다. 길을 찾을 때는 몸에서 나오는 냄새를 길잡이로 씁니다.",
+ w:"페로몬", m:"동물이 몸에서 내보내는 냄새 신호. 개미는 이것으로 동료에게 길을 알린다.",
+ q1:"사람이 개미만큼 힘이 세다면 무엇을 들 수 있을까요?", q2:"개미처럼 역할을 나눠 하면 좋은 일은 무엇일까요?"},
+{t:"나무 속에 적힌 나이",
+ b:"나무를 자르면 동그란 줄무늬가 보입니다. 이 줄 하나가 보통 한 해를 뜻해서 줄을 세면 나무의 나이를 알 수 있습니다. 비가 많고 따뜻한 해에는 줄이 넓게, 메마른 해에는 좁게 생깁니다. 그래서 나이테는 그 나무가 살아온 날씨 기록이기도 합니다.",
+ w:"나이테", m:"나무 줄기 안에 한 해마다 생기는 둥근 줄무늬.",
+ q1:"줄이 넓은 해에는 날씨가 어땠을까요?", q2:"내 한 해를 줄무늬로 그린다면 올해는 넓을까요, 좁을까요?"},
+{t:"오늘 마신 물은 공룡도 마셨다",
+ b:"지구의 물은 새로 만들어지지도 사라지지도 않고 돌고 돕니다. 바다와 땅에서 올라간 물은 구름이 되고 비나 눈이 되어 다시 내려옵니다. 그래서 지금 우리가 마시는 물에는 아주 오래전 공룡이 마셨던 물이 섞여 있을 수 있습니다. 물을 아껴 쓰고 더럽히지 않아야 하는 까닭도 여기에 있습니다.",
+ w:"증발", m:"물이 열을 받아 눈에 보이지 않는 기체로 바뀌어 올라가는 일.",
+ q1:"빨래가 마르는 것도 증발일까요?", q2:"집에서 물을 아낄 방법을 세 가지 적어 볼까요?"},
+{t:"무지개는 비와 햇빛이 같이 그린 그림",
+ b:"비가 그친 뒤 공기에는 작은 물방울이 떠 있습니다. 햇빛이 그 물방울 속으로 들어가면 색마다 꺾이는 정도가 달라서 빛이 여러 색으로 나뉩니다. 그래서 무지개는 늘 해를 등지고 서야 보입니다. 물을 뿌리는 호스 앞에서도 작은 무지개를 만들 수 있습니다.",
+ w:"굴절", m:"빛이 물이나 유리를 지날 때 방향이 꺾이는 일.",
+ q1:"무지개를 보려면 해는 내 앞에 있어야 할까요, 뒤에 있어야 할까요?", q2:"집에서 무지개를 만들 방법을 생각해 볼까요?"},
+{t:"번개가 먼저 보이는 이유",
+ b:"번개와 천둥은 같은 순간에 생깁니다. 그런데 빛은 1초에 30만 킬로미터를 가고 소리는 1초에 약 340미터밖에 가지 못합니다. 그래서 번개가 먼저 보이고 천둥이 늦게 들립니다. 번개를 본 뒤 천둥까지 3초가 걸렸다면 번개는 약 1킬로미터 떨어진 곳에서 친 것입니다.",
+ w:"음속", m:"소리가 공기 속에서 나아가는 빠르기. 1초에 약 340미터.",
+ q1:"천둥이 10초 뒤에 들렸다면 번개는 얼마나 멀리 있었을까요?", q2:"번개가 칠 때 안전한 곳은 어디일까요?"},
+{t:"바닷물은 왜 짤까",
+ b:"비가 땅과 바위를 지나며 작은 소금 성분을 조금씩 녹여 바다로 데려갑니다. 바닷물은 햇빛에 증발해 줄어들지만 소금은 남기 때문에 짠맛이 쌓입니다. 바닷물 1리터에는 소금이 약 35그램 들어 있습니다. 그래서 바닷물은 그대로는 마실 수 없습니다.",
+ w:"용해", m:"어떤 것이 물에 녹아 고르게 섞이는 일.",
+ q1:"강물은 왜 짜지 않을까요?", q2:"소금물에서 소금만 꺼내려면 어떻게 할까요?"},
+{t:"지구는 커다란 자석이다",
+ b:"자석에는 N극과 S극이 있고 다른 극끼리는 붙고 같은 극끼리는 밀어냅니다. 지구도 속에서 흐르는 금속 때문에 커다란 자석처럼 행동합니다. 그래서 나침반 바늘이 늘 북쪽을 가리킵니다. 옛날 뱃사람들은 이 바늘 하나로 넓은 바다에서 길을 찾았습니다.",
+ w:"나침반", m:"자석 바늘이 북쪽을 가리켜 방향을 알려 주는 도구.",
+ q1:"나침반이 없다면 방향을 어떻게 찾을까요?", q2:"집에서 자석에 붙는 물건과 붙지 않는 물건을 찾아볼까요?"},
+{t:"눈송이는 모두 육각형",
+ b:"눈송이를 확대해 보면 여섯 갈래로 뻗은 모양입니다. 물을 이루는 알갱이가 얼 때 육각형으로 줄을 서기 때문입니다. 그런데 하늘에서 내려오는 길의 온도와 습도가 조금씩 달라서 똑같이 생긴 눈송이는 거의 없습니다. 같은 규칙에서 서로 다른 모양이 끝없이 나오는 셈입니다.",
+ w:"결정", m:"알갱이들이 일정한 규칙으로 줄을 서서 생긴 또렷한 모양.",
+ q1:"눈송이가 모두 다르게 생기는 까닭은 무엇일까요?", q2:"종이를 접어 육각 눈송이를 만들어 볼까요?"},
+{t:"달에 남은 발자국은 지워지지 않는다",
+ b:"1969년 사람이 처음 달에 내려서 남긴 발자국은 아직 그대로 있습니다. 달에는 공기가 없어서 바람도 비도 없기 때문입니다. 지구라면 하루 만에 지워질 자취가 달에서는 아주 오래 남습니다. 대신 작은 돌이 떨어지는 일로 천천히 흐려집니다.",
+ w:"진공", m:"공기가 거의 없는 텅 빈 상태.",
+ q1:"바람과 비가 없으면 또 어떤 일이 생길까요?", q2:"달에 가서 무엇을 남겨 두고 싶나요?"},
+{t:"하루에 해가 열여섯 번 뜨는 집",
+ b:"국제우주정거장은 지구에서 약 400킬로미터 위를 돌며 90분에 한 바퀴를 돕니다. 그래서 그 안에 있는 사람은 하루에 해가 열여섯 번쯤 뜨고 지는 것을 봅니다. 무게가 느껴지지 않아서 물도 공처럼 둥글게 떠다닙니다. 잠을 잘 때는 침낭을 벽에 고정해 두고 잡니다.",
+ w:"무중력", m:"무게가 느껴지지 않아 몸과 물건이 떠 있는 상태.",
+ q1:"물이 둥글게 떠다니면 어떻게 마셔야 할까요?", q2:"무중력에서 하고 싶은 놀이는 무엇인가요?"},
+{t:"지금 보는 햇빛은 8분 전에 떠난 빛",
+ b:"태양은 지구에서 약 1억 5천만 킬로미터 떨어져 있습니다. 빛이 그 거리를 건너오는 데 약 8분 20초가 걸립니다. 그래서 우리가 보는 햇빛은 8분 전에 태양을 떠난 빛입니다. 만약 태양이 지금 사라진다 해도 우리는 8분 동안 그 사실을 모를 것입니다.",
+ w:"천문단위", m:"지구에서 태양까지의 거리. 우주의 먼 거리를 재는 자 역할을 한다.",
+ q1:"8분 전의 빛을 본다는 말이 신기한 까닭은 무엇일까요?", q2:"태양이 없으면 지구는 어떻게 될까요?"},
+{t:"바나나는 나무가 아니라 풀",
+ b:"바나나가 자라는 기둥은 나무줄기처럼 보이지만 사실은 잎이 겹겹이 말린 것입니다. 나무처럼 단단한 목질이 없어서 식물학에서는 풀로 봅니다. 그래서 바나나는 세상에서 가장 큰 풀 가운데 하나입니다. 열매를 거두면 기둥은 베어 내고 뿌리에서 새 기둥이 다시 올라옵니다.",
+ w:"목질", m:"나무를 단단하게 만드는 성분. 풀에는 이것이 거의 없다.",
+ q1:"나무와 풀은 무엇으로 구분할까요?", q2:"생각과 달랐던 식물이 또 있을까요?"},
+{t:"기린과 사람의 목뼈 개수가 같다",
+ b:"기린의 목은 2미터가 넘지만 목뼈 개수는 일곱 개로 사람과 같습니다. 뼈 하나하나가 아주 길어진 것입니다. 거의 모든 포유동물의 목뼈는 일곱 개입니다. 기린은 높은 나뭇잎을 먹으려고 뼈를 늘리는 쪽으로 자라 온 셈입니다.",
+ w:"포유동물", m:"새끼를 낳아 젖을 먹여 기르는 동물. 사람, 개, 기린이 모두 포유동물이다.",
+ q1:"사람 목뼈가 기린처럼 길어지면 어떤 일이 생길까요?", q2:"내가 아는 포유동물을 다섯 가지 적어 볼까요?"},
+{t:"소리로 길을 보는 동물",
+ b:"박쥐는 어두운 동굴에서도 부딪히지 않고 날아다닙니다. 사람이 듣지 못하는 높은 소리를 내보내고 되돌아온 소리를 들어 앞에 무엇이 있는지 알아냅니다. 이 방법으로 날아가는 작은 벌레까지 잡습니다. 배에서 쓰는 음파 탐지기도 같은 원리로 만들어졌습니다.",
+ w:"초음파", m:"사람 귀에는 들리지 않는 아주 높은 소리.",
+ q1:"눈을 감고 소리로 길을 찾아 보면 어떤 느낌일까요?", q2:"박쥐의 방법을 따라 만든 기계는 어디에 쓰일까요?"},
+{t:"태어난 해변으로 돌아오는 거북",
+ b:"바다거북은 모래 해변에 알을 낳고 새끼는 바다로 들어가 수천 킬로미터를 돌아다닙니다. 그런데 어른이 되어 알을 낳을 때가 되면 자기가 태어난 그 해변으로 돌아옵니다. 지구의 자기장을 느껴 길을 기억한다고 알려져 있습니다. 해변에 빛이 너무 많으면 새끼가 바다 방향을 잃기도 합니다.",
+ w:"자기장", m:"자석이나 지구가 만드는, 눈에 보이지 않는 힘이 미치는 자리.",
+ q1:"거북이 길을 잃지 않게 사람이 할 수 있는 일은 무엇일까요?", q2:"나는 돌아가고 싶은 장소가 있나요?"},
+{t:"지구에서 가장 멀리 나는 새",
+ b:"북극제비갈매기는 북극에서 여름을 보내고 남극 근처까지 날아가 또 여름을 보냅니다. 한 해에 오가는 거리가 수만 킬로미터에 이릅니다. 평생 날아간 거리를 모으면 달까지 여러 번 오갈 수 있을 만큼입니다. 이 새는 늘 밝은 여름을 따라 사는 셈입니다.",
+ w:"철새", m:"계절에 따라 먼 곳으로 옮겨 가며 사는 새.",
+ q1:"새들은 왜 계절마다 먼 길을 떠날까요?", q2:"내가 새라면 어디에서 여름을 보내고 싶나요?"},
+{t:"종이를 모으면 나무를 살린다",
+ b:"종이를 1톤 다시 쓰면 나무 스무 그루 가까이를 베지 않아도 됩니다. 종이를 새로 만들 때보다 물과 전기도 훨씬 적게 듭니다. 다만 음식물이 묻거나 비닐이 덮인 종이는 다시 쓰기 어렵습니다. 깨끗하게 펴서 종이끼리 모아 내놓는 것이 가장 큰 도움이 됩니다.",
+ w:"재활용", m:"쓰고 버릴 것을 다시 쓸 수 있게 만드는 일.",
+ q1:"우리 집에서 가장 많이 나오는 쓰레기는 무엇인가요?", q2:"종이를 아끼는 방법을 세 가지 적어 볼까요?"},
+{t:"3초면 자동차보다 빠르다",
+ b:"치타는 달릴 때 시속 100킬로미터가 넘습니다. 멈춰 있다가 3초 만에 그 빠르기에 이릅니다. 대신 오래 달리지 못해서 20초 정도면 지쳐 멈춰야 합니다. 그래서 치타는 멀리서 쫓지 않고 가까이 다가간 뒤 짧게 달려 사냥합니다.",
+ w:"가속", m:"빠르기가 점점 빨라지는 일.",
+ q1:"빠르게 달리는 대신 치타가 포기한 것은 무엇일까요?", q2:"짧게 잘하는 일과 오래 잘하는 일, 나는 어느 쪽인가요?"},
+{t:"오래 두어도 상하지 않는 음식",
+ b:"이집트 무덤에서 발견된 아주 오래된 꿀이 먹을 수 있는 상태였다는 기록이 있습니다. 꿀에는 물이 적고 단맛이 아주 진해서 세균이 살기 어렵습니다. 그래서 뚜껑을 잘 닫아 두면 아주 오래 보관할 수 있습니다. 굳어서 하얀 알갱이가 생기는 것은 상한 것이 아니라 단맛 성분이 뭉친 것입니다.",
+ w:"보존", m:"상하지 않게 그대로 지켜 두는 일.",
+ q1:"상하기 쉬운 음식과 오래 두는 음식은 무엇이 다를까요?", q2:"냉장고가 없던 옛날에는 음식을 어떻게 보관했을까요?"},
+{t:"두 섬과 아흔 개 가까운 바위섬",
+ b:"독도는 동도와 서도라는 두 개의 큰 섬과 그 주변의 작은 바위섬들로 이루어져 있습니다. 울릉도에서 약 87킬로미터 떨어져 있어 맑은 날에는 울릉도에서 보입니다. 주변 바다는 찬 물과 더운 물이 만나 물고기가 많이 모입니다. 우리나라 사람들이 살며 지키고 있는 우리 땅입니다.",
+ w:"동도와 서도", m:"독도를 이루는 두 개의 큰 섬 이름.",
+ q1:"섬 주변에 물고기가 많이 모이는 까닭은 무엇일까요?", q2:"독도에 가면 무엇을 가장 보고 싶나요?"},
+{t:"물의 행성, 그런데 마실 물은 조금",
+ b:"지구 표면의 약 70퍼센트는 물입니다. 그런데 그중 대부분은 짠 바닷물이고 민물은 전체의 3퍼센트 정도뿐입니다. 그 민물마저 대부분 빙하와 땅속에 있어서 바로 마실 수 있는 물은 아주 적습니다. 물이 많아 보이는 행성에서 물을 아껴야 하는 까닭입니다.",
+ w:"민물", m:"소금기가 없는 물. 강과 호수의 물이 민물이다.",
+ q1:"바닷물을 마실 물로 바꾸려면 무엇이 필요할까요?", q2:"하루에 내가 쓰는 물은 얼마나 될까요?"},
+{t:"어린 해바라기는 해를 따라 고개를 돌린다",
+ b:"어린 해바라기는 아침에 동쪽을, 저녁에 서쪽을 바라보며 하루 동안 고개를 돌립니다. 줄기의 한쪽이 더 빨리 자라면서 방향이 바뀌는 것입니다. 그런데 꽃이 다 피어 어른이 되면 대개 동쪽을 향한 채 멈춥니다. 아침 햇살을 먼저 받아 꽃이 따뜻해지면 벌이 더 잘 찾아옵니다.",
+ w:"굴광성", m:"식물이 빛이 오는 쪽으로 자라는 성질.",
+ q1:"창가에 둔 화분은 어느 쪽으로 기울까요?", q2:"해바라기가 동쪽을 보고 멈추는 까닭은 무엇일까요?"}
+];
+
+/* ============================================================ 상태 */
+const DRAFT_KEY = "kidsnews_draft_v1";
+const ISSUE_KEY = "kidsnews_issues_v1";
+const $ = id => document.getElementById(id);
+
+const DEFAULT_STATE = () => ({
+  paper:"휘민일보", reporter:"휘민", date:todayISO(), issue:1, weather:"☀️ 맑음",
+  leadT:"", leadB:"", cap:"", img:"", draw:true,
+  s1T:"", s1B:"", s2T:"", s2B:"",
+  w:"", m:"", q1:"", q2:"", diary:"오늘 읽고 한 줄", fs:11
+});
+let S = DEFAULT_STATE();
+
+function todayISO(){
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function fmtDate(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||"");
+  if(!m) return "";
+  const d = new Date(+m[1], +m[2]-1, +m[3]);
+  const days = ["일","월","화","수","목","금","토"];
+  return m[1]+"년 "+(+m[2])+"월 "+(+m[3])+"일 "+days[d.getDay()]+"요일";
+}
+function firstSentences(text, n){
+  const parts = String(text||"").split(/(?<=[.!?])\s+/);
+  return parts.slice(0, n).join(" ").trim();
+}
+
+/* ============================================================ 미리보기 그리기 */
+function render(){
+  $("pvPaper").textContent   = S.paper || "우리 신문";
+  $("pvDate").textContent    = fmtDate(S.date);
+  $("pvIssue").textContent   = "제 " + (S.issue||1) + "호";
+  $("pvWeather").textContent = "오늘 날씨 " + S.weather;
+  $("pvReporter").textContent= "기자 " + (S.reporter || "");
+  $("pvFoot1").textContent   = (S.paper||"우리 신문") + " · " + fmtDate(S.date);
+
+  $("pvLeadT").textContent = S.leadT || "머리기사 제목을 넣어 주세요";
+  $("pvLeadB").textContent = S.leadB || "";
+  $("pvS1T").textContent   = S.s1T || "";
+  $("pvS1B").textContent   = S.s1B || "";
+  $("pvS2T").textContent   = S.s2T || "";
+  $("pvS2B").textContent   = S.s2B || "";
+  $("pvW").textContent     = S.w || "";
+  $("pvM").textContent     = S.m || "";
+  $("pvQ1").textContent    = S.q1 || "";
+  $("pvQ2").textContent    = S.q2 || "";
+  $("pvDiary").textContent = S.diary || "오늘 읽고 한 줄";
+  $("pvCap").textContent   = S.cap || "";
+
+  const img = $("pvImg"), draw = $("pvDraw"), fig = $("pvFig");
+  if(S.img){
+    img.src = S.img; img.style.display = "block"; draw.style.display = "none";
+    fig.classList.remove("hide");
+  } else if(S.draw){
+    img.style.display = "none"; img.removeAttribute("src");
+    draw.style.display = "flex"; draw.textContent = S.cap ? S.cap : "여기에 오늘의 그림을 그려요";
+    $("pvCap").textContent = S.cap ? "" : "";
+    fig.classList.remove("hide");
+  } else {
+    fig.classList.add("hide");
+  }
+
+  $("paper").style.setProperty("--fs", S.fs + "pt");
+  $("fsVal").textContent = S.fs + "pt";
+  checkOverflow();
+  saveDraft();
+}
+
+function checkOverflow(){
+  const ids = ["leadFlow","s1Flow","s2Flow"];
+  let over = ids.some(id => { const e = $(id); return e.scrollHeight > e.clientHeight + 2; });
+  const think = document.querySelector(".box.think");
+  if(think && think.scrollHeight > think.clientHeight + 2) over = true;
+  $("warn").classList.toggle("on", over);
+}
+
+/* ============================================================ 확대·축소 */
+function fit(){
+  const stage = $("scaler"), paper = $("paper");
+  const w = paper.offsetWidth, h = paper.offsetHeight;
+  if(!w) return;
+  const k = Math.min(1, stage.clientWidth / w);
+  paper.style.transform = "scale(" + k + ")";
+  stage.style.height = (h * k) + "px";
+}
+window.addEventListener("resize", fit);
+
+/* ============================================================ 입력 연결 */
+const BIND = [
+  ["fPaper","paper"],["fReporter","reporter"],["fDate","date"],["fWeather","weather"],
+  ["fLeadT","leadT"],["fLeadB","leadB"],["fCap","cap"],
+  ["fS1T","s1T"],["fS1B","s1B"],["fS2T","s2T"],["fS2B","s2B"],
+  ["fW","w"],["fM","m"],["fQ1","q1"],["fQ2","q2"],["fDiary","diary"]
+];
+function bindInputs(){
+  BIND.forEach(([id,key]) => {
+    const el = $(id);
+    el.addEventListener("input", () => { S[key] = el.value; render(); });
+    el.addEventListener("change", () => { S[key] = el.value; render(); });
+  });
+  $("fIssue").addEventListener("input", () => {
+    S.issue = parseInt($("fIssue").value.replace(/\D/g,""),10) || 1; render();
+  });
+  $("fDraw").addEventListener("change", () => { S.draw = $("fDraw").checked; render(); });
+  $("fFs").addEventListener("input", () => { S.fs = parseFloat($("fFs").value); render(); });
+}
+function fillInputs(){
+  BIND.forEach(([id,key]) => { $(id).value = S[key] || ""; });
+  $("fIssue").value = S.issue || 1;
+  $("fDraw").checked = !!S.draw;
+  $("fFs").value = S.fs;
+}
+
+/* ============================================================ 사진 */
+$("fImg").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const max = 1100;
+      const k = Math.min(1, max / im.width);
+      const c = document.createElement("canvas");
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      S.img = c.toDataURL("image/jpeg", 0.82);
+      render();
+    };
+    im.onerror = () => { alert("이 그림 파일은 읽을 수 없어요."); };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+});
+$("btnImgClear").addEventListener("click", () => { S.img = ""; $("fImg").value = ""; render(); });
+
+/* ============================================================ 소재 모음 */
+function drawBank(filter){
+  const box = $("bank");
+  box.innerHTML = "";
+  const q = (filter||"").trim();
+  let shown = 0;
+  BANK.forEach((it, i) => {
+    const hay = it.t + " " + it.b + " " + it.w;
+    if(q && hay.indexOf(q) === -1) return;
+    shown++;
+    const row = document.createElement("div");
+    row.className = "bankitem";
+    const t = document.createElement("div");
+    t.className = "bt";
+    t.innerHTML = "";
+    t.appendChild(document.createTextNode(it.t));
+    const s = document.createElement("small");
+    s.textContent = "낱말 · " + it.w;
+    t.appendChild(s);
+    const b1 = document.createElement("button"); b1.className = "tiny"; b1.textContent = "머리";
+    const b2 = document.createElement("button"); b2.className = "tiny"; b2.textContent = "작은";
+    b1.onclick = () => useAsLead(i);
+    b2.onclick = () => useAsSub(i);
+    row.append(t, b1, b2);
+    box.appendChild(row);
+  });
+  if(!shown){
+    const e = document.createElement("div");
+    e.className = "empty"; e.textContent = "찾는 낱말이 없어요. 다른 말로 찾아보세요.";
+    box.appendChild(e);
+  }
+}
+function useAsLead(i){
+  const it = BANK[i];
+  S.leadT = it.t; S.leadB = it.b;
+  S.w = it.w; S.m = it.m; S.q1 = it.q1; S.q2 = it.q2;
+  if(!S.cap) S.cap = "오늘 기사와 어울리는 그림을 그려 보세요";
+  fillInputs(); render();
+}
+function useAsSub(i){
+  const it = BANK[i];
+  const short = firstSentences(it.b, 2);
+  if(!S.s1T){ S.s1T = it.t; S.s1B = short; }
+  else { S.s2T = it.t; S.s2B = short; }
+  fillInputs(); render();
+}
+$("fSearch").addEventListener("input", () => drawBank($("fSearch").value));
+
+/* ============================================================ 저장 / 보관함 */
+function saveDraft(){
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(S)); }catch(e){}
+}
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if(raw) S = Object.assign(DEFAULT_STATE(), JSON.parse(raw));
+  }catch(e){}
+}
+function issues(){
+  try{ return JSON.parse(localStorage.getItem(ISSUE_KEY) || "[]"); }catch(e){ return []; }
+}
+function putIssues(arr){
+  try{ localStorage.setItem(ISSUE_KEY, JSON.stringify(arr)); }
+  catch(e){ alert("저장 공간이 가득 찼어요. 보관함에서 오래된 호를 지워 주세요."); }
+}
+function drawSaved(){
+  const box = $("saved");
+  box.innerHTML = "";
+  const list = issues();
+  if(!list.length){
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.textContent = "아직 보관한 호가 없어요. 신문을 다 만들고 [보관함에 저장]을 누르면 여기에 쌓입니다.";
+    box.appendChild(e); return;
+  }
+  list.slice().reverse().forEach(it => {
+    const row = document.createElement("div"); row.className = "saveditem";
+    const si = document.createElement("div"); si.className = "si";
+    si.appendChild(document.createTextNode("제 " + it.issue + "호 · " + (it.leadT || "제목 없음")));
+    const s = document.createElement("small"); s.textContent = fmtDate(it.date);
+    si.appendChild(s);
+    const b1 = document.createElement("button"); b1.className = "tiny"; b1.textContent = "불러오기";
+    const b2 = document.createElement("button"); b2.className = "tiny"; b2.textContent = "삭제";
+    b1.onclick = () => { S = Object.assign(DEFAULT_STATE(), it); fillInputs(); render(); fit(); window.scrollTo(0,0); };
+    b2.onclick = () => {
+      if(!confirm("제 " + it.issue + "호를 보관함에서 지울까요?")) return;
+      putIssues(issues().filter(x => x.id !== it.id));
+      drawSaved();
+    };
+    row.append(si, b1, b2);
+    box.appendChild(row);
+  });
+}
+$("btnSave").addEventListener("click", () => {
+  const list = issues();
+  const copy = JSON.parse(JSON.stringify(S));
+  copy.id = Date.now();
+  const same = list.findIndex(x => x.issue === copy.issue && x.date === copy.date);
+  if(same >= 0) list[same] = copy; else list.push(copy);
+  putIssues(list); drawSaved();
+  const b = $("btnSave"); const old = b.textContent;
+  b.textContent = "저장했어요 ✓"; setTimeout(() => { b.textContent = old; }, 1400);
+});
+$("btnNew").addEventListener("click", () => {
+  if(!confirm("새 호를 만들까요? 지금 화면 내용은 지워집니다. (보관함에 저장한 호는 그대로 있어요)")) return;
+  const next = (S.issue || 1) + 1;
+  const keepPaper = S.paper, keepReporter = S.reporter, keepFs = S.fs;
+  S = DEFAULT_STATE();
+  S.issue = next; S.paper = keepPaper; S.reporter = keepReporter; S.fs = keepFs;
+  $("fImg").value = "";
+  fillInputs(); render(); fit();
+});
+
+/* ============================================================ 인쇄 · 읽어주기 */
+$("btnPrint").addEventListener("click", () => window.print());
+$("btnRead").addEventListener("click", () => {
+  if(!("speechSynthesis" in window)){ alert("이 브라우저는 읽어주기를 지원하지 않아요."); return; }
+  const sp = window.speechSynthesis;
+  if(sp.speaking){ sp.cancel(); return; }
+  const u = new SpeechSynthesisUtterance((S.leadT || "") + ". " + (S.leadB || ""));
+  u.lang = "ko-KR"; u.rate = 0.95;
+  sp.speak(u);
+});
+
+/* ============================================================ 시작 */
+loadDraft();
+if(!S.leadT && !S.s1T){            // 처음 열었을 때 한 장을 채워 보여 준다
+  const it = BANK[0];
+  S.leadT = it.t; S.leadB = it.b; S.w = it.w; S.m = it.m; S.q1 = it.q1; S.q2 = it.q2;
+  S.cap = "오늘 기사와 어울리는 그림을 그려 보세요";
+  S.s1T = BANK[10].t; S.s1B = firstSentences(BANK[10].b, 2);
+  S.s2T = BANK[12].t; S.s2B = firstSentences(BANK[12].b, 2);
+}
+bindInputs();
+fillInputs();
+drawBank("");
+drawSaved();
+render();
+fit();
+window.addEventListener("load", fit);
+</script>
+</body>
+</html>
