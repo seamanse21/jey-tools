@@ -138,6 +138,29 @@ textarea{resize:vertical;line-height:1.6}
   color:#b3afa2;font-size:8.5pt;padding:3mm}
 .actfill{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .sample{font-size:9pt;color:#7b7970;margin:2mm 0 0;line-height:1.6}
+.sec{margin-bottom:5mm}
+.sec h3{display:flex;align-items:center;gap:2mm;font-size:11.5pt;font-weight:900;margin:0 0 2.5mm}
+.sec h3 i{font-style:normal;background:var(--brand);color:#fff;border-radius:99px;font-size:8pt;padding:.8mm 2.6mm}
+.sec h3 small{font-weight:600;font-size:8pt;color:#8d8b80;margin-left:auto}
+.qline{display:flex;align-items:center;gap:3mm;padding:2.6mm 1mm;border-bottom:1px dotted #ddd9cd}
+.qline .no{flex:0 0 auto;width:6mm;height:6mm;border-radius:50%;background:#f4f1e6;color:#6b6a60;
+  font-size:8pt;font-weight:800;display:flex;align-items:center;justify-content:center}
+.qline .t{flex:1;min-width:0;font-size:10.5pt;line-height:1.5;word-break:keep-all}
+.qline .ox{flex:0 0 auto;display:flex;gap:2.5mm}
+.qline .ox b{width:8.5mm;height:8.5mm;border:1.3px solid #cfcbbf;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:9.5pt;color:#a9a69a;font-weight:700}
+.fillbox{border:1px solid #d9d6cb;border-radius:2mm;padding:4mm;font-size:11.5pt;line-height:1.9;word-break:keep-all}
+.fillbox u{display:inline-block;min-width:26mm;border-bottom:1.5px solid #9a978c;text-decoration:none}
+.facts{display:grid;gap:3mm}
+.facts.c3{grid-template-columns:repeat(3,1fr)}
+.facts.c2{grid-template-columns:repeat(2,1fr)}
+.fact{border:1px solid #e3e0d6;border-left:2.5mm solid var(--brand2);border-radius:1.5mm;padding:3mm 3.2mm;
+  font-size:8.6pt;line-height:1.62;word-break:keep-all;background:#fcfcf9}
+.fact b{display:block;color:var(--brand2);font-size:9pt;margin-bottom:1.2mm}
+.oneline{border:1px solid #d9d6cb;border-radius:2mm;padding:3mm 4mm 2mm}
+.oneline p{margin:0 0 2mm;font-size:10.5pt;font-weight:700;word-break:keep-all}
+.answers{text-align:right;font-size:7pt;color:#b6b3a9;margin-top:auto;padding-top:2mm;
+  transform:rotate(180deg);transform-origin:center}
 
 /* 표지 */
 .cover{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4mm;
@@ -233,26 +256,30 @@ textarea{resize:vertical;line-height:1.6}
     <details>
       <summary>활동지</summary>
       <div class="fields">
-        <label for="fQ1">질문 1</label>
-        <input type="text" id="fQ1" maxlength="60">
-        <label for="fType">질문 1 모양</label>
+        <label for="fQuiz">맞혀 보기 — 한 줄에 하나씩, <b>문장 | O</b> 또는 <b>문장 | X</b></label>
+        <textarea id="fQuiz" rows="4" placeholder="세계 관용의 날은 11월 16일이다. | O"></textarea>
+        <label for="fFill">낱말 채우기 — <b>빈칸은 ___ 로, 끝에 | 정답</b></label>
+        <textarea id="fFill" rows="2" placeholder="생각이 달라도 서로를 ___하면 사이좋게 지낼 수 있어요. | 존중"></textarea>
+        <label for="fFacts">더 알아보기 — 한 줄에 하나씩, <b>제목 | 내용</b> (두세 개)</label>
+        <textarea id="fFacts" rows="4" placeholder="다른 말로는 | 영어로는 톨레랑스라고 불러요."></textarea>
+        <label for="fOne">맨 아래 한 줄 쓰기 (비우면 칸이 사라집니다)</label>
+        <input type="text" id="fOne" maxlength="60">
+        <label for="fType">추가 활동 (없어도 됩니다)</label>
         <select id="fType">
+          <option value="none">없음 — 퀴즈와 읽을거리만</option>
           <option value="cards">카드 4개 중 고르기</option>
-          <option value="write">쓰는 상자 2개</option>
           <option value="draw">그림 + 설명 쓰기</option>
-          <option value="lines">줄만 (자유 서술)</option>
+          <option value="write">쓰는 칸 하나</option>
         </select>
         <div id="cardFields">
-          <label>카드 내용 네 개</label>
+          <label for="fQ1">추가 활동 안내문</label>
+          <input type="text" id="fQ1" maxlength="60">
+          <label>카드 / 칸 이름</label>
           <textarea id="fC1" rows="2"></textarea>
           <textarea id="fC2" rows="2" style="margin-top:6px"></textarea>
           <textarea id="fC3" rows="2" style="margin-top:6px"></textarea>
           <textarea id="fC4" rows="2" style="margin-top:6px"></textarea>
         </div>
-        <label for="fQ2">질문 2 (자기 생각 쓰기)</label>
-        <input type="text" id="fQ2" maxlength="60">
-        <label for="fSample">질문 2 아래 예시 한 줄 (선택)</label>
-        <input type="text" id="fSample" maxlength="80">
       </div>
     </details>
 
@@ -370,41 +397,51 @@ const SAMPLE_DAYS = [
  cap:"", note:"", w:"존중", m:"남을 귀하게 여기고 함부로 대하지 않는 것.",
  ex:"생각이 달라도 서로를 *존중*하면 사이좋게 지낼 수 있어요.",
  togo:"소리내어 읽어보세요.\n\n나와 다른 점이 있는 친구를 한 명 떠올려 보세요.",
- type:"cards", q1:"다음 중 관용에 어울리는 말을 모두 찾아보고, 그렇게 생각한 이유를 적어 봐.",
- cards:["나랑 노는 방법이 다르다고?\n저 친구는 참 이상해.","네 생각은 나랑 다르구나.\n왜 그렇게 생각했는지\n말해 줄래?","저 친구는 말이 서툴러서\n같이 놀기 싫어.","못 먹는 음식이 있구나.\n내가 대신 받아 줄게."],
- q2:"나와 달라서 멀리했던 적이 있는지, 그때 어떤 마음이었는지 적어 봐.", sample:""},
+ type:"none", q1:"", cards:["","","",""],
+ quiz:"세계 관용의 날은 11월 16일이다. | O\n관용은 싫은 것을 억지로 참는 것이다. | X\n유엔은 서로를 알아 가는 것이 관용을 기르는 좋은 방법이라고 했다. | O",
+ fill:"생각이 달라도 서로를 ___하면 사이좋게 지낼 수 있어요. | 존중",
+ facts:"다른 말로는 | 영어로는 톨레랑스(tolerance)라고 불러요.\n유네스코 | 교육·과학·문화를 맡은 유엔 기구예요. 관용의 원칙을 담은 선언을 냈어요.\n숫자로 보면 | 세계에는 7,000개가 넘는 언어가 쓰이고 있어요.",
+ oneline:"나와 다른 친구에게 오늘 물어보고 싶은 것 한 가지.", sample:""},
 {cat:"기념일",kicker:"이름을 다 적을 수 없는 사람들",head:"11월 17일, 순국선열의 날",
  body:"11월 17일은 나라를 되찾기 위해 목숨을 바친 분들을 기억하는 '순국선열의 날'이에요. 순국선열은 나라를 위해 목숨을 잃은, 우리보다 앞서 살았던 사람들이라는 뜻이지요.\n\n왜 하필 11월 17일일까요? 1905년 11월 17일, 일본은 대한제국이 다른 나라와 교류할 권리를 빼앗는 *을사늑약*을 강제로 맺게 했어요. 나라를 빼앗기기 시작한 가장 아픈 날을 잊지 말자는 뜻에서, 1939년 대한민국 임시정부가 이날을 기념일로 정했답니다. 광복 뒤에도 이어지다가 1997년부터는 정부가 지키는 공식 기념일이 되었어요.\n\n우리가 이름을 아는 독립운동가는 안중근, 유관순처럼 일부일 뿐이에요. 이름도 사진도 남기지 못한 채 싸운 사람이 훨씬 많았지요. 만주의 추운 들판에서, 감옥 안에서, 먼 나라의 공장에서 독립을 기다리다 세상을 떠난 분들이에요.\n\n기념일은 슬퍼하기만 하는 날이 아니에요. 그분들이 되찾고 싶어 했던 나라에서 우리가 어떻게 살고 있는지 돌아보는 날이기도 해요. 오늘은 잠시 묵념을 하고, 가족과 함께 그 이야기를 나눠 보면 어떨까요?",
  cap:"", note:"", w:"을사늑약", m:"1905년 일본이 억지로 맺게 한 조약. '늑약'은 강제로 맺은 조약을 말해요.",
  ex:"*을사늑약*으로 우리나라는 다른 나라와 교류할 권리를 잃었어요.",
  togo:"소리내어 읽어보세요.\n\n가족과 함께 우리 지역의 독립운동 이야기를 찾아보세요.",
- type:"write", q1:"순국선열께 전하고 싶은 말을 편지로 적어 봐.",
- cards:["드리고 싶은 말","내가 지키고 싶은 약속","",""],
- q2:"내가 그 시대에 태어났다면 무엇을 할 수 있었을지 적어 봐.", sample:""},
+ type:"none", q1:"", cards:["","","",""],
+ quiz:"순국선열의 날은 11월 17일이다. | O\n11월 17일은 나라를 되찾은 광복절이다. | X\n이 기념일은 대한민국 임시정부가 처음 정했다. | O",
+ fill:"1905년 일본이 억지로 맺게 한 조약을 ___이라고 해요. | 을사늑약",
+ facts:"늑약이란 | '늑'은 억지로 시킨다는 뜻이에요. 강제로 맺은 조약을 늑약이라 불러요.\n이름 없는 분들 | 기록이 남지 않은 독립운동가는 지금도 해마다 새로 찾아내고 있어요.\n묵념 | 잠시 고개를 숙이고 조용히 기리는 일이에요.",
+ oneline:"오늘 기억하고 싶은 이름이나 한마디.", sample:""},
 {cat:"인물",kicker:"1928년 11월 18일, 생쥐 한 마리",head:"실패에서 태어난 미키마우스",
  body:"오늘은 세상에서 가장 유명한 생쥐의 생일이에요. 1928년 11월 18일, 미국 뉴욕에서 만화 영화 '증기선 윌리'가 처음 상영되었어요. 그 영화에 나온 생쥐가 바로 미키마우스랍니다.\n\n미키마우스는 큰 실패 끝에 태어났어요. 만화가 월트 디즈니는 '오스왈드'라는 토끼 캐릭터로 인기를 얻었지만, 계약 문제로 자기가 만든 캐릭터에 대한 *권리*를 영화사에 빼앗기고 말았어요. 모든 것을 잃고 돌아오는 기차 안에서 그는 새 캐릭터를 궁리했고, 그렇게 생쥐 한 마리를 그렸지요.\n\n'증기선 윌리'가 특별했던 까닭은 그림과 소리가 딱 맞아떨어진 첫 만화 영화 가운데 하나였기 때문이에요. 휘파람 소리와 동물 울음소리가 장면에 꼭 맞게 흘러나오자 관객들은 깜짝 놀랐어요. 이 작은 성공이 오늘날 커다란 애니메이션 회사의 시작이 되었답니다.\n\n누구에게나 공들인 것을 잃어버리는 날이 있어요. 중요한 것은 그다음에 무엇을 그리느냐겠지요.",
  cap:"", note:"", w:"권리", m:"어떤 일을 할 수 있는 올바른 자격.",
  ex:"내가 그린 그림에 대한 *권리*는 나에게 있어요.",
  togo:"소리내어 읽어보세요.\n\n내가 좋아하는 캐릭터는 누가 만들었는지 찾아보세요.",
- type:"draw", q1:"나만의 캐릭터를 만들어 그려 보고, 이름과 성격을 적어 봐.",
- cards:["캐릭터 이름","성격과 특징","",""],
- q2:"공들인 것을 잃어버린 적이 있나요? 그때 어떻게 했는지 적어 봐.", sample:""},
+ type:"draw", q1:"나만의 캐릭터를 만들어 그려 보자.", cards:["캐릭터 이름","성격과 특징","",""],
+ quiz:"미키마우스가 처음 나온 영화는 '증기선 윌리'다. | O\n월트 디즈니의 첫 인기 캐릭터는 미키마우스였다. | X\n'증기선 윌리'는 소리가 함께 나온 만화 영화였다. | O",
+ fill:"내가 그린 그림에 대한 ___는 나에게 있어요. | 권리",
+ facts:"미키의 첫 목소리 | 월트 디즈니가 직접 목소리를 냈어요.\n오스왈드는 | 80년 가까이 지난 2006년에야 디즈니로 돌아왔어요.",
+ oneline:"내 캐릭터에게 지어 주고 싶은 이름.", sample:""},
 {cat:"과학",kicker:"웃기지만 진지한 기념일",head:"11월 19일, 세계 화장실의 날",
  body:"11월 19일은 유엔이 정한 '세계 화장실의 날'이에요. 이름만 들으면 웃음이 나지만 아주 진지한 기념일이에요. 세계에는 아직 안전한 화장실을 쓰지 못하는 사람이 수십억 명이나 되거든요.\n\n화장실이 없으면 어떤 일이 생길까요? 사람의 배설물에는 병을 일으키는 세균이 들어 있어요. 이것이 마실 물에 섞이면 설사병 같은 무서운 병이 퍼지지요. 깨끗한 화장실과 *위생*이 갖춰지지 않아 목숨을 잃는 어린이가 해마다 아주 많답니다.\n\n화장실은 공부와도 이어져 있어요. 학교에 안전한 화장실이 없으면 학교를 그만두는 학생이 생기거든요. 그래서 유엔은 2013년부터 이날을 정해 '모두를 위한 화장실'을 이야기하고 있어요.\n\n물을 내리는 변기는 1596년 영국의 존 해링턴이 처음 만들었고, 1775년 알렉산더 커밍스가 냄새를 막는 S자 모양 관을 더하면서 오늘날의 모습이 되었어요. 당연해 보이는 물건 하나가 수많은 생명을 구한 셈이지요.",
  cap:"", note:"", w:"위생", m:"병에 걸리지 않도록 깨끗하게 지내는 일.",
  ex:"손을 잘 씻는 것은 가장 쉬운 *위생* 습관이에요.",
  togo:"소리내어 읽어보세요.\n\n우리 집 화장실에서 물이 얼마나 쓰이는지 살펴보세요.",
- type:"lines", q1:"화장실이 하루 동안 사라진다면 어떤 일이 벌어질지 적어 봐.",
- cards:["","","",""],
- q2:"집과 학교에서 내가 지킬 수 있는 위생 습관을 세 가지 적어 봐.", sample:""},
+ type:"none", q1:"", cards:["","","",""],
+ quiz:"세계 화장실의 날은 유엔이 정한 날이다. | O\n화장실은 병이 퍼지는 것과 관계가 없다. | X\n물을 내리는 변기는 400년도 더 전에 처음 만들어졌다. | O",
+ fill:"손을 잘 씻는 것은 가장 쉬운 ___ 습관이에요. | 위생",
+ facts:"S자 관의 비밀 | 구부러진 곳에 물이 고여 있어서 아래에서 올라오는 냄새를 막아 줘요.\n비누의 힘 | 비누로 30초만 씻어도 많은 병을 막을 수 있어요.\n학교와 화장실 | 안전한 화장실이 생기면 학교에 오는 학생이 늘어나요.",
+ oneline:"오늘 손을 몇 번 씻었는지 세어 보기.", sample:""},
 {cat:"사회",kicker:"어린이에게도 권리가 있다",head:"11월 20일, 세계 어린이날",
  body:"우리나라의 어린이날은 5월 5일이지만, 세계가 함께 지키는 어린이날은 11월 20일이에요. 유엔이 1954년에 정했고, 이날이 특별한 까닭은 1989년 11월 20일에 '유엔 아동권리협약'이 채택되었기 때문이에요.\n\n아동권리협약은 어린이도 어른과 똑같이 권리를 가진 사람이라고 적어 둔 약속이에요. 여기에는 살아갈 권리, 보호받을 권리, 자라날 권리, 그리고 *참여*할 권리가 담겨 있어요. 특히 참여할 권리는 어린이와 관련된 일을 정할 때 어린이의 생각을 물어야 한다는 뜻이랍니다.\n\n이 약속은 세계에서 가장 많은 나라가 받아들인 국제 약속이에요. 우리나라도 1991년에 가입했지요. 그 덕분에 학교와 사회는 어린이의 의견을 듣는 자리를 조금씩 늘려 가고 있어요.\n\n권리는 '내 마음대로 해도 된다'는 뜻이 아니에요. 나에게 권리가 있듯 친구에게도 똑같은 권리가 있다는 뜻이지요. 오늘은 내가 가진 권리 가운데 하나를 떠올려 보면 좋겠어요.",
  cap:"", note:"", w:"참여", m:"어떤 일에 함께 끼어 뜻을 보태는 것.",
  ex:"학급 회의에 *참여*해 내 의견을 말했어요.",
  togo:"소리내어 읽어보세요.\n\n우리 집에서 내 의견이 반영된 일을 찾아보세요.",
- type:"cards", q1:"다음 중 어린이의 권리를 지켜 주는 행동을 모두 찾고, 이유를 적어 봐.",
- cards:["학급 규칙을 정할 때\n아이들 의견을 먼저 묻는다.","아이가 싫다고 해도\n사진을 찍어 인터넷에 올린다.","아플 때 바로\n병원에 데려간다.","공부에 방해된다며\n쉬는 시간을 없앤다."],
- q2:"내가 어린이 대표라면 어른들에게 꼭 부탁하고 싶은 것을 적어 봐.", sample:""}
+ type:"none", q1:"", cards:["","","",""],
+ quiz:"세계가 함께 지키는 어린이날은 11월 20일이다. | O\n아동권리협약에는 어린이의 의견을 묻는 권리가 들어 있다. | O\n우리나라는 아동권리협약에 가입하지 않았다. | X",
+ fill:"학급 회의에 ___해 내 의견을 말했어요. | 참여",
+ facts:"네 가지 권리 | 살아갈 권리, 보호받을 권리, 자라날 권리, 참여할 권리예요.\n가장 큰 약속 | 세계에서 거의 모든 나라가 받아들인 국제 약속이에요.\n우리 어린이날 | 1922년 방정환 선생이 시작했어요.",
+ oneline:"내가 가진 권리 가운데 가장 소중한 것.", sample:""}
 ];
 
 /* ============================================================
@@ -445,7 +482,15 @@ function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,
 function emph(s){ return esc(s).replace(/\*([^*\n]+)\*/g,"<em>$1</em>"); }
 
 function blankDay(){ return {cat:"사회",kicker:"",head:"",body:"",cap:"",note:"",photo:"",
-  w:"",m:"",ex:"",togo:"소리내어 읽어보세요.",type:"lines",q1:"",cards:["","","",""],q2:"",sample:""}; }
+  w:"",m:"",ex:"",togo:"소리내어 읽어보세요.",
+  quiz:"",fill:"",facts:"",oneline:"",
+  type:"none",q1:"",cards:["","","",""],sample:""}; }
+function rows(txt){
+  return String(txt||"").split(/\n+/).map(l=>l.trim()).filter(Boolean).map(l=>{
+    const i=l.lastIndexOf("|");
+    return i<0 ? {a:l,b:""} : {a:l.slice(0,i).trim(), b:l.slice(i+1).trim()};
+  });
+}
 
 function defaultState(){
   const week = mondayOf(todayISO());
@@ -519,35 +564,56 @@ function artHTML(d,i){
    + '</aside></div></div>';
 }
 function actHTML(d,i){
-  let block = "";
-  if(d.type==="cards"){
-    block = '<div class="cards">'+d.cards.slice(0,4).map(c=>'<div class="card">'+esc(c).replace(/\n/g,"<br>")+'</div>').join("")+'</div>'
-          + '<div class="wbox" style="height:26mm"><span class="lb">그렇게 생각한 이유</span><div class="lines" style="height:16mm"></div></div>';
-  } else if(d.type==="write"){
-    block = '<div class="cards" style="grid-template-columns:1fr 1fr">'
-      + d.cards.slice(0,2).map(c=>'<div class="wbox" style="height:46mm;margin:0"><span class="lb">'+esc(c||" ")+'</span><div class="lines" style="height:34mm"></div></div>').join("")
+  const quiz = rows(d.quiz).slice(0,4);
+  const fill = rows(d.fill)[0];
+  const facts = rows(d.facts).slice(0,3);
+  let out = '<div class="act">'
+   + '<div class="acthead"><span>'+esc(S.title)+' 오늘의 한 장</span></div>';
+
+  if(quiz.length){
+    out += '<div class="sec"><h3><i>1</i>맞혀 보기<small>맞으면 O, 아니면 X 에 동그라미</small></h3>'
+      + quiz.map((q,n)=>'<div class="qline"><span class="no">'+(n+1)+'</span><span class="t">'+esc(q.a)
+        +'</span><span class="ox"><b>O</b><b>X</b></span></div>').join("")
       + '</div>';
-  } else if(d.type==="draw"){
-    block = '<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:5mm;margin:4mm 0 6mm">'
-      + '<div class="drawbox" style="height:62mm">그림을 그려 보세요</div>'
-      + '<div style="display:flex;flex-direction:column;gap:4mm">'
-      +   '<div class="wbox" style="height:24mm;margin:0"><span class="lb">'+esc(d.cards[0]||"이름")+'</span><div class="lines" style="height:12mm"></div></div>'
-      +   '<div class="wbox" style="height:34mm;margin:0"><span class="lb">'+esc(d.cards[1]||"특징")+'</span><div class="lines" style="height:22mm"></div></div>'
-      + '</div></div>';
-  } else {
-    block = '<div class="wbox" style="height:58mm"><span class="lb">여기에 적어 보세요</span><div class="lines" style="height:48mm"></div></div>';
   }
-  return '<div class="act">'
-   + '<div class="acthead"><span>'+esc(S.title)+' 생각노트</span></div>'
-   + '<div class="q"><div class="mark">'+OWL.replace('width="46" height="46"','width="42" height="42"')+'</div>'
-   +   '<div class="tx"><span class="tag">읽고 나서 생각해 보기</span><p class="qt">'+esc(d.q1)+'</p></div></div>'
-   + block
-   + '<div class="q" style="margin-top:2mm"><div class="mark">'+OWL.replace('width="46" height="46"','width="42" height="42"')+'</div>'
-   +   '<div class="tx"><span class="tag" style="background:#d8f0dd;color:#1d5c33">내 생각 쓰기</span><p class="qt">'+esc(d.q2)+'</p></div></div>'
-   + (d.sample?'<p class="sample hand">예) '+esc(d.sample)+'</p>':'')
-   + '<div class="actfill"><div class="lines" style="flex:1 1 auto;margin-top:3mm"></div></div>'
-   + '<div style="text-align:right;font-size:7pt;color:#9b9890;margin-top:3mm">'+esc(fmt(addDays(S.week,i)))+' · '+esc(S.kid)+'</div>'
+  if(fill){
+    out += '<div class="sec"><h3><i>2</i>낱말 채우기<small>오늘의 단어를 떠올려 보세요</small></h3>'
+      + '<div class="fillbox">'+esc(fill.a).replace(/_{2,}/g,"<u></u>")+'</div></div>';
+  }
+
+  if(d.type && d.type!=="none"){
+    let block="";
+    if(d.type==="cards"){
+      block = '<div class="cards">'+d.cards.slice(0,4).map(c=>'<div class="card">'+esc(c).replace(/\n/g,"<br>")+'</div>').join("")+'</div>';
+    } else if(d.type==="draw"){
+      block = '<div style="display:grid;grid-template-columns:1.15fr 1fr;gap:4mm">'
+        + '<div class="drawbox" style="height:52mm">그림을 그려 보세요</div>'
+        + '<div style="display:flex;flex-direction:column;gap:3mm">'
+        +   '<div class="wbox" style="height:22mm;margin:0"><span class="lb">'+esc(d.cards[0]||"이름")+'</span><div class="lines" style="height:10mm"></div></div>'
+        +   '<div class="wbox" style="height:27mm;margin:0"><span class="lb">'+esc(d.cards[1]||"특징")+'</span><div class="lines" style="height:16mm"></div></div>'
+        + '</div></div>';
+    } else {
+      block = '<div class="wbox" style="height:34mm;margin:0"><span class="lb">여기에 적어 보세요</span><div class="lines" style="height:24mm"></div></div>';
+    }
+    out += '<div class="sec"><h3><i>3</i>'+esc(d.q1||"해 보기")+'</h3>'+block+'</div>';
+  }
+
+  if(facts.length){
+    const n = (d.type && d.type!=="none") ? "4" : "3";
+    out += '<div class="sec"><h3><i>'+n+'</i>더 알아보기<small>기사에 안 나온 이야기</small></h3>'
+      + '<div class="facts '+(facts.length>2?"c3":"c2")+'">'
+      + facts.map(f=>'<div class="fact"><b>'+esc(f.a)+'</b>'+esc(f.b)+'</div>').join("")
+      + '</div></div>';
+  }
+  if(d.oneline){
+    out += '<div class="sec oneline"><p>✎ '+esc(d.oneline)+'</p><div class="lines" style="height:16mm"></div></div>';
+  }
+
+  const ans = quiz.map((q,n)=>(n+1)+". "+(q.b||"")).join("   ") + (fill && fill.b ? "   낱말 · "+fill.b : "");
+  out += '<div class="answers">종이를 거꾸로 돌려 보세요 &nbsp;·&nbsp; 정답 '+esc(ans)+'</div>'
+   + '<div style="text-align:right;font-size:7pt;color:#b6b3a9;margin-top:1mm">'+esc(fmt(addDays(S.week,i)))+' · '+esc(S.kid)+'</div>'
    + '</div>';
+  return out;
 }
 
 let PAGES = [];
@@ -606,7 +672,8 @@ function autoFit(){
    5) 편집 패널
    ============================================================ */
 const DBIND=[["fCat","cat"],["fKicker","kicker"],["fHead","head"],["fBody","body"],["fCap","cap"],
-  ["fNote","note"],["fW","w"],["fM","m"],["fEx","ex"],["fTogo","togo"],["fQ1","q1"],["fQ2","q2"],["fSample","sample"]];
+  ["fNote","note"],["fW","w"],["fM","m"],["fEx","ex"],["fTogo","togo"],
+  ["fQuiz","quiz"],["fFill","fill"],["fFacts","facts"],["fOne","oneline"],["fQ1","q1"]];
 const SBIND=[["fTitle","title"],["fKid","kid"],["fSlogan","slogan"]];
 
 function drawTabs(){
@@ -626,7 +693,7 @@ function fillDay(){
   $("fType").value = d.type||"lines";
   $("fDate").value = addDays(S.week,cur);
   ["fC1","fC2","fC3","fC4"].forEach((id,n)=>{ $(id).value = (d.cards&&d.cards[n])||""; });
-  $("cardFields").style.display = (d.type==="lines") ? "none" : "block";
+  $("cardFields").style.display = (!d.type || d.type==="none") ? "none" : "block";
 }
 function fillSettings(){
   SBIND.forEach(([id,k])=>{ $(id).value=S[k]||""; });
@@ -688,7 +755,8 @@ function drawBank(q){
 function insertBank(i){
   const it=BANK[i], d=S.days[cur];
   d.cat=it.cat; d.kicker=it.k; d.head=it.t; d.body=it.s;
-  d.w=it.w; d.m=it.m; d.ex=it.ex; d.q1=it.q1; d.q2=it.q2;
+  d.w=it.w; d.m=it.m; d.ex=it.ex; d.oneline=it.q2; d.q1=it.q1;
+  d.fill = d.fill || (it.ex.replace("*"+it.w+"*","___").replace(it.w,"___")+" | "+it.w);
   if(!d.togo) d.togo="소리내어 읽어보세요.";
   fillDay(); touch();
 }
@@ -702,21 +770,28 @@ function promptText(){
   return [
 "아래 조건으로 어린이 주간신문 5일치 원고를 JSON으로만 써 줘. 설명은 붙이지 마.",
 "",
-"[대상] 초등 저학년~중학년이 혼자 읽을 수 있는 수준. 문장은 '~해요', '~답니다' 체.",
+"[대상] 초등 저학년~중학년. 혼자 읽을 수 있는 수준, '~해요' '~답니다' 체.",
+"[목표] 매일 가볍고 재미있게 읽으면서 상식이 쌓이는 것. 글쓰기 훈련이 목적이 아니다.",
 "[날짜] "+S.week+" 주간",
 days,
 "",
-"[각 기사 조건]",
-"- body: 네 문단, 전체 700~850자. 첫 문단은 사실, 가운데 두 문단은 배경과 까닭, 마지막 문단은 생각할 거리.",
-"- body 안에서 오늘의 낱말이 처음 나오는 곳 한 군데만 *별표*로 감싼다.",
+"[기사면]",
+"- body: 네 문단, 전체 950~1,100자. 첫 문단은 사실, 가운데 두 문단은 배경과 까닭, 마지막은 생각할 거리 한 줄.",
+"- 오늘의 낱말이 body에 처음 나오는 곳 한 군데만 *별표*로 감싼다.",
 "- 숫자와 연도는 확실한 것만 쓴다. 모르면 쓰지 않는다.",
-"- 분류는 기념일·인물·사회·과학·문화·마음 가운데 하나. 그 주의 기념일이나 절기가 있으면 우선한다.",
-"- q1은 활동지 첫 질문(고르기/상상하기), q2는 자기 생각을 쓰는 질문.",
-"- type은 cards(카드 4개 중 고르기) / write(쓰는 상자 2개) / draw(그림+설명) / lines(줄만) 중 하나.",
-"- type이 cards면 cards에 보기 4개, write면 상자 이름 2개, draw면 [이름, 특징]을 넣는다.",
+"- 분류는 기념일·인물·사회·과학·문화·마음 중 하나. 그 주의 기념일·절기가 있으면 우선한다.",
+"",
+"[활동지] 쓰는 분량은 적게, 읽는 재미는 크게.",
+"- quiz: O/X 세 문장. 한 줄에 하나씩 '문장 | O' 또는 '문장 | X'. 기사를 읽었으면 바로 풀리는 수준.",
+"- fill: 오늘의 낱말을 넣는 빈칸 문장 하나. '문장에 ___ 넣기 | 정답' 형식.",
+"- facts: '제목 | 내용' 세 줄. 기사에 안 나온 재미있는 곁가지 상식. 한 줄에 한 문장.",
+"- oneline: 한 줄이면 답할 수 있는 가벼운 질문. 길게 쓰게 하지 말 것.",
+"- type: 보통 \"none\". 그릴 거리가 뚜렷한 날만 \"draw\"(cards[0]=이름, cards[1]=특징), 고를 거리가 있으면 \"cards\"(보기 4개).",
 "",
 "[출력 형식]",
-'{"days":[{"cat":"","kicker":"","head":"","body":"","w":"","m":"","ex":"","togo":"소리내어 읽어보세요.","type":"cards","q1":"","cards":["","","",""],"q2":"","sample":""}, ... 5개]}'
+'{"days":[{"cat":"","kicker":"","head":"","body":"","w":"","m":"","ex":"","togo":"소리내어 읽어보세요.",',
+'  "quiz":"문장 | O\\n문장 | X\\n문장 | O","fill":"문장 ___ | 정답","facts":"제목 | 내용\\n제목 | 내용\\n제목 | 내용",',
+'  "oneline":"","type":"none","q1":"","cards":["","","",""]}, ... 5개]}'
   ].join("\n");
 }
 function copyText(t,btn){
@@ -746,7 +821,18 @@ $("btnImport").addEventListener("click",()=>{
    7) 저장 · 인쇄
    ============================================================ */
 function saveDraft(){ try{ localStorage.setItem(KEY_DRAFT, JSON.stringify(S)); }catch(e){} }
-function loadDraft(){ try{ const r=localStorage.getItem(KEY_DRAFT); if(r) S=Object.assign(defaultState(), JSON.parse(r)); }catch(e){} }
+function migrate(st){
+  if(!st || !Array.isArray(st.days)) return st;
+  st.days = st.days.map(d=>{
+    const n = Object.assign(blankDay(), d);
+    if(!Array.isArray(n.cards)) n.cards=["","","",""];
+    if(n.type==="lines") n.type="none";            // 예전 '줄만' 형식 정리
+    if(!n.oneline && d && d.q2) n.oneline = d.q2;  // 예전 '내 생각 쓰기' 질문 이어받기
+    return n;
+  });
+  return st;
+}
+function loadDraft(){ try{ const r=localStorage.getItem(KEY_DRAFT); if(r) S=migrate(Object.assign(defaultState(), JSON.parse(r))); }catch(e){} }
 function issues(){ try{ return JSON.parse(localStorage.getItem(KEY_SAVED)||"[]"); }catch(e){ return []; } }
 function putIssues(a){ try{ localStorage.setItem(KEY_SAVED, JSON.stringify(a)); }
   catch(e){ alert("저장 공간이 가득 찼어요. 보관함에서 지난 호를 지워 주세요. (사진이 많으면 더 빨리 찹니다)"); } }
@@ -762,7 +848,7 @@ function drawSaved(){
     t.appendChild(s);
     const b1=document.createElement("button"); b1.className="tiny"; b1.textContent="불러오기";
     const b2=document.createElement("button"); b2.className="tiny"; b2.textContent="삭제";
-    b1.onclick=()=>{ S=Object.assign(defaultState(), JSON.parse(JSON.stringify(it))); cur=0;
+    b1.onclick=()=>{ S=migrate(Object.assign(defaultState(), JSON.parse(JSON.stringify(it)))); cur=0;
       fillSettings(); drawTabs(); fillDay(); drawBank(""); touch(); window.scrollTo(0,0); };
     b2.onclick=()=>{ if(!confirm("제 "+it.issue+"호를 지울까요?")) return;
       putIssues(issues().filter(x=>x.id!==it.id)); drawSaved(); };
