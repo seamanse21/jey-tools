@@ -4483,7 +4483,7 @@ function rows(txt){
 
 function defaultState(){
   const week = mondayOf(todayISO());
-  return { title:"하루 10분 어린이신문", kid:"", week, issue:1, fs:10.2,
+  return { title:"10분 키즈뉴스", kid:"", week, issue:1, fs:10.2,
     slogan:"세상이 궁금한 어린이를 위한 주간 신문",
     days: SAMPLE_DAYS.map(d => Object.assign(blankDay(), JSON.parse(JSON.stringify(d)))) };
 }
@@ -4799,7 +4799,7 @@ function applyVisibility(){
     const show = showAll || (p.tag.kind!=="cover" && p.tag.kind!=="guide" && p.tag.kind!=="wrap" && p.tag.kind!=="weekend" && p.tag.i===cur);
     p.wrap.classList.toggle("off", !show);
   });
-  $("stageInfo").textContent = showAll ? "전체 12쪽" : (fmt(addDays(S.week,cur))+" · 기사면 + 활동지");
+  $("stageInfo").textContent = showAll ? ("전체 "+PAGES.length+"쪽") : (fmt(addDays(S.week,cur))+" · 기사면 + 활동지");
   $("btnAll").classList.toggle("on", showAll);
   $("btnAll").textContent = showAll ? "하루치만 보기" : ("전체 "+PAGES.length+"쪽 보기");
 }
