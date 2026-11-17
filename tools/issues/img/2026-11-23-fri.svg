@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" width="480" height="240">
-  <rect width="480" height="240" fill="#eaf5ee"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#eaf5ee"/>
   <rect x="0" y="190" width="480" height="50" fill="#d6ead e"/>
   <rect x="0" y="190" width="480" height="50" fill="#d8ebdf"/>
   <!-- 가게 차양 -->
