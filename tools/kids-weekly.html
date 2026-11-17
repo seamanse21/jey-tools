@@ -101,7 +101,7 @@ textarea{resize:vertical;line-height:1.6}
 .wordside .fh small{display:block;font-size:6.8pt;opacity:.9;font-weight:600}
 .wordside .fin{padding:3mm;flex:1 1 auto;display:flex;flex-direction:column}
 .wordside .w{font-size:15pt;font-weight:900;margin:0 0 2mm;line-height:1.2}
-.wordside .w::before{content:"◠ ";color:var(--cat)}
+.wordside .w .ic{vertical-align:-0.5mm;margin-right:1.6mm}
 .wordside .m{font-size:8.6pt;line-height:1.65;margin:0;word-break:keep-all}
 .wordside .ex{font-size:8.4pt;line-height:1.65;margin:auto 0 0;color:#3f3e36;word-break:keep-all;
   border-top:1px dashed #cfcbbf;padding-top:2.2mm}
@@ -142,7 +142,7 @@ textarea{resize:vertical;line-height:1.6}
 .wordbox .cap small{display:block;font-size:6.6pt;opacity:.85;font-weight:600}
 .wordbox .in{padding:3mm}
 .wordbox .w{font-size:13pt;font-weight:900;margin:0 0 1.5mm}
-.wordbox .w::before{content:"◠ ";color:var(--brand)}
+.wordbox .w .ic{vertical-align:-0.5mm;margin-right:1.6mm}
 .wordbox .m{font-size:8.2pt;line-height:1.6;margin:0;word-break:keep-all}
 .wordbox .ex{font-size:8pt;line-height:1.6;margin:2.5mm 0 0;color:#3f3e36;word-break:keep-all}
 .wordbox .ex b{color:var(--cat);font-weight:800}
@@ -2978,6 +2978,14 @@ const CAT_COLOR={"기념일":"#f08c2e","인물":"#8b5cf6","사회":"#2f7fd1","�
   "경제":"#2fa36b","과학":"#0f9b9b","문화":"#e35d8a","마음":"#dba400"};
 function catColor(c){ return CAT_COLOR[c] || "#f08c2e"; }
 function parts(txt){ return String(txt||"").split("|").map(x=>x.trim()); }
+/* 오늘의 단어 머리 아이콘 — 말풍선(낱말을 소리 내어 말해 본다) */
+function BUBBLE(px){
+  const n = px || 14;
+  return '<svg class="ic" width="'+n+'" height="'+n+'" viewBox="0 0 24 24" aria-hidden="true">'
+    + '<path d="M4.4 3h15.2A2.4 2.4 0 0 1 22 5.4v8.9a2.4 2.4 0 0 1-2.4 2.4h-7.2L7 21.2v-4.5H4.4A2.4 2.4 0 0 1 2 14.3V5.4A2.4 2.4 0 0 1 4.4 3z" fill="var(--cat)"/>'
+    + '<circle cx="8.2" cy="9.9" r="1.45" fill="#fff"/><circle cx="12" cy="9.9" r="1.45" fill="#fff"/>'
+    + '<circle cx="15.8" cy="9.9" r="1.45" fill="#fff"/></svg>';
+}
 /* 네이버 영어사전 '검색' 주소 — 단어만 바뀌므로 링크가 깨질 일이 없다 */
 function dictURL(word){ return "https://en.dict.naver.com/#/search?query="+encodeURIComponent(word); }
 function qrDataURL(text, px){
@@ -3084,7 +3092,7 @@ function artHTML(d,i){
    + '<div class="hero">'
    +   '<div class="heroL">'+photo+'</div>'
    +   '<div class="wordside"><div class="fh">오늘의 단어<small>읽으면서 뜻을 함께 익혀요</small></div>'
-   +     '<div class="fin"><p class="w">'+esc(d.w)+'</p><p class="m">'+esc(d.m)+'</p>'
+   +     '<div class="fin"><p class="w">'+BUBBLE(15)+esc(d.w)+'</p><p class="m">'+esc(d.m)+'</p>'
    +     '<p class="ex hand">'+emph(d.ex).replace(/<em>/g,"<b>").replace(/<\/em>/g,"</b>")+'</p></div></div>'
    + '</div>'
    + '<div class="artbody"><div class="main">'
