@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 240" width="480" height="240">
+  <rect width="480" height="240" fill="#eaf5ee"/>
+  <rect x="0" y="190" width="480" height="50" fill="#d6ead e"/>
+  <rect x="0" y="190" width="480" height="50" fill="#d8ebdf"/>
+  <!-- 가게 차양 -->
+  <g>
+    <rect x="40" y="36" width="280" height="18" rx="4" fill="#4b8f63"/>
+    <path d="M40 54h280l-16 26H56z" fill="#7fc090"/>
+    <path d="M56 80h258" stroke="#4b8f63" stroke-width="3"/>
+  </g>
+  <!-- 진열대 -->
+  <g>
+    <rect x="56" y="96" width="248" height="94" rx="6" fill="#fff" stroke="#cfe0d5" stroke-width="3"/>
+    <rect x="56" y="140" width="248" height="4" fill="#cfe0d5"/>
+    <rect x="76" y="108" width="40" height="28" rx="4" fill="#f3b63f"/>
+    <rect x="130" y="104" width="34" height="32" rx="4" fill="#e8795f"/>
+    <rect x="180" y="110" width="44" height="26" rx="4" fill="#7fa8d8"/>
+    <rect x="240" y="106" width="36" height="30" rx="4" fill="#b58de0"/>
+    <rect x="84" y="152" width="46" height="28" rx="4" fill="#7fc090"/>
+    <rect x="146" y="150" width="38" height="30" rx="4" fill="#f3b63f"/>
+    <rect x="200" y="154" width="50" height="26" rx="4" fill="#e8795f"/>
+  </g>
+  <!-- 가격표 -->
+  <g>
+    <path d="M330 58l34-10 10 34-28 10z" fill="#f08c2e"/>
+    <circle cx="352" cy="62" r="4" fill="#fff"/>
+    <path d="M372 96l34-10 10 34-28 10z" fill="#e35d8a"/>
+    <circle cx="394" cy="100" r="4" fill="#fff"/>
+  </g>
+  <!-- 장바구니 -->
+  <g transform="translate(336 134)">
+    <path d="M4 0h12l14 54h66l12-34H34" fill="none" stroke="#4a5a70" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="44" cy="64" r="7" fill="#4a5a70"/><circle cx="86" cy="64" r="7" fill="#4a5a70"/>
+  </g>
+  <!-- 체크리스트 -->
+  <g transform="translate(300 150)">
+    <rect x="0" y="0" width="44" height="56" rx="5" fill="#fff" stroke="#9fc4ac" stroke-width="3"/>
+    <rect x="14" y="-6" width="16" height="10" rx="3" fill="#9fc4ac"/>
+    <g stroke="#9fc4ac" stroke-width="3" stroke-linecap="round">
+      <path d="M10 18h24"/><path d="M10 30h24"/><path d="M10 42h16"/>
+    </g>
+    <path d="M8 16l4 4 7-8" stroke="#4b8f63" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
