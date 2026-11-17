@@ -1539,7 +1539,7 @@ const S = 1080;                       // 인스타 정사각형
 const CAT = {"기념일":"#f08c2e","인물":"#8b5cf6","사회":"#2f7fd1","정치":"#3b5f9e",
   "경제":"#2fa36b","과학":"#0f9b9b","문화":"#e35d8a","마음":"#dba400"};
 const DOW = ["일","월","화","수","목","금","토"];
-let ISSUE = null, DAY = 0, BRAND = "하루 10분 어린이신문", HANDLE = "@10min_kidsnews";
+let ISSUE = null, DAY = 0, BRAND = "10분 키즈뉴스", HANDLE = "@10minkids", SITE = "10minkids.com";
 
 /* ---------- 작은 도구들 ---------- */
 function addDays(iso,n){
@@ -1746,22 +1746,41 @@ async function card4(g, d, dt, cat){
 /* 5. 마무리 — 생각거리와 안내 */
 async function card5(g, d, dt, cat){
   g.fillStyle=cat; g.fillRect(0,0,S,S);
-  g.fillStyle="rgba(255,255,255,.96)"; rrect(g,64,120,S-128,S-300,34); g.fill();
 
+  /* 글이 짧으면 상자가 휑해 보인다. 먼저 줄 수를 재어 상자를 내용에 맞춘다 */
+  g.font='400 46px "Jua","Apple SD Gothic Neo",sans-serif';
+  const head = wrap(g, plain(d.oneline||d.q1||""), S-260);
+  g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
+  const cta  = wrap(g, "프로필 링크에서 1주일치 14쪽을 무료로 받으세요", S-260);
+  const sub  = ["기사 전문과 활동지는", "이번 주 신문에 담겨 있어요"];
+
+  const PAD=92, G1=74, G2=78, G3=72;
+  const inner = 34 + G1 + head.length*62 + G2 + sub.length*44 + G3 + cta.length*46;
+  /* 마지막 줄의 베이스라인 아래 여유를 한 번 빼야 위아래 여백이 같아 보인다 */
+  const boxH  = inner + PAD*2 - 34;
+  const boxY  = Math.round((S - 120 - boxH) / 2) + 20;
+
+  g.fillStyle="rgba(255,255,255,.96)"; rrect(g,64,boxY,S-128,boxH,34); g.fill();
+
+  let y = boxY + PAD + 34;
   g.fillStyle=cat; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.textAlign="center"; g.fillText("함께 이야기 나눠 보세요", S/2, 220);
+  g.textAlign="center"; g.fillText("함께 이야기 나눠 보세요", S/2, y);
+  g.textAlign="left";
 
+  y += G1 + 46;
   g.fillStyle="#17170f"; g.font='400 46px "Jua","Apple SD Gothic Neo",sans-serif';
-  let y = drawLines(g, wrap(g, plain(d.oneline||d.q1||""), S-260), S/2, 330, 62, "center");
+  y = drawLines(g, head, S/2, y, 62, "center") - 62;
 
+  y += G2 + 30;
   g.fillStyle="#6b6a60"; g.font='400 30px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-  drawLines(g, ["기사 전문과 활동지는", "이번 주 신문에 담겨 있어요"], S/2, y+70, 44, "center");
+  y = drawLines(g, sub, S/2, y, 44, "center") - 44;
 
+  y += G3 + 34;
   g.fillStyle=cat; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
-  drawLines(g, wrap(g, "이번 주 신문은 프로필 링크에서 무료로 받을 수 있어요", S-260), S/2, y+200, 46, "center");
+  drawLines(g, cta, S/2, y, 46, "center");
 
   g.fillStyle="#fff"; g.font='600 26px "Apple SD Gothic Neo",sans-serif';
-  g.textAlign="center"; g.fillText(HANDLE+"   ·   "+BRAND, S/2, S-56);
+  g.textAlign="center"; g.fillText(HANDLE+"   ·   "+SITE, S/2, S-56);
   g.textAlign="left";
 }
 
@@ -1789,11 +1808,30 @@ function drawDays(){
   });
 }
 
+/* 캔버스는 unicode-range 로 쪼갠 웹폰트를 알아서 받아오지 않는다.
+   DOM 에 없는 글자는 조용히 시스템 글꼴로 떨어지므로, 그릴 글자를 모아
+   document.fonts.load() 로 필요한 서브셋을 먼저 받아 둔다. */
+async function preloadFonts(d, dt){
+  const text = [d.cat, d.kicker, d.head, d.body, d.w, d.m, d.ex, d.oneline, d.q1,
+                d.idiom, d.hanja, d.eng, d.nums, d.facts, d.cap, d.searchq,
+                BRAND, HANDLE, SITE, fmt(dt),
+                "함께 이야기 나눠 보세요 기사 전문과 활동지는 이번 주 신문에 담겨 있어요",
+                "프로필 링크에서 1주일치 14쪽을 무료로 받으세요",
+                "오늘의 이야기 오늘의 낱말 숫자로 보는 뉴스 기사에 안 나온 이야기",
+                "사자성어 한자 영단어 뜻 쓰임새 훈음 급수 획수"]
+               .filter(Boolean).join(" ");
+  const specs = ['400 46px "Jua"', '400 30px "Gowun Dodum"'];
+  await Promise.all(specs.map(sp =>
+    document.fonts.load(sp, text).catch(()=>{})));
+  try{ await document.fonts.ready; }catch(e){}
+}
+
 async function render(){
   const box=$("sheet"); box.innerHTML="";
   if(!ISSUE) return;
   const d=ISSUE.days[DAY], dt=addDays(ISSUE.week,DAY);
   const cat=CAT[d.cat]||"#f08c2e";
+  await preloadFonts(d, dt);
   for(const c of CARDS){
     const slot=document.createElement("div"); slot.className="slot";
     const cv=document.createElement("canvas"); cv.width=S; cv.height=S;
