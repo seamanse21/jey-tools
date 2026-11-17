@@ -1,0 +1,251 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+:root{ --cat:#f08c2e; --cream:#fdf6e8; --navy:#22304a; --orange:#f08c2e; --ink:#2b2a24; }
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:"Gowun Dodum",sans-serif;color:var(--ink)}
+.sc{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:0 90px;text-align:center}
+.jua{font-family:"Jua",sans-serif;line-height:1.26}
+em{font-style:normal}
+
+/* 1 훅 ─ 공통 */
+#s1{background:#000}
+#s1 .ph{position:absolute;inset:0;filter:brightness(.40) saturate(1.05)}
+#s1 .in{position:relative;transform:translateY(-70px)}
+#s1 .pill{display:inline-block;background:var(--cat);color:#fff;font-family:"Jua",sans-serif;
+  font-size:40px;padding:12px 34px;border-radius:999px;margin-bottom:44px}
+#s1 h1{font-size:100px;color:#fff;letter-spacing:-.02em}
+
+/* 숫자 장면 */
+.numsc{background:var(--cream)}
+.numsc .big{font-family:"Jua",sans-serif;font-size:360px;color:var(--cat);line-height:1}
+.numsc .big .u{font-size:150px}
+.numsc .cap{font-size:58px;color:#6b6a60;margin-top:14px}
+.numsc .sub{font-size:44px;color:#9a978c;margin-top:22px}
+
+/* 낱말 장면 */
+#w2{background:var(--cream)}
+#w2 .lab{font-family:"Jua",sans-serif;font-size:44px;color:var(--cat);margin-bottom:34px}
+#w2 .wbox{position:relative;display:inline-block;padding:0 18px}
+#w2 .mark{position:absolute;left:0;bottom:16px;height:46px;width:0;
+  background:var(--cat);opacity:.22;border-radius:6px}
+#w2 .w{position:relative;font-family:"Jua",sans-serif;font-size:180px;color:var(--ink);line-height:1.1}
+#w2 .mean{font-size:54px;color:#6b6a60;margin-top:44px;line-height:1.55}
+#w2 .ex{font-size:44px;color:#9a978c;margin-top:34px}
+#w2 .ex em{color:var(--cat)}
+
+/* 기사 한 조각 / 결론 문장 */
+.linesc{background:var(--navy)}
+.linesc .yr{font-family:"Jua",sans-serif;font-size:150px;color:var(--orange);
+  margin-bottom:40px;line-height:1}
+.linesc .q{font-family:"Jua",sans-serif;font-size:74px;color:#fff;line-height:1.5}
+.linesc .q em{color:#ffd79a}
+
+/* 합치기 */
+#j4{background:var(--cat)}
+#j4 .row{display:flex;align-items:baseline;gap:18px;font-family:"Jua",sans-serif;
+  font-size:180px;color:#fff;line-height:1}
+#j4 .u{font-size:92px}
+#j4 .tag{font-size:62px;color:#fff;opacity:.85;margin-top:48px;font-family:"Jua",sans-serif}
+
+/* 사자성어 */
+#i4{background:var(--cat)}
+#i4 .lab{font-family:"Jua",sans-serif;font-size:42px;color:#fff;opacity:.75;margin-bottom:46px}
+#i4 .han{display:flex;gap:26px}
+#i4 .han span{font-family:"Jua",sans-serif;font-size:150px;color:#fff;line-height:1;
+  opacity:0;display:inline-block}
+#i4 .rd{font-family:"Jua",sans-serif;font-size:62px;color:#fff;margin-top:40px}
+#i4 .mn{font-size:46px;color:#fff;opacity:.85;margin-top:28px;line-height:1.5}
+
+/* 5 마무리 ─ 공통 */
+#s5{background:var(--orange)}
+#s5 .m{margin-bottom:40px}
+#s5 .h{font-family:"Jua",sans-serif;font-size:92px;color:#fff;line-height:1.32}
+#s5 .who{font-size:46px;color:#fff6e7;margin-top:28px}
+#s5 .btn{margin-top:60px;background:#fff;border-radius:28px;padding:34px 54px;
+  box-shadow:0 14px 34px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:10px}
+#s5 .btn .k{font-family:"Jua",sans-serif;font-size:44px;color:var(--orange)}
+#s5 .btn .v{font-family:"Jua",sans-serif;font-size:56px;color:var(--navy);line-height:1.3}
+#s5 .f{position:absolute;bottom:520px;font-family:"Jua",sans-serif;font-size:46px;color:#fff}
+</style></head><body>
+
+<div class="sc" id="s1">
+  <div class="ph"></div>
+  <div class="in"><div class="pill"></div><h1 class="jua"></h1></div>
+</div>
+
+<div class="sc numsc" id="n2"><div class="big"></div><div class="cap"></div><div class="sub"></div></div>
+<div class="sc numsc" id="n3"><div class="big"></div><div class="cap"></div><div class="sub"></div></div>
+
+<div class="sc" id="w2">
+  <div class="lab">오늘의 낱말</div>
+  <div class="wbox"><span class="mark"></span><span class="w"></span></div>
+  <div class="mean"></div><div class="ex"></div>
+</div>
+
+<div class="sc linesc" id="l3"><div class="yr"></div><div class="q jua"></div></div>
+<div class="sc linesc" id="l4"><div class="yr"></div><div class="q jua"></div></div>
+
+<div class="sc" id="j4">
+  <div class="row"></div><div class="tag"></div>
+</div>
+
+<div class="sc" id="i4">
+  <div class="lab">오늘의 사자성어</div>
+  <div class="han"></div><div class="rd"></div><div class="mn"></div>
+</div>
+
+<div class="sc" id="s5">
+  <div class="m">
+    <svg width="170" height="170" viewBox="0 0 64 64">
+      <path d="M32 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="32" cy="7" r="3.4" fill="#fff"/>
+      <rect x="12" y="15" width="40" height="36" rx="11" fill="#fff"/>
+      <circle cx="24.6" cy="30.5" r="4.2" fill="#e8891f"/><circle cx="40.4" cy="30.5" r="4.2" fill="#e8891f"/>
+      <rect x="25" y="43" width="14" height="3.6" rx="1.8" fill="#e8891f"/>
+      <rect x="6" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+      <rect x="53" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="h">이런 이야기를<br>우리 아이가 매일 한 장씩</div>
+  <div class="who">7세–초등 4학년 · 하루 10분이면 돼요</div>
+  <div class="btn">
+    <div class="k">프로필 링크를 눌러</div>
+    <div class="v">1주일치 14쪽<br>무료로 받아 가세요</div>
+  </div>
+  <div class="f">@10minkids</div>
+</div>
+
+<script>
+const E=x=>Math.min(1,Math.max(0,x));
+const easeOut=x=>1-Math.pow(1-x,3);
+const easeOutBack=x=>{const c1=2.0,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+const ramp=(t,a,b)=>E((t-a)/(b-a));
+const $=s=>document.querySelector(s);
+
+let SCENES=[], MODE="num", D=null;
+const XF=0.18;
+
+/* 데이터를 받아 DOM 을 채우고 장면 목록을 정한다 */
+function buildDOM(data){
+  D=data; MODE=data.mode||"num";
+  document.documentElement.style.setProperty('--cat', data.catColor);
+
+  const ph=$('#s1 .ph');
+  if(data.photo){
+    ph.style.background = 'url("'+data.photo+'") center/'+(data.fit||'cover')+' no-repeat';
+    if(data.fit==='contain') ph.style.backgroundColor = data.catColor;
+  } else { ph.style.background = data.catColor; }
+  $('#s1 .pill').textContent = data.cat;
+  $('#s1 h1').innerHTML = data.hook;
+
+  if(MODE==="num"){
+    const fill=(sel,o)=>{ $(sel+' .big').innerHTML=o.num+(o.unit?'<span class="u">'+o.unit+'</span>':'');
+      $(sel+' .cap').textContent=o.cap; $(sel+' .sub').textContent=o.sub||''; };
+    fill('#n2', data.a); fill('#n3', data.b);
+    if(data.join){
+      const row=$('#j4 .row');
+      row.innerHTML = data.join.parts.map(p=>
+        '<span'+(p.u?' class="u"':'')+'>'+p.t+'</span>').join('');
+      $('#j4 .tag').textContent=data.join.tag;
+      SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['j4',8.70,12.90],['s5',12.90,15.00]];
+    } else {
+      $('#l4 .yr').innerHTML = data.line.yr||'';
+      if(!data.line.yr) $('#l4 .yr').style.display='none';
+      $('#l4 .q').innerHTML = data.line.text;
+      SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['l4',8.70,12.90],['s5',12.90,15.00]];
+    }
+  } else {
+    $('#w2 .w').textContent=data.word.w;
+    $('#w2 .mean').innerHTML=data.word.mean;
+    $('#w2 .ex').innerHTML=data.word.ex;
+    $('#l3 .yr').innerHTML=data.line.yr||'';
+    if(!data.line.yr) $('#l3 .yr').style.display='none';
+    $('#l3 .q').innerHTML=data.line.text;
+    $('#i4 .han').innerHTML=[...data.idiom.han].map(c=>'<span>'+c+'</span>').join('');
+    $('#i4 .rd').textContent=data.idiom.read;
+    $('#i4 .mn').innerHTML=data.idiom.mean;
+    SCENES=[['s1',0,2.60],['w2',2.60,7.00],['l3',7.00,10.20],['i4',10.20,12.90],['s5',12.90,15.00]];
+  }
+}
+
+function seek(t){
+  SCENES.forEach(([id,a,b])=>{
+    const el=document.getElementById(id);
+    let o=0;
+    if(t>=a-XF && t<=b+0.01) o=E(Math.min(ramp(t,a-XF,a+XF*0.6), 1-ramp(t,b-XF,b)));
+    el.style.opacity=o;
+  });
+
+  /* 훅 — 0.5초 안에 다 읽힌다 */
+  { const p=easeOut(ramp(t,0.02,0.50)), inn=$('#s1 .in');
+    inn.style.opacity=p; inn.style.transform='translateY('+(-70+46*(1-p))+'px)';
+    $('#s1 .ph').style.transform='scale('+(1+0.07*ramp(t,0,2.6))+')'; }
+
+  if(MODE==="num"){
+    [['n2',2.60],['n3',5.70]].forEach(([id,a])=>{
+      const k=easeOutBack(ramp(t,a,a+0.55));
+      $('#'+id+' .big').style.transform='scale('+(0.55+0.45*k)+')';
+      const c=easeOut(ramp(t,a+0.30,a+0.85)), cap=$('#'+id+' .cap');
+      cap.style.opacity=c; cap.style.transform='translateY('+(18-18*c)+'px)';
+      const u=easeOut(ramp(t,a+0.55,a+1.10)), sub=$('#'+id+' .sub');
+      sub.style.opacity=u; sub.style.transform='translateY('+(16-16*u)+'px)';
+    });
+    if(D.join){
+      const a=8.70, k=easeOut(ramp(t,a,a+0.70)), sp=document.querySelectorAll('#j4 .row span');
+      sp.forEach((el,i)=>{
+        if(el.className==='u'){ el.style.opacity=k; }
+        else { el.style.transform='translateX('+((i===0?-1:1)*220*(1-k))+'px)'; }
+      });
+      const g=easeOutBack(ramp(t,a+0.60,a+1.25)), tag=$('#j4 .tag');
+      tag.style.opacity=E(ramp(t,a+0.60,a+0.95));
+      tag.style.transform='scale('+(0.86+0.14*g)+')';
+    } else { animLine('#l4', 8.70); }
+  } else {
+    const a=2.60;
+    $('#w2 .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
+    const k=easeOutBack(ramp(t,a+0.15,a+0.80)), w=$('#w2 .w');
+    w.style.transform='scale('+(0.7+0.3*k)+')'; w.style.opacity=E(ramp(t,a+0.15,a+0.45));
+    $('#w2 .mark').style.width=(easeOut(ramp(t,a+0.75,a+1.35))*100)+'%';
+    const mn=easeOut(ramp(t,a+1.15,a+1.75)), me=$('#w2 .mean');
+    me.style.opacity=mn; me.style.transform='translateY('+(20-20*mn)+'px)';
+    const ex=easeOut(ramp(t,a+1.60,a+2.20)), ee=$('#w2 .ex');
+    ee.style.opacity=ex; ee.style.transform='translateY('+(18-18*ex)+'px)';
+
+    animLine('#l3', 7.00);
+
+    const b=10.20;
+    $('#i4 .lab').style.opacity=easeOut(ramp(t,b,b+0.35));
+    document.querySelectorAll('#i4 .han span').forEach((el,i)=>{
+      const s0=b+0.25+i*0.16, kk=easeOutBack(ramp(t,s0,s0+0.50));
+      el.style.opacity=E(ramp(t,s0,s0+0.25));
+      el.style.transform='translateY('+(-34*(1-kk))+'px) scale('+(0.8+0.2*kk)+')';
+    });
+    const r=easeOut(ramp(t,b+1.05,b+1.55)), rd=$('#i4 .rd');
+    rd.style.opacity=r; rd.style.transform='translateY('+(18-18*r)+'px)';
+    const m2=easeOut(ramp(t,b+1.40,b+2.00)), mm=$('#i4 .mn');
+    mm.style.opacity=m2; mm.style.transform='translateY('+(18-18*m2)+'px)';
+  }
+
+  function animLine(sel, a){
+    const y=easeOutBack(ramp(t,a,a+0.60)), yr=document.querySelector(sel+' .yr');
+    if(yr){ yr.style.opacity=E(ramp(t,a,a+0.35)); yr.style.transform='scale('+(0.75+0.25*y)+')'; }
+    const q=easeOut(ramp(t,a+0.40,a+1.10)), qq=document.querySelector(sel+' .q');
+    qq.style.opacity=q; qq.style.transform='translateY('+(26-26*q)+'px)';
+  }
+
+  /* 마무리 — 버튼이 살짝 숨쉬어 누르고 싶게 만든다 */
+  { const a=12.90, k=easeOutBack(ramp(t,a,a+0.55));
+    $('#s5 .m').style.transform='scale('+(0.7+0.3*k)+')';
+    const h=easeOut(ramp(t,a+0.20,a+0.80)), hh=$('#s5 .h');
+    hh.style.opacity=h; hh.style.transform='translateY('+(24-24*h)+'px)';
+    const wh=easeOut(ramp(t,a+0.45,a+1.00)); $('#s5 .who').style.opacity=wh;
+    const bt=easeOutBack(ramp(t,a+0.70,a+1.30)), btn=$('#s5 .btn');
+    btn.style.opacity=E(ramp(t,a+0.70,a+1.00));
+    const pulse = 1 + 0.022*Math.sin((t-a-1.3)*7.5);
+    btn.style.transform='scale('+((0.86+0.14*bt) * (t>a+1.3 ? pulse : 1))+')';
+    $('#s5 .f').style.opacity=easeOut(ramp(t,a+1.10,a+1.70)); }
+}
+</script></body></html>
