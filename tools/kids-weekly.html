@@ -93,10 +93,24 @@ textarea{resize:vertical;line-height:1.6}
 .flag .when{margin-left:auto;text-align:right;color:#fff}
 .flag .when b{display:block;font-size:11.5pt;font-weight:800;line-height:1.15}
 .flag .when span{font-size:7.4pt;letter-spacing:.16em;opacity:.92}
-.foot3{flex:0 0 auto;display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:4mm;margin-top:3.5mm}
+/* 상단: 이미지 2/3 + 오늘의 단어 1/3 — 본문 3단의 1~2단 / 3단 폭에 맞춘다 */
+.hero{display:grid;grid-template-columns:calc((200% - 6mm)/3) calc((100% - 12mm)/3);gap:6mm;flex:0 0 auto}
+.hero .photo{height:100%}
+.hero .heroL{display:flex;flex-direction:column}
+.wordside{border:1.5px solid var(--cat);border-radius:3mm;overflow:hidden;display:flex;flex-direction:column}
+.wordside .fh{background:var(--cat);color:#fff;font-size:8.4pt;font-weight:800;padding:1.8mm 3mm;line-height:1.3}
+.wordside .fh small{display:block;font-size:6.8pt;opacity:.9;font-weight:600}
+.wordside .fin{padding:3mm;flex:1 1 auto;display:flex;flex-direction:column}
+.wordside .w{font-size:15pt;font-weight:900;margin:0 0 2mm;line-height:1.2}
+.wordside .w::before{content:"◠ ";color:var(--cat)}
+.wordside .m{font-size:8.6pt;line-height:1.65;margin:0;word-break:keep-all}
+.wordside .ex{font-size:8.4pt;line-height:1.65;margin:auto 0 0;color:#3f3e36;word-break:keep-all;
+  border-top:1px dashed #cfcbbf;padding-top:2.2mm}
+.wordside .ex b{color:var(--cat);font-weight:800}
+.foot3{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:3.5mm}
 .fbox{border:1.5px solid var(--cat);border-radius:3mm;overflow:hidden;display:flex;flex-direction:column}
 .fbox .fh{background:var(--cat);color:#fff;font-size:8.4pt;font-weight:800;padding:1.6mm 3mm}
-.fbox .fin{padding:2.6mm 3mm;flex:1 1 auto}
+.fbox .fin{padding:2.2mm 3mm;flex:1 1 auto}
 .fbox.dash{border-style:dashed}
 .fbox.dash .fh{background:transparent;color:var(--cat);border-bottom:1px dashed var(--cat)}
 .readstrip{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:4mm;
@@ -105,7 +119,7 @@ textarea{resize:vertical;line-height:1.6}
 .readstrip u{display:inline-block;min-width:10mm;border-bottom:1px solid #9a978c;text-decoration:none}
 .readstrip b.box{display:inline-block;width:3mm;height:3mm;border:1px solid #a9a69a;border-radius:.6mm;
   vertical-align:-.3mm;margin-right:1mm}
-.photo{width:100%;height:46mm;background:#f1efe8;border:1px solid #e3e0d6;border-radius:2mm;
+.photo{width:100%;height:62mm;background:#f1efe8;border:1px solid #e3e0d6;border-radius:2mm;
   display:flex;align-items:center;justify-content:center;color:#a8a496;font-size:9pt;overflow:hidden}
 .photo img{width:100%;height:100%;object-fit:cover;display:block}
 .photocap{font-size:7pt;color:#6b6a60;margin:1mm 0 3mm}
@@ -211,7 +225,15 @@ textarea{resize:vertical;line-height:1.6}
   padding:.8mm 3mm;border-radius:99px;letter-spacing:.02em}
 
 /* 오늘의 사자성어 · 오늘의 한자 */
-.vocab{display:grid;grid-template-columns:1.3fr 1fr;gap:3.5mm;margin-bottom:3mm}
+.vocab{display:grid;grid-template-columns:1.45fr 1fr 1.15fr;gap:3mm;margin-bottom:3mm}
+.eng{text-align:center}
+.eng .word{font-size:17pt;font-weight:900;line-height:1.1;margin:1mm 0 0;letter-spacing:-.01em}
+.eng .say{font-size:8.6pt;color:var(--cat);font-weight:700;margin:1mm 0 0}
+.eng .mean{font-size:10pt;font-weight:800;margin:1.5mm 0 0}
+.eng .ex{font-size:7.8pt;color:#55544c;line-height:1.5;margin:2mm 0 0;word-break:keep-all}
+.eng .trace{display:flex;justify-content:center;margin-top:2.5mm}
+.eng .trace span{min-width:30mm;height:9mm;border:1px dashed #cfcbbf;border-radius:1.5mm;
+  display:flex;align-items:center;justify-content:center;font-size:12pt;font-weight:700;color:#e2dfd5}
 .vbox{border:1.5px solid var(--cat);border-radius:3mm;overflow:hidden;display:flex;flex-direction:column}
 .vbox .vh{background:var(--cat);color:#fff;font-size:9pt;font-weight:800;padding:1.8mm 3mm;letter-spacing:.04em}
 .vbox .vin{padding:3mm 3.5mm;flex:1 1 auto}
@@ -249,7 +271,9 @@ textarea{resize:vertical;line-height:1.6}
 .vtable td.d{width:22mm;text-align:center;background:#fbf8ef;font-size:8.4pt;color:#55544c}
 .vtable td.w{font-weight:800}
 .vtable td.i{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;font-weight:800}
-.vtable td.h{text-align:center;width:26mm}
+.vtable td.h{text-align:center;width:24mm}
+.vtable td.e{width:30mm}
+.vtable td.e b{font-size:10pt}
 .vtable td.h b{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;font-size:14pt;margin-right:1.5mm}
 .stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:4mm;margin:2mm 0 6mm}
 .stamp{border:1.5px dashed #d9b36a;border-radius:50%;aspect-ratio:1/1;display:flex;flex-direction:column;
@@ -361,6 +385,8 @@ textarea{resize:vertical;line-height:1.6}
         <textarea id="fIdiom" rows="3" placeholder="十匙一飯 | 십시일반 | 열 사람이 한 술씩 보태면 한 사람 먹을 밥이 된다. | 여럿이 조금씩 도우면 큰 힘이 돼요."></textarea>
         <label for="fHanja">오늘의 한자 — <b>한자 | 훈음 | 급수 | 획수 | 활용 낱말</b></label>
         <textarea id="fHanja" rows="2" placeholder="食 | 먹을 식 | 7급II | 9획 | 음식(飮食) · 식사(食事)"></textarea>
+        <label for="fEng">오늘의 영단어 — <b>단어 | 한글 발음 | 뜻 | 예문</b></label>
+        <textarea id="fEng" rows="2" placeholder="tradition | 트러디션 | 전통, 풍습 | Kimjang is a Korean tradition."></textarea>
         <label for="fOne">맨 아래 한 줄 쓰기 (비우면 칸이 사라집니다)</label>
         <input type="text" id="fOne" maxlength="60">
         <label for="fType">추가 활동 (없어도 됩니다)</label>
@@ -587,7 +613,7 @@ function emph(s){ return esc(s).replace(/\*([^*\n]+)\*/g,"<em>$1</em>"); }
 
 function blankDay(){ return {cat:"사회",kicker:"",head:"",body:"",cap:"",note:"",photo:"",
   w:"",m:"",ex:"",togo:"소리내어 읽어보세요.",
-  quiz:"",fill:"",facts:"",oneline:"",idiom:"",hanja:"",nums:"",searchq:"",sentence:"",
+  quiz:"",fill:"",facts:"",oneline:"",idiom:"",hanja:"",nums:"",searchq:"",sentence:"",eng:"",
   type:"none",q1:"",cards:["","","",""],sample:""}; }
 const CAT_COLOR={"기념일":"#f08c2e","인물":"#8b5cf6","사회":"#2f7fd1","정치":"#3b5f9e",
   "경제":"#2fa36b","과학":"#0f9b9b","문화":"#e35d8a","마음":"#dba400"};
@@ -670,20 +696,20 @@ function artHTML(d,i){
    +   '<span class="catbadge">'+esc(d.cat)+'</span>'
    +   '<span>제 '+esc(S.issue)+'호 · '+(i+1)+'/5</span></div>'
 
+   + '<div class="hero">'
+   +   '<div class="heroL">'+photo
+   +     (d.cap?'<div class="photocap">'+esc(d.cap)+'</div>':'')+'</div>'
+   +   '<div class="wordside"><div class="fh">오늘의 단어<small>읽으면서 뜻을 함께 익혀요</small></div>'
+   +     '<div class="fin"><p class="w">'+esc(d.w)+'</p><p class="m">'+esc(d.m)+'</p>'
+   +     '<p class="ex hand">'+emph(d.ex).replace(/<em>/g,"<b>").replace(/<\/em>/g,"</b>")+'</p></div></div>'
+   + '</div>'
    + '<div class="artbody"><div class="main">'
-   +   photo + (d.cap?'<div class="photocap">'+esc(d.cap)+'</div>':'<div style="height:2.5mm"></div>')
-   +   '<p class="kicker">'+esc(d.kicker)+'</p><h1 class="head">'+esc(d.head)+'</h1>'
+   +   '<p class="kicker" style="margin-top:3.5mm">'+esc(d.kicker)+'</p><h1 class="head">'+esc(d.head)+'</h1>'
    +   '<div class="cols" data-flow="1">'+paras+'</div>'
    +   (d.note?'<div class="note">'+esc(d.note)+'</div>':'')
    + '</div></div>'
 
    + '<div class="foot3">'
-   +   '<div class="fbox"><div class="fh">오늘의 단어</div><div class="fin">'
-   +     '<p class="w" style="font-size:13pt;font-weight:900;margin:0 0 1.5mm">'+esc(d.w)+'</p>'
-   +     '<p class="m" style="font-size:8.4pt;line-height:1.6;margin:0;word-break:keep-all">'+esc(d.m)+'</p>'
-   +     '<p class="ex hand" style="font-size:8.2pt;line-height:1.6;margin:2mm 0 0;color:#3f3e36;word-break:keep-all">'
-   +       emph(d.ex).replace(/<em>/g,'<b style="color:var(--cat)">').replace(/<\/em>/g,"</b>")+'</p>'
-   +   '</div></div>'
    +   '<div class="fbox"><div class="fh">숫자로 보는 뉴스</div><div class="fin">'
    +     (numrows.length
         ? numrows.map(r=>'<div style="display:flex;align-items:baseline;gap:2mm;padding:1.2mm 0">'
@@ -731,8 +757,9 @@ function actHTML(d,i){
   // 오늘의 사자성어 · 오늘의 한자 (매일 고정)
   const id4 = parts(d.idiom);   // 十匙一飯 | 십시일반 | 뜻 | 쓰임새
   const hj  = parts(d.hanja);   // 食 | 먹을 식 | 7급II | 9획 | 활용 낱말
-  if((id4[0]||hj[0])){
-    out += '<div class="sec"><h3><i>2</i>오늘의 어휘<small>매일 세 가지씩 모아요</small></h3><div class="vocab">';
+                                // eng: tradition | 트러디션 | 전통 | 예문
+  if((id4[0]||hj[0]||d.eng)){
+    out += '<div class="sec"><h3><i>2</i>오늘의 어휘<small>사자성어 · 한자 · 영단어</small></h3><div class="vocab">';
     out += '<div class="vbox idiom"><div class="vh">오늘의 사자성어</div><div class="vin">'
       + '<p class="ch">'+esc(id4[0]||"")+'</p>'
       + '<p class="ro">'+esc(id4[1]||"")+'</p>'
@@ -746,6 +773,14 @@ function actHTML(d,i){
       + '<p class="meta">'+esc([hj[2],hj[3]].filter(Boolean).join(" · "))+'</p>'
       + '<div class="trace"><span>'+esc(ch)+'</span><span>'+esc(ch)+'</span><span></span></div>'
       + (hj[4]?'<p class="words">'+esc(hj[4])+'</p>':'')
+      + '</div></div>';
+    const en = parts(d.eng);
+    out += '<div class="vbox eng"><div class="vh">오늘의 영단어</div><div class="vin">'
+      + '<p class="word">'+esc(en[0]||"")+'</p>'
+      + '<p class="say">'+esc(en[1]||"")+'</p>'
+      + '<p class="mean">'+esc(en[2]||"")+'</p>'
+      + (en[3]?'<p class="ex">'+esc(en[3])+'</p>':'')
+      + '<div class="trace"><span>'+esc(en[0]||"")+'</span></div>'
       + '</div></div>';
     out += '</div></div>';
   }
@@ -800,17 +835,18 @@ function actHTML(d,i){
 
 function wrapHTML(){
   const rowsHTML = S.days.map((d,i)=>{
-    const id4=parts(d.idiom), hj=parts(d.hanja);
+    const id4=parts(d.idiom), hj=parts(d.hanja), en=parts(d.eng);
     return '<tr><td class="d">'+esc(fmt(addDays(S.week,i)))+'</td>'
       + '<td class="w">'+esc(d.w||"")+'<br><span style="font-weight:400;font-size:8.2pt;color:#55544c">'+esc(d.m||"")+'</span></td>'
       + '<td class="i">'+esc(id4[0]||"")+' <span style="font-size:8.4pt;color:#55544c">'+esc(id4[1]||"")+'</span></td>'
-      + '<td class="h"><b>'+esc(hj[0]||"")+'</b>'+esc(hj[1]||"")+'</td></tr>';
+      + '<td class="h"><b>'+esc(hj[0]||"")+'</b>'+esc(hj[1]||"")+'</td>'
+      + '<td class="e"><b>'+esc(en[0]||"")+'</b><br><span style="font-size:8.2pt;color:#55544c">'+esc(en[2]||"")+'</span></td></tr>';
   }).join("");
   const stamps = S.days.map((d,i)=>'<div class="stamp"><b>'+(i+1)+'</b><span>'
     + esc(fmt(addDays(S.week,i)).replace(/요일$/,"")) + '</span></div>').join("");
   return '<div class="wrap2"><h2>한 주 어휘 모아보기</h2>'
-   + '<p class="sub">이번 주에 만난 낱말 5개 · 사자성어 5개 · 한자 5자</p>'
-   + '<table class="vtable"><tr><th>날짜</th><th>오늘의 낱말</th><th>사자성어</th><th>한자</th></tr>'+rowsHTML+'</table>'
+   + '<p class="sub">이번 주에 만난 낱말 5개 · 사자성어 5개 · 한자 5자 · 영단어 5개</p>'
+   + '<table class="vtable"><tr><th>날짜</th><th>오늘의 낱말</th><th>사자성어</th><th>한자</th><th>영단어</th></tr>'+rowsHTML+'</table>'
    + '<h2 style="font-size:15pt">읽은 날 도장판</h2>'
    + '<p class="sub">읽은 날에는 동그라미 안에 도장을 찍거나 색칠해 보세요</p>'
    + '<div class="stamps">'+stamps+'</div>'
@@ -873,7 +909,7 @@ function autoFit(){
     if(p.tag.kind!=="art") return;
     const flow=p.page.querySelector('[data-flow]'); if(!flow) return;
     let best=8;
-    for(let v=8; v<=11.4; v+=0.2){
+    for(let v=8; v<=13.4; v+=0.2){
       p.page.style.setProperty("--fs", v.toFixed(1)+"pt");
       if(!flowed(flow)) best=v; else break;
     }
@@ -889,7 +925,7 @@ function autoFit(){
 const DBIND=[["fCat","cat"],["fKicker","kicker"],["fHead","head"],["fBody","body"],["fCap","cap"],
   ["fNote","note"],["fW","w"],["fM","m"],["fEx","ex"],["fTogo","togo"],
   ["fQuiz","quiz"],["fFill","fill"],["fFacts","facts"],["fIdiom","idiom"],["fHanja","hanja"],
-  ["fNums","nums"],["fSearchq","searchq"],
+  ["fNums","nums"],["fSearchq","searchq"],["fEng","eng"],
   ["fOne","oneline"],["fQ1","q1"]];
 const SBIND=[["fTitle","title"],["fKid","kid"],["fSlogan","slogan"]];
 
@@ -999,13 +1035,22 @@ days,
 "- 분류는 기념일·인물·사회·과학·문화·마음 중 하나. 그 주의 기념일·절기가 있으면 우선한다.",
 "",
 "[활동지] 쓰는 분량은 적게, 읽는 재미는 크게.",
-"- quiz: O/X 세 문장. 한 줄에 하나씩 '문장 | O' 또는 '문장 | X'. 기사를 읽었으면 바로 풀리는 수준.",
+"- quiz: O/X 세 문장. 한 줄에 하나씩 '문장 | O' 또는 '문장 | X'.",
+"  목적은 기사 내용을 제대로 이해했는지 확인하는 것이다. 기사를 읽지 않으면 풀 수 없고, 읽었으면 바로 풀리게 만든다.",
+"  세 문장은 각각 기사의 다른 문단에서 가져오고, 적어도 하나는 X 로 한다. 상식만으로 맞힐 수 있는 문장은 쓰지 않는다.",
 "- fill: 오늘의 낱말을 넣는 빈칸 문장 하나. '문장에 ___ 넣기 | 정답' 형식.",
 "- facts: '제목 | 내용' 세 줄. 기사에 안 나온 재미있는 곁가지 상식. 한 줄에 한 문장.",
-"- idiom: 오늘의 사자성어. '한자 넉 자 | 독음 | 뜻 | 쓰임새 한 줄'. 그날 기사와 뜻이 통하는 것으로 고른다.",
+"- idiom: 오늘의 사자성어. '한자 넉 자 | 독음 | 뜻 | 쓰임새 한 줄'.",
+"  반드시 그날 기사의 내용과 맞물리는 것으로 고른다. 쓰임새 한 줄에서 기사와 어떻게 이어지는지 드러나게 쓴다.",
+"  (예: 김장 기사 → 십시일반 / 20년을 연구한 과학자 기사 → 우공이산)",
 "- hanja: 오늘의 한자. '한자 한 자 | 훈음 | 급수 | 획수 | 활용 낱말 두 개'. 8급~5급에서 고르고 급수는 한국어문회 기준으로 적는다.",
+"  이것도 기사와 이어지는 글자로 고른다. (예: 김장 기사 → 食, 추수감사절 기사 → 秋, 물건을 사는 기사 → 買)",
+"  사자성어에서 글자 하나를 그대로 떼어 오지는 말고, 기사 주제를 바로 가리키는 글자를 고른다.",
 "- nums: 숫자로 보는 뉴스. '숫자 | 무엇인지' 두세 줄. 기사에 나온 숫자만 쓴다.",
 "- searchq: 더 알고 싶을 때 검색할 키워드 한 줄. 링크나 주소는 쓰지 않는다.",
+"- eng: 오늘의 영단어. '단어 | 한글 발음 | 뜻 | 짧은 예문'.",
+"  오늘의 낱말과 짝이 되는 영어 한 단어로 고른다. (예: 풍습 → tradition, 수확 → harvest, 할인 → sale)",
+"  초등 저학년이 따라 쓸 수 있게 철자가 너무 길지 않은 것으로, 예문은 여섯 단어를 넘지 않게 쓴다.",
 "- oneline: 한 줄이면 답할 수 있는 가벼운 질문. 길게 쓰게 하지 말 것.",
 "- type: 보통 \"none\". 그릴 거리가 뚜렷한 날만 \"draw\"(cards[0]=이름, cards[1]=특징), 고를 거리가 있으면 \"cards\"(보기 4개).",
 "",
@@ -1014,6 +1059,7 @@ days,
 '  "quiz":"문장 | O\\n문장 | X\\n문장 | O","fill":"문장 ___ | 정답","facts":"제목 | 내용\\n제목 | 내용\\n제목 | 내용",',
 '  "idiom":"十匙一飯 | 십시일반 | 뜻 | 쓰임새","hanja":"食 | 먹을 식 | 7급II | 9획 | 음식 · 식사",',
 '  "nums":"2013년 | 유네스코 등재\\n11·22 | 재료 열한 가지, 좋은 점 스물두 가지","searchq":"김장 문화 유네스코",',
+'  "eng":"tradition | 트러디션 | 전통, 풍습 | Kimjang is a Korean tradition.",',
 '  "oneline":"","type":"none","q1":"","cards":["","","",""]}, ... 5개]}'
   ].join("\n");
 }
