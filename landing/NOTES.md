@@ -1,5 +1,9 @@
 # 10분 키즈뉴스 랜딩 페이지 — 작업 메모
 
+> **실제 파일은 이 저장소에 없다.** `seamanse21/10minkids` 의 `main` 이 원본이고
+> GitHub Pages 로 `https://10minkids.com` 에 배포된다. 이 폴더에는 이 메모만 둔다.
+> (한때 양쪽에 똑같은 파일을 두었다가 PDF 경로가 어긋났다. 원본은 한 곳만 둔다.)
+
 ## 무엇인가
 무료 샘플(1주치 14쪽 PDF)을 미끼로 이메일을 모으는 한 장짜리 랜딩.
 인스타 프로필 링크의 도착지다. 설계 근거는 `docs/landing-strategy.md`, 퍼널 전체는 `docs/funnel.md`.
@@ -48,8 +52,11 @@ lazyowen.com 은 글의 뒷부분을 가리지만, 우리 상품은 PDF 라서 �
 칸이 하나 느는 마찰보다 얻는 게 크다. 학년별 발송이 가능해지고,
 물어보는 행위 자체가 "내 아이를 위한 것"이라는 신호가 되어 전환이 오히려 오른다.
 
-## 파일
-- `index.html` — 전부. 외부 라이브러리·스크립트 없음
+## 파일 (모두 `seamanse21/10minkids`)
+- `index.html` — 랜딩 전부. 외부는 스티비 스크립트 하나뿐
+- `thanks/index.html` — 구독 확인 뒤 PDF 를 받는 페이지. 스타일은 랜딩에서 복사해 왔다
+- `files/10min-kidsnews-sample.pdf` — 1주치 14쪽, 약 4MB
+- `CNAME` — `10minkids.com`
 - `fonts.css` + `fonts/` — Jua(제목) · Gowun Dodum(본문). 구글 폰트 OFL 자체 호스팅.
   **`fonts.css` 는 반드시 `landing/` 바로 아래 둔다.** 안의 경로가 `./fonts/...` 라서
   `fonts/` 안으로 옮기면 전부 404 가 나고 시스템 글꼴로 조용히 바뀐다(한 번 겪음)
