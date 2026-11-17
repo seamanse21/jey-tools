@@ -214,7 +214,8 @@ textarea{resize:vertical;line-height:1.6}
 .mysent{border:1px solid #d9d6cb;border-radius:2mm;padding:2.5mm 3mm}
 .mysent p{margin:0 0 1.5mm;font-size:8.6pt;color:#55544c}
 .mysent .lines{height:10mm}
-.fillbox u{display:inline-block;min-width:26mm;border-bottom:1.5px solid #9a978c;text-decoration:none}
+.fillbox u{display:inline-block;min-width:26mm;height:1.05em;border-bottom:1.6px solid #9a978c;
+  text-decoration:none;vertical-align:-0.3em}
 .facts{display:grid;gap:3mm}
 .facts.c3{grid-template-columns:repeat(3,1fr)}
 .facts.c2{grid-template-columns:repeat(2,1fr)}
@@ -257,6 +258,7 @@ textarea{resize:vertical;line-height:1.6}
   font-size:34pt;font-weight:900;line-height:1;margin:1mm 0 0}
 .hanja .ro{font-size:11.5pt;font-weight:800;margin:1.5mm 0 .8mm}
 .hanja .meta{font-size:7.6pt;color:#7a7970;margin:0}
+.readstrip u,.wk u{vertical-align:-0.25em}
 .hanja .trace{display:flex;gap:2mm;justify-content:center;margin-top:2.5mm}
 .hanja .trace span{width:12mm;height:12mm;border:1px dashed #cfcbbf;border-radius:1.5mm;
   display:flex;align-items:center;justify-content:center;
@@ -299,7 +301,7 @@ textarea{resize:vertical;line-height:1.6}
 .wwrite .c .s{font-size:7pt;color:#8d8b80;margin-top:.6mm}
 .wwrite .c .box{height:9mm;border:1px dashed #cfcbbf;border-radius:1.5mm;margin-top:1.6mm}
 /* 사자성어 짝 맞추기 */
-.match{display:grid;grid-template-columns:1fr 1fr;gap:2.6mm 12mm;align-items:center}
+.match{display:grid;grid-template-columns:44mm 1fr;gap:3mm 34mm;align-items:center}
 .match .l,.match .r{display:flex;align-items:center;gap:2.5mm;border:1px solid #e2dfd5;border-radius:2mm;
   padding:2.2mm 3mm;background:#fff;min-height:11.5mm}
 .match .l{justify-content:space-between}
@@ -324,24 +326,24 @@ textarea{resize:vertical;line-height:1.6}
 .vtable td.h b{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;font-size:14pt;margin-right:1.5mm}
 .stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:5mm;margin:2.5mm auto 6mm;max-width:172mm}
 .stamp{border:1.5px dashed #d9b36a;border-radius:50%;aspect-ratio:1/1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;color:#c9a35a}
-.stamp b{font-size:11pt;font-weight:800}
-.stamp span{font-size:8.4pt;margin-top:1.2mm}
+  align-items:center;justify-content:center;color:#c9a35a;padding:4mm;box-sizing:border-box}
+.stamp b{font-size:9.6pt;font-weight:800;line-height:1.1}
+.stamp span{font-size:7.6pt;margin-top:1.4mm;line-height:1}
 .lookback{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:auto}
 .lookback .lb{border:1px solid #d9d6cb;border-radius:2.5mm;padding:3mm}
 .lookback .lb h4{margin:0 0 2mm;font-size:9.5pt;font-weight:800}
 .lookback .lb .lines{height:18mm}
 
 /* 보호자 안내 */
-.guide{padding:12mm 12mm;height:100%;display:flex;flex-direction:column}
-.guide h2{font-size:20pt;margin:0 0 2mm;text-align:center;font-weight:900}
-.guide .lead{text-align:center;font-size:9.5pt;color:#55544c;margin:0 0 6mm;line-height:1.7}
-.guide table{width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:6mm}
-.guide th{background:var(--brand);color:#fff;padding:2.2mm;font-weight:700}
-.guide td{border:1px solid #ddd9cd;padding:2.2mm 3mm;vertical-align:middle;line-height:1.6}
+.guide{padding:10mm 11mm;height:100%;display:flex;flex-direction:column;overflow:hidden}
+.guide h2{font-size:18pt;margin:0 0 1.5mm;text-align:center;font-weight:900}
+.guide .lead{text-align:center;font-size:9pt;color:#55544c;margin:0 0 4mm;line-height:1.6}
+.guide table{width:100%;border-collapse:collapse;font-size:8.6pt;margin-bottom:4mm}
+.guide th{background:var(--brand);color:#fff;padding:1.8mm;font-weight:700}
+.guide td{border:1px solid #ddd9cd;padding:1.8mm 2.6mm;vertical-align:middle;line-height:1.5}
 .guide td.k{width:30mm;text-align:center;background:#fbf8ef}
-.guide h3{font-size:12pt;margin:3mm 0 2.5mm;font-weight:800}
-.guide ol{margin:0;padding-left:6mm;font-size:9.5pt;line-height:1.9}
+.guide h3{font-size:11pt;margin:2mm 0 2mm;font-weight:800}
+.guide ol{margin:0;padding-left:5.5mm;font-size:9pt;line-height:1.75}
 
 @page{size:A4;margin:0}
 @media print{
@@ -3027,7 +3029,8 @@ function coverHTML(){
   return '<div class="cover">'+MASCOT(112,"color")
     + '<div class="nm">'+esc(S.title)+'</div>'
     + '<div class="en">WEEKLY READING</div>'
-    + '<div class="meta">제 '+esc(S.issue)+'호 &nbsp;|&nbsp; '+esc(S.week)+' 주간'+(S.kid?' &nbsp;|&nbsp; '+esc(S.kid)+' 어린이':'')+'</div>'
+    + '<div class="meta">'+esc(S.week.replace(/-/g,". "))+' ~ '+esc(addDays(S.week,6).slice(5).replace("-",". "))
+    +   (S.kid?' &nbsp;|&nbsp; '+esc(S.kid)+' 어린이':'')+'</div>'
     + '<div class="list">'+list+'</div></div>';
 }
 function guideHTML(){
@@ -3076,7 +3079,7 @@ function artHTML(d,i){
    + '<div class="rule2"></div>'
    + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:7.5pt;color:#8d8b80;margin-bottom:3mm">'
    +   '<span class="catbadge">'+esc(d.cat)+'</span>'
-   +   '<span>제 '+esc(S.issue)+'호 · '+(i+1)+'/5</span></div>'
+   +   '<span>'+(i+1)+' / 5</span></div>'
 
    + '<div class="hero">'
    +   '<div class="heroL">'+photo+'</div>'
@@ -3235,7 +3238,7 @@ function weekendHTML(){
   }).join("");
   return '<div class="wk">'
    + '<div class="top"><b>주말에 한 번 더</b>'
-   +   '<span>'+esc(fmt(sat))+' · '+esc(fmt(sun))+' &nbsp;|&nbsp; 제 '+esc(S.issue)+'호</span></div>'
+   +   '<span>'+esc(fmt(sat))+' · '+esc(fmt(sun))+'</span></div>'
    + '<div class="sec"><h3><i>1</i>무슨 이야기였나요?<small>기억나는 대로 한 줄씩 적어 보세요</small></h3>'
    +   '<div class="recall">'+recall+'</div></div>'
    + '<div class="sec"><h3><i>2</i>낱말 다시 채우기<small>뜻을 보고 낱말을 써 보세요</small></h3>'
@@ -3338,8 +3341,10 @@ function checkOverflow(){
   PAGES.forEach(p=>{
     if(p.wrap.classList.contains("off")) return;
     p.page.querySelectorAll('[data-flow]').forEach(e=>{ if(flowed(e)) over=true; });
-    const act=p.page.querySelector('.act');
-    if(act && act.scrollHeight>act.clientHeight+2) over=true;
+    ['.act','.wrap2','.wk','.guide'].forEach(sel=>{
+      const e=p.page.querySelector(sel);
+      if(e && e.scrollHeight>e.clientHeight+2) over=true;
+    });
   });
   $("warn").classList.toggle("on", over);
 }
