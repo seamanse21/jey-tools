@@ -3156,7 +3156,8 @@ function wrapHTML(){
     const id4=parts(d.idiom), hj=parts(d.hanja), en=parts(d.eng);
     return '<tr><td class="d">'+esc(fmt(addDays(S.week,i)))+'</td>'
       + '<td class="w">'+esc(d.w||"")+'<br><span style="font-weight:400;font-size:8.2pt;color:#55544c">'+esc(d.m||"")+'</span></td>'
-      + '<td class="i">'+esc(id4[0]||"")+' <span style="font-size:8.4pt;color:#55544c">'+esc(id4[1]||"")+'</span></td>'
+      + '<td class="i">'+esc(id4[0]||"")
+      +   '<br><span style="font-weight:400;font-size:8.4pt;color:#55544c">'+esc(id4[1]||"")+'</span></td>'
       + '<td class="h"><b>'+esc(hj[0]||"")+'</b>'+esc(hj[1]||"")+'</td>'
       + '<td class="e"><b>'+esc(en[0]||"")+'</b><br><span style="font-size:8.2pt;color:#55544c">'+esc(en[2]||"")+'</span></td></tr>';
   }).join("");
