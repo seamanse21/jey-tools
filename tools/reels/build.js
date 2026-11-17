@@ -37,21 +37,22 @@ function dataFor(d, i){
   const ns = rows(d.nums);
   const photo = d.photo ? 'file://'+path.join(TOOLS, d.photo) : null;
   const fit = (d.photo||'').endsWith('.svg') ? 'contain' : 'cover';
-  const base = { cat:d.cat, catColor:color, photo, fit,
-                 hook: hookOf(d) };
-  /* 숫자가 둘 이상이면 숫자형, 아니면 어휘형 */
-  if(ns.length >= 2){
+  const id = parts(d.idiom), hj = parts(d.hanja);
+  const word = { w:d.w, mean:String(d.m||'').replace(/\.$/,''), ex: emph(d.ex) };
+  const base = { cat:d.cat, catColor:color, photo, fit, hook:hookOf(d), word };
+
+  /* 요일마다 번갈아 쓴다. 모든 기사에 숫자가 있어 숫자 개수로 나누면 전부 숫자형이 된다.
+     월·수·금 숫자형, 화·목 어휘형. 숫자가 모자라면 어휘형으로 넘긴다. */
+  const wantNum = (i % 2 === 0) && ns.length >= 2;
+  if(wantNum){
     const a = splitNum(ns[0].a), b = splitNum(ns[1].a);
-    const o = Object.assign({mode:'num'}, base,
+    return Object.assign({mode:'num'}, base,
       { a:{num:a.num, unit:a.unit, cap:ns[0].b}, b:{num:b.num, unit:b.unit, cap:ns[1].b} });
-    o.line = { yr:'', text: emph(String(d.kicker||d.head)) };
-    return o;
   }
-  const id = parts(d.idiom);
   return Object.assign({mode:'word'}, base, {
-    word:{ w:d.w, mean:String(d.m||'').replace(/\.$/,''), ex: emph(d.ex) },
-    line:{ yr:'', text: emph(String(d.kicker||d.head)) },
-    idiom:{ han:id[0]||'', read:id[1]||'', mean:String(id[2]||'').replace(/이에요\.$/,'') }
+    hanja:{ c:hj[0]||'', read:hj[1]||'', use:hj[4]||'' },
+    idiom:{ han:id[0]||'', read:id[1]||'',
+            mean:String(id[2]||'').replace(/이에요\.$/,'').replace(/\.$/,'') }
   });
 }
 function hookOf(d){

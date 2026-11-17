@@ -13,10 +13,20 @@ em{font-style:normal}
 /* 1 훅 ─ 공통 */
 #s1{background:#000}
 #s1 .ph{position:absolute;inset:0;filter:brightness(.40) saturate(1.05)}
+#s1 .card{display:none}
 #s1 .in{position:relative;transform:translateY(-70px)}
 #s1 .pill{display:inline-block;background:var(--cat);color:#fff;font-family:"Jua",sans-serif;
   font-size:40px;padding:12px 34px;border-radius:999px;margin-bottom:44px}
 #s1 h1{font-size:100px;color:#fff;letter-spacing:-.02em}
+/* 일러스트는 밝고 단순해서 어둡게 덮으면 망가진다. 흰 카드에 올리고 글자는 아래에 둔다 */
+#s1.illu{background:var(--cat);justify-content:flex-start;padding-top:250px}
+#s1.illu .ph{display:none}
+#s1.illu .card{display:block;width:100%;height:600px;background:#fff;border-radius:40px;
+  padding:46px;box-shadow:0 20px 50px rgba(0,0,0,.18)}
+#s1.illu .card .im{width:100%;height:100%;background-position:center;
+  background-size:contain;background-repeat:no-repeat}
+#s1.illu .in{transform:none;margin-top:70px}
+#s1.illu .pill{background:#fff;color:var(--cat);margin-bottom:34px}
 
 /* 숫자 장면 */
 .numsc{background:var(--cream)}
@@ -50,6 +60,13 @@ em{font-style:normal}
 #j4 .u{font-size:92px}
 #j4 .tag{font-size:62px;color:#fff;opacity:.85;margin-top:48px;font-family:"Jua",sans-serif}
 
+/* 한자 */
+#h3{background:var(--navy)}
+#h3 .lab{font-family:"Jua",sans-serif;font-size:42px;color:#9fb3cf;margin-bottom:40px}
+#h3 .c{font-family:"Jua",sans-serif;font-size:340px;color:#fff;line-height:1}
+#h3 .rd{font-family:"Jua",sans-serif;font-size:72px;color:var(--orange);margin-top:30px}
+#h3 .use{font-size:46px;color:#c3d2e6;margin-top:30px}
+
 /* 사자성어 */
 #i4{background:var(--cat)}
 #i4 .lab{font-family:"Jua",sans-serif;font-size:42px;color:#fff;opacity:.75;margin-bottom:46px}
@@ -64,15 +81,16 @@ em{font-style:normal}
 #s5 .m{margin-bottom:40px}
 #s5 .h{font-family:"Jua",sans-serif;font-size:92px;color:#fff;line-height:1.32}
 #s5 .who{font-size:46px;color:#fff6e7;margin-top:28px}
-#s5 .btn{margin-top:60px;background:#fff;border-radius:28px;padding:34px 54px;
-  box-shadow:0 14px 34px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:10px}
-#s5 .btn .k{font-family:"Jua",sans-serif;font-size:44px;color:var(--orange)}
-#s5 .btn .v{font-family:"Jua",sans-serif;font-size:56px;color:var(--navy);line-height:1.3}
+#s5 .btn{margin-top:64px;background:#fff;border-radius:34px;padding:48px 70px;
+  box-shadow:0 18px 44px rgba(0,0,0,.22);display:flex;flex-direction:column;gap:16px}
+#s5 .btn .k{font-family:"Jua",sans-serif;font-size:52px;color:var(--orange)}
+#s5 .btn .v{font-family:"Jua",sans-serif;font-size:70px;color:var(--navy);line-height:1.32}
 #s5 .f{position:absolute;bottom:520px;font-family:"Jua",sans-serif;font-size:46px;color:#fff}
 </style></head><body>
 
 <div class="sc" id="s1">
   <div class="ph"></div>
+  <div class="card"><div class="im"></div></div>
   <div class="in"><div class="pill"></div><h1 class="jua"></h1></div>
 </div>
 
@@ -90,6 +108,11 @@ em{font-style:normal}
 
 <div class="sc" id="j4">
   <div class="row"></div><div class="tag"></div>
+</div>
+
+<div class="sc" id="h3">
+  <div class="lab">오늘의 한자</div>
+  <div class="c"></div><div class="rd"></div><div class="use"></div>
 </div>
 
 <div class="sc" id="i4">
@@ -133,41 +156,36 @@ function buildDOM(data){
   D=data; MODE=data.mode||"num";
   document.documentElement.style.setProperty('--cat', data.catColor);
 
-  const ph=$('#s1 .ph');
-  if(data.photo){
-    ph.style.background = 'url("'+data.photo+'") center/'+(data.fit||'cover')+' no-repeat';
-    if(data.fit==='contain') ph.style.backgroundColor = data.catColor;
-  } else { ph.style.background = data.catColor; }
-  $('#s1 .pill').textContent = data.cat;
-  $('#s1 h1').innerHTML = data.hook;
+  /* 사진은 화면을 가득 채워 어둡게, 일러스트는 흰 카드에 올린다 */
+  const s1=document.getElementById('s1');
+  if(data.fit==='contain' && data.photo){
+    s1.classList.add('illu');
+    $('#s1 .card .im').style.backgroundImage='url("'+data.photo+'")';
+  } else if(data.photo){
+    $('#s1 .ph').style.background='url("'+data.photo+'") center/cover no-repeat';
+  } else { $('#s1 .ph').style.background=data.catColor; }
+  $('#s1 .pill').textContent=data.cat;
+  $('#s1 h1').innerHTML=data.hook;
+
+  /* 오늘의 낱말 — 글자가 길면 크기를 줄인다 */
+  $('#w2 .w').textContent=data.word.w;
+  $('#w2 .w').style.fontSize = (data.word.w.length>=5 ? 140 : data.word.w.length>=4 ? 164 : 180)+'px';
+  $('#w2 .mean').innerHTML=data.word.mean;
+  $('#w2 .ex').innerHTML=data.word.ex;
 
   if(MODE==="num"){
     const fill=(sel,o)=>{ $(sel+' .big').innerHTML=o.num+(o.unit?'<span class="u">'+o.unit+'</span>':'');
       $(sel+' .cap').textContent=o.cap; $(sel+' .sub').textContent=o.sub||''; };
     fill('#n2', data.a); fill('#n3', data.b);
-    if(data.join){
-      const row=$('#j4 .row');
-      row.innerHTML = data.join.parts.map(p=>
-        '<span'+(p.u?' class="u"':'')+'>'+p.t+'</span>').join('');
-      $('#j4 .tag').textContent=data.join.tag;
-      SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['j4',8.70,12.90],['s5',12.90,15.00]];
-    } else {
-      $('#l4 .yr').innerHTML = data.line.yr||'';
-      if(!data.line.yr) $('#l4 .yr').style.display='none';
-      $('#l4 .q').innerHTML = data.line.text;
-      SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['l4',8.70,12.90],['s5',12.90,15.00]];
-    }
+    SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['w2',8.70,12.90],['s5',12.90,15.00]];
   } else {
-    $('#w2 .w').textContent=data.word.w;
-    $('#w2 .mean').innerHTML=data.word.mean;
-    $('#w2 .ex').innerHTML=data.word.ex;
-    $('#l3 .yr').innerHTML=data.line.yr||'';
-    if(!data.line.yr) $('#l3 .yr').style.display='none';
-    $('#l3 .q').innerHTML=data.line.text;
+    $('#h3 .c').textContent=data.hanja.c;
+    $('#h3 .rd').textContent=data.hanja.read;
+    $('#h3 .use').textContent=data.hanja.use;
     $('#i4 .han').innerHTML=[...data.idiom.han].map(c=>'<span>'+c+'</span>').join('');
     $('#i4 .rd').textContent=data.idiom.read;
     $('#i4 .mn').innerHTML=data.idiom.mean;
-    SCENES=[['s1',0,2.60],['w2',2.60,7.00],['l3',7.00,10.20],['i4',10.20,12.90],['s5',12.90,15.00]];
+    SCENES=[['s1',0,2.60],['w2',2.60,7.00],['h3',7.00,10.20],['i4',10.20,12.90],['s5',12.90,15.00]];
   }
 }
 
@@ -180,9 +198,29 @@ function seek(t){
   });
 
   /* 훅 — 0.5초 안에 다 읽힌다 */
-  { const p=easeOut(ramp(t,0.02,0.50)), inn=$('#s1 .in');
-    inn.style.opacity=p; inn.style.transform='translateY('+(-70+46*(1-p))+'px)';
-    $('#s1 .ph').style.transform='scale('+(1+0.07*ramp(t,0,2.6))+')'; }
+  { const p=easeOut(ramp(t,0.02,0.50)), inn=$('#s1 .in'), s1=document.getElementById('s1');
+    inn.style.opacity=p;
+    inn.style.transform = s1.classList.contains('illu')
+      ? 'translateY('+(30*(1-p))+'px)' : 'translateY('+(-70+46*(1-p))+'px)';
+    const card=$('#s1 .card');
+    if(s1.classList.contains('illu')){
+      const k=easeOutBack(ramp(t,0,0.60));
+      card.style.opacity=E(ramp(t,0,0.30));
+      card.style.transform='scale('+(0.88+0.12*k)+')';
+    } else {
+      $('#s1 .ph').style.transform='scale('+(1+0.07*ramp(t,0,2.6))+')';
+    } }
+
+  /* 낱말 — 글자가 뜨고 형광펜이 그어진다 */
+  { const a = (MODE==='num') ? 8.70 : 2.60;
+    $('#w2 .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
+    const k=easeOutBack(ramp(t,a+0.15,a+0.80)), w=$('#w2 .w');
+    w.style.transform='scale('+(0.7+0.3*k)+')'; w.style.opacity=E(ramp(t,a+0.15,a+0.45));
+    $('#w2 .mark').style.width=(easeOut(ramp(t,a+0.75,a+1.35))*100)+'%';
+    const mn=easeOut(ramp(t,a+1.15,a+1.75)), me=$('#w2 .mean');
+    me.style.opacity=mn; me.style.transform='translateY('+(20-20*mn)+'px)';
+    const ex=easeOut(ramp(t,a+1.60,a+2.20)), ee=$('#w2 .ex');
+    ee.style.opacity=ex; ee.style.transform='translateY('+(18-18*ex)+'px)'; }
 
   if(MODE==="num"){
     [['n2',2.60],['n3',5.70]].forEach(([id,a])=>{
@@ -193,47 +231,30 @@ function seek(t){
       const u=easeOut(ramp(t,a+0.55,a+1.10)), sub=$('#'+id+' .sub');
       sub.style.opacity=u; sub.style.transform='translateY('+(16-16*u)+'px)';
     });
-    if(D.join){
-      const a=8.70, k=easeOut(ramp(t,a,a+0.70)), sp=document.querySelectorAll('#j4 .row span');
-      sp.forEach((el,i)=>{
-        if(el.className==='u'){ el.style.opacity=k; }
-        else { el.style.transform='translateX('+((i===0?-1:1)*220*(1-k))+'px)'; }
-      });
-      const g=easeOutBack(ramp(t,a+0.60,a+1.25)), tag=$('#j4 .tag');
-      tag.style.opacity=E(ramp(t,a+0.60,a+0.95));
-      tag.style.transform='scale('+(0.86+0.14*g)+')';
-    } else { animLine('#l4', 8.70); }
   } else {
-    const a=2.60;
-    $('#w2 .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
-    const k=easeOutBack(ramp(t,a+0.15,a+0.80)), w=$('#w2 .w');
-    w.style.transform='scale('+(0.7+0.3*k)+')'; w.style.opacity=E(ramp(t,a+0.15,a+0.45));
-    $('#w2 .mark').style.width=(easeOut(ramp(t,a+0.75,a+1.35))*100)+'%';
-    const mn=easeOut(ramp(t,a+1.15,a+1.75)), me=$('#w2 .mean');
-    me.style.opacity=mn; me.style.transform='translateY('+(20-20*mn)+'px)';
-    const ex=easeOut(ramp(t,a+1.60,a+2.20)), ee=$('#w2 .ex');
-    ee.style.opacity=ex; ee.style.transform='translateY('+(18-18*ex)+'px)';
+    /* 한자 — 한 글자가 크게 찍힌다 */
+    { const a=7.00;
+      $('#h3 .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
+      const k=easeOutBack(ramp(t,a+0.10,a+0.75)), c=$('#h3 .c');
+      c.style.opacity=E(ramp(t,a+0.10,a+0.40));
+      c.style.transform='scale('+(0.62+0.38*k)+')';
+      const r=easeOut(ramp(t,a+0.60,a+1.15)), rd=$('#h3 .rd');
+      rd.style.opacity=r; rd.style.transform='translateY('+(20-20*r)+'px)';
+      const u=easeOut(ramp(t,a+0.95,a+1.50)), us=$('#h3 .use');
+      us.style.opacity=u; us.style.transform='translateY('+(18-18*u)+'px)'; }
 
-    animLine('#l3', 7.00);
-
-    const b=10.20;
-    $('#i4 .lab').style.opacity=easeOut(ramp(t,b,b+0.35));
-    document.querySelectorAll('#i4 .han span').forEach((el,i)=>{
-      const s0=b+0.25+i*0.16, kk=easeOutBack(ramp(t,s0,s0+0.50));
-      el.style.opacity=E(ramp(t,s0,s0+0.25));
-      el.style.transform='translateY('+(-34*(1-kk))+'px) scale('+(0.8+0.2*kk)+')';
-    });
-    const r=easeOut(ramp(t,b+1.05,b+1.55)), rd=$('#i4 .rd');
-    rd.style.opacity=r; rd.style.transform='translateY('+(18-18*r)+'px)';
-    const m2=easeOut(ramp(t,b+1.40,b+2.00)), mm=$('#i4 .mn');
-    mm.style.opacity=m2; mm.style.transform='translateY('+(18-18*m2)+'px)';
-  }
-
-  function animLine(sel, a){
-    const y=easeOutBack(ramp(t,a,a+0.60)), yr=document.querySelector(sel+' .yr');
-    if(yr){ yr.style.opacity=E(ramp(t,a,a+0.35)); yr.style.transform='scale('+(0.75+0.25*y)+')'; }
-    const q=easeOut(ramp(t,a+0.40,a+1.10)), qq=document.querySelector(sel+' .q');
-    qq.style.opacity=q; qq.style.transform='translateY('+(26-26*q)+'px)';
+    /* 사자성어 — 한 글자씩 떨어진다 */
+    { const b=10.20;
+      $('#i4 .lab').style.opacity=easeOut(ramp(t,b,b+0.35));
+      document.querySelectorAll('#i4 .han span').forEach((el,i)=>{
+        const s0=b+0.25+i*0.16, kk=easeOutBack(ramp(t,s0,s0+0.50));
+        el.style.opacity=E(ramp(t,s0,s0+0.25));
+        el.style.transform='translateY('+(-34*(1-kk))+'px) scale('+(0.8+0.2*kk)+')';
+      });
+      const r=easeOut(ramp(t,b+1.05,b+1.55)), rd=$('#i4 .rd');
+      rd.style.opacity=r; rd.style.transform='translateY('+(18-18*r)+'px)';
+      const m2=easeOut(ramp(t,b+1.40,b+2.00)), mm=$('#i4 .mn');
+      mm.style.opacity=m2; mm.style.transform='translateY('+(18-18*m2)+'px)'; }
   }
 
   /* 마무리 — 버튼이 살짝 숨쉬어 누르고 싶게 만든다 */
@@ -241,7 +262,7 @@ function seek(t){
     $('#s5 .m').style.transform='scale('+(0.7+0.3*k)+')';
     const h=easeOut(ramp(t,a+0.20,a+0.80)), hh=$('#s5 .h');
     hh.style.opacity=h; hh.style.transform='translateY('+(24-24*h)+'px)';
-    const wh=easeOut(ramp(t,a+0.45,a+1.00)); $('#s5 .who').style.opacity=wh;
+    $('#s5 .who').style.opacity=easeOut(ramp(t,a+0.45,a+1.00));
     const bt=easeOutBack(ramp(t,a+0.70,a+1.30)), btn=$('#s5 .btn');
     btn.style.opacity=E(ramp(t,a+0.70,a+1.00));
     const pulse = 1 + 0.022*Math.sin((t-a-1.3)*7.5);
