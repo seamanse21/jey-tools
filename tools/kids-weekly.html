@@ -278,7 +278,8 @@ textarea{resize:vertical;line-height:1.6}
 .vtable{width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:7mm}
 .vtable th{background:#f08c2e;color:#fff;padding:2.2mm;font-weight:700;font-size:8.6pt}
 .vtable td{border:1px solid #e2dfd5;padding:2.4mm 3mm;line-height:1.5;vertical-align:middle}
-.vtable td.d{width:22mm;text-align:center;background:#fbf8ef;font-size:8.4pt;color:#55544c}
+.vtable td.d{width:20mm;text-align:center;background:#fbf8ef;font-size:8.6pt;color:#55544c;
+  line-height:1.45;word-break:keep-all}
 .vtable td.w{font-weight:800}
 .vtable td.i{font-family:"AppleMyungjo","Nanum Myeongjo","Batang","바탕",serif;font-weight:800}
 .vtable td.h{text-align:center;width:24mm}
@@ -3177,15 +3178,21 @@ function actHTML(d,i){
 function wrapHTML(){
   const rowsHTML = S.days.map((d,i)=>{
     const id4=parts(d.idiom), hj=parts(d.hanja), en=parts(d.eng);
-    return '<tr><td class="d">'+esc(fmt(addDays(S.week,i)))+'</td>'
+    const f = fmt(addDays(S.week,i)), sp = f.lastIndexOf(" ");
+    return '<tr><td class="d">'+esc(f.slice(0,sp))
+      + '<br><span style="font-size:8pt;color:#8d8b80">'+esc(f.slice(sp+1))+'</span></td>'
       + '<td class="w">'+esc(d.w||"")+'<br><span style="font-weight:400;font-size:8.2pt;color:#55544c">'+esc(d.m||"")+'</span></td>'
       + '<td class="i">'+esc(id4[0]||"")
       +   '<br><span style="font-weight:400;font-size:8.4pt;color:#55544c">'+esc(id4[1]||"")+'</span></td>'
       + '<td class="h"><b>'+esc(hj[0]||"")+'</b>'+esc(hj[1]||"")+'</td>'
       + '<td class="e"><b>'+esc(en[0]||"")+'</b><br><span style="font-size:8.2pt;color:#55544c">'+esc(en[2]||"")+'</span></td></tr>';
   }).join("");
-  const stamps = S.days.map((d,i)=>'<div class="stamp"><b>'+(i+1)+'</b><span>'
-    + esc(fmt(addDays(S.week,i)).replace(/요일$/,"")) + '</span></div>').join("");
+  const stamps = S.days.map((d,i)=>{
+    const dt = addDays(S.week,i), f = fmt(dt);
+    const md = (+dt.slice(5,7))+"/"+(+dt.slice(8,10));
+    const dow = f.slice(f.lastIndexOf(" ")+1, f.lastIndexOf(" ")+2);
+    return '<div class="stamp"><b>'+md+'</b><span>'+esc(dow)+'</span></div>';
+  }).join("");
   return '<div class="wrap2"><h2>한 주 어휘 모아보기</h2>'
    + '<p class="sub">이번 주에 만난 낱말 5개 · 사자성어 5개 · 한자 5자 · 영단어 5개</p>'
    + '<table class="vtable"><tr><th>날짜</th><th>오늘의 낱말</th><th>사자성어</th><th>한자</th><th>영단어</th></tr>'+rowsHTML+'</table>'
