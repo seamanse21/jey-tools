@@ -111,6 +111,49 @@ section{padding:68px 0}
 .ck input{margin:3px 0 0;width:18px;height:18px;flex:none;accent-color:var(--orange)}
 .ck b{color:var(--navy);font-weight:normal;font-family:"Jua",sans-serif}
 .ck a{color:var(--orange-d)}
+
+/* 스티비 폼 — 스티비 CSS 를 쓰지 않으므로 여기서 전부 입힌다 */
+.stb_form{margin:0}
+.stb_form_set{border:0;margin:0 0 14px;padding:0}
+.stb_form_set_label{display:block;font-size:14.5px;color:var(--navy);margin-bottom:6px;
+  font-family:"Jua",sans-serif}
+.stb_asterisk{color:var(--orange);margin-left:2px}
+.stb_form_set_input,.stb_form_set_select{width:100%;padding:14px 15px;font:inherit;font-size:16px;
+  border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);
+  -webkit-appearance:none;appearance:none}
+.stb_form_set_select{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236c7789' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 15px center;padding-right:40px}
+.stb_form_set_input:focus,.stb_form_set_select:focus{outline:0;border-color:var(--orange);
+  box-shadow:0 0 0 3px rgba(240,140,46,.16)}
+.stb_form_msg_error{color:#d6453c;font-size:13.5px;margin-top:6px;line-height:1.5}
+.stb_form_msg_error:empty{display:none}
+.stb_form_policy{margin:0 0 11px;font-size:14px;color:var(--mute);line-height:1.6}
+.stb_form_policy:first-of-type{border-top:1px solid var(--line);padding-top:16px;margin-top:18px}
+.stb_form_policy label{display:flex;gap:9px;align-items:center;flex-wrap:wrap;cursor:pointer}
+.stb_form_policy input[type=checkbox]{width:19px;height:19px;flex:none;accent-color:var(--orange);margin:0}
+.stb_form_policy span{color:var(--navy);font-family:"Jua",sans-serif}
+.stb_form_modal_open_btn{background:0;border:0;padding:0;font:inherit;color:var(--orange-d);
+  text-decoration:underline;cursor:pointer}
+.adhint{font-size:13px;color:var(--mute);margin:4px 0 0;padding-left:28px;line-height:1.55}
+.stb_form_set_submit{border:0;margin:0;padding:0}
+.stb_form_submit_button{width:100%;background:var(--orange);color:#fff;border:0;border-radius:12px;
+  padding:17px;font-family:"Jua",sans-serif;font-size:19px;cursor:pointer;margin-top:18px;
+  box-shadow:0 8px 20px rgba(240,140,46,.3)}
+.stb_form_submit_button:hover{background:var(--orange-d)}
+.stb_form_result{font-size:15px;line-height:1.7;margin-top:14px;color:var(--navy)}
+.stb_form_result:empty{display:none}
+/* 약관 모달 */
+.blind{display:none !important}
+.stb_form_modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;
+  justify-content:center;padding:20px}
+.stb_form_modal_bg,.stb_form_ad_modal_bg{position:absolute;inset:0;background:rgba(20,26,38,.6)}
+.stb_form_modal_body{position:relative;z-index:1;background:#fff;border-radius:16px;
+  padding:28px 24px;max-width:430px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.stb_form_modal_title{font-size:20px;color:var(--navy);margin:0 0 14px}
+.stb_form_modal_text{font-size:15px;color:var(--mute);line-height:1.75}
+.stb_form_modal_btn{margin-top:22px;text-align:right}
+.stb_form_modal_close_btn{background:var(--navy);color:#fff;border:0;border-radius:9px;
+  padding:11px 24px;font:inherit;font-family:"Jua",sans-serif;font-size:15px;cursor:pointer}
 .submit{width:100%;background:var(--orange);color:#fff;border:0;border-radius:12px;
   padding:17px;font-family:"Jua",sans-serif;font-size:19px;cursor:pointer;margin-top:10px;
   box-shadow:0 8px 20px rgba(240,140,46,.3)}
@@ -292,44 +335,88 @@ footer a:hover{text-decoration:underline}
       <p class="sub">위에서 보신 <b>월요일 한 장을 포함해 14쪽 전체</b>를
         인쇄용 PDF로 보내 드립니다. 결제 정보는 받지 않습니다.</p>
 
-      <!-- ▼ 스티비 폼 연결 지점 — action 과 필드 이름만 교체하면 됩니다 -->
-      <form id="subscribe" method="post" action="" novalidate>
-        <div class="field">
-          <label for="email">이메일 주소</label>
-          <input type="email" id="email" name="email" required placeholder="parent@example.com" autocomplete="email">
-        </div>
-        <div class="field">
-          <label for="grade">아이 학년</label>
-          <select id="grade" name="grade" required>
-            <option value="">선택해 주세요</option>
-            <option>7세 (미취학)</option>
-            <option>초등 1학년</option>
-            <option>초등 2학년</option>
-            <option>초등 3학년</option>
-            <option>초등 4학년</option>
-            <option>그 외</option>
-          </select>
-        </div>
+      <!-- ▼ 스티비 구독 폼 — 마크업과 id 는 스티비 것을 그대로 쓰고 스타일만 우리 것으로 입힌다.
+           스티비 CSS(stb_subscribe_form_style.css)는 일부러 불러오지 않는다. -->
+      <div id="stb_subscribe">
+        <form action="https://stibee.com/api/v1.0/lists/KMif8O96v79dIbfF4EfE0eNBpon85w==/public/subscribers"
+              method="POST" target="_blank" accept-charset="utf-8"
+              class="stb_form" name="stb_subscribe_form" id="stb_subscribe_form" data-lang="" novalidate>
 
-        <div class="agree">
-          <label class="ck">
-            <input type="checkbox" name="consent_privacy" required>
-            <span><b>(필수) 개인정보 수집·이용 동의</b><br>
-              이메일 주소와 아이 학년을 자료 발송에 사용하며, 구독을 해지하실 때까지 보관합니다.
-              동의하지 않으시면 자료를 보내 드릴 수 없습니다.</span>
-          </label>
-          <label class="ck">
-            <input type="checkbox" name="consent_ads" required>
-            <span><b>(필수) 광고성 정보 수신 동의</b><br>
-              매주 보내 드리는 무료 1장과, 구독 상품 안내를 이메일로 받습니다.
-              메일 아래쪽에서 언제든 수신을 거부하실 수 있습니다.</span>
-          </label>
-        </div>
+          <fieldset class="stb_form_set">
+            <label for="stb_email" class="stb_form_set_label">이메일 주소<span class="stb_asterisk">*</span></label>
+            <input type="text" class="stb_form_set_input" id="stb_email" name="email"
+                   required="required" placeholder="parent@example.com" autocomplete="email" inputmode="email">
+            <div class="stb_form_msg_error" id="stb_email_error"></div>
+          </fieldset>
 
-        <button class="submit" type="submit">1주일치 14쪽 받기</button>
-        <p class="fine">스팸은 보내지 않습니다. 한 번의 클릭으로 언제든 해지할 수 있어요.</p>
-      </form>
-      <!-- ▲ 스티비 폼 연결 지점 -->
+          <fieldset class="stb_form_set">
+            <label for="stb_grade" class="stb_form_set_label">아이 학년</label>
+            <select class="stb_form_set_select" id="stb_grade" name="grade">
+              <option value="">선택</option>
+              <option>7세</option>
+              <option>초1</option>
+              <option>초2</option>
+              <option>초3</option>
+              <option>초4</option>
+              <option>그 외</option>
+            </select>
+            <div class="stb_form_msg_error" id="stb_grade_error"></div>
+          </fieldset>
+
+          <div class="stb_form_policy">
+            <label>
+              <input type="checkbox" id="stb_policy" value="stb_policy_true">
+              <span>(필수)</span>
+              <button id="stb_policy_modal_open" data-modal="stb_form_policy_modal"
+                      class="stb_form_modal_open_btn" type="button">개인정보 수집 및 이용</button>에 동의합니다.
+            </label>
+            <div class="stb_form_msg_error" id="stb_policy_error"></div>
+            <div class="stb_form_modal stb_form_policy_text blind" id="stb_form_policy_modal">
+              <div class="stb_form_modal_body">
+                <h1 class="stb_form_modal_title">개인정보 수집 및 이용</h1>
+                <div class="stb_form_modal_text">이메일 주소와 아이 학년을 자료 발송과 학년별 안내에 이용합니다.
+                  수집한 정보는 다른 목적으로 이용하지 않으며, 구독을 해지하시면 즉시 파기합니다.</div>
+                <div class="stb_form_modal_btn">
+                  <button id="stb_policy_modal_close" class="stb_form_modal_close_btn"
+                          data-modal="stb_form_policy_modal" type="button">닫기</button>
+                </div>
+              </div>
+              <div class="stb_form_modal_bg" id="stb_form_modal_bg" data-modal="stb_form_policy_modal"></div>
+            </div>
+          </div>
+
+          <div class="stb_form_policy">
+            <label>
+              <input type="checkbox" id="stb_ad_agreement" value="stb_ad_agreement_true">
+              <span>(선택)</span>
+              <button id="stb_form_ad_modal_open" data-modal="stb_form_ad_agreemnet_modal"
+                      class="stb_form_modal_open_btn" type="button">광고성 정보 수신</button>에 동의합니다.
+            </label>
+            <div class="stb_form_msg_error" id="stb_ad_agreement_error"></div>
+            <div class="stb_form_modal stb_form_policy_text blind" id="stb_form_ad_agreemnet_modal">
+              <div class="stb_form_modal_body">
+                <h1 class="stb_form_modal_title">광고성 정보 수신</h1>
+                <div class="stb_form_modal_text">매주 금요일에 보내 드리는 무료 학습지 1장과,
+                  구독 상품·할인 안내를 이메일로 받습니다. 메일 아래쪽에서 언제든 수신을 거부하실 수 있습니다.</div>
+                <div class="stb_form_modal_btn">
+                  <button id="stb_form_ad_modal_close" class="stb_form_modal_close_btn"
+                          data-modal="stb_form_ad_agreemnet_modal" type="button">닫기</button>
+                </div>
+              </div>
+              <div class="stb_form_ad_modal_bg" data-modal="stb_form_ad_agreemnet_modal"></div>
+            </div>
+          </div>
+          <p class="adhint">매주 보내 드리는 무료 1장을 받으시려면 광고성 정보 수신에도 체크해 주세요.</p>
+
+          <div class="stb_form_result" id="stb_form_result"></div>
+
+          <fieldset class="stb_form_set_submit">
+            <button type="submit" class="stb_form_submit_button" id="stb_form_submit_button">1주일치 14쪽 받기</button>
+          </fieldset>
+        </form>
+      </div>
+      <p class="fine">스팸은 보내지 않습니다. 한 번의 클릭으로 언제든 해지할 수 있어요.</p>
+      <!-- ▲ 스티비 구독 폼 -->
     </div>
   </div>
 </section>
@@ -395,13 +482,20 @@ footer a:hover{text-decoration:underline}
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') lb.classList.remove('on'); });
 })();
 
-/* 폼이 아직 연결되지 않았을 때의 임시 안내 */
-document.getElementById('subscribe').addEventListener('submit',function(e){
-  if(!this.getAttribute('action')){
-    e.preventDefault();
-    alert('구독 폼이 아직 연결되지 않았습니다.\n곧 열립니다.');
+/* 동의 약관 모달 — 배경 클릭과 Esc 로도 닫는다 */
+(function(){
+  function closeAll(){
+    document.querySelectorAll('.stb_form_modal').forEach(function(m){
+      if(m.className.indexOf('blind')<0) m.className += ' blind';
+    });
   }
-});
+  document.querySelectorAll('.stb_form_modal_bg,.stb_form_ad_modal_bg').forEach(function(bg){
+    bg.addEventListener('click', closeAll);
+  });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeAll(); });
+})();
+
 </script>
+<script src="https://resource.stibee.com/subscribe/stb_subscribe_form.js"></script>
 </body>
 </html>
