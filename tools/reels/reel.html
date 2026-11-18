@@ -153,7 +153,7 @@ const easeOutBack=x=>{const c1=2.0,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.p
 const ramp=(t,a,b)=>E((t-a)/(b-a));
 const $=s=>document.querySelector(s);
 
-let SCENES=[], MODE="num", D=null;
+let SCENES=[], MODE="num", D=null, AT={};
 const XF=0.18;
 
 /* 데이터를 받아 DOM 을 채우고 장면 목록을 정한다 */
@@ -189,7 +189,7 @@ function buildDOM(data){
     const fill=(sel,o)=>{ $(sel+' .big').innerHTML=o.num+(o.unit?'<span class="u">'+o.unit+'</span>':'');
       $(sel+' .cap').textContent=o.cap; $(sel+' .sub').textContent=o.sub||''; };
     fill('#n2', data.a); fill('#n3', data.b);
-    SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['w2',8.70,12.90],['s5',12.90,16.50]];
+    SCENES=[['s1',0,3.00],['n2',3.00,6.80],['n3',6.80,10.40],['w2',10.40,15.60],['s5',15.60,20.00]];
   } else {
     $('#h3 .c').textContent=data.hanja.c;
     $('#h3 .rd').textContent=data.hanja.read;
@@ -197,8 +197,9 @@ function buildDOM(data){
     $('#i4 .han').innerHTML=[...data.idiom.han].map(c=>'<span>'+c+'</span>').join('');
     $('#i4 .rd').textContent=data.idiom.read;
     $('#i4 .mn').innerHTML=data.idiom.mean;
-    SCENES=[['s1',0,2.60],['w2',2.60,7.00],['h3',7.00,10.20],['i4',10.20,12.90],['s5',12.90,16.50]];
+    SCENES=[['s1',0,3.00],['w2',3.00,8.40],['h3',8.40,12.20],['i4',12.20,15.80],['s5',15.80,20.00]];
   }
+  AT={}; SCENES.forEach(([id,a])=>{ AT[id]=a; });
 }
 
 function seek(t){
@@ -224,7 +225,7 @@ function seek(t){
     } }
 
   /* 낱말 — 글자가 뜨고 형광펜이 그어진다 */
-  { const a = (MODE==='num') ? 8.70 : 2.60;
+  { const a = AT.w2;
     $('#w2 .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
     const k=easeOutBack(ramp(t,a+0.15,a+0.80)), w=$('#w2 .w');
     w.style.transform='scale('+(0.7+0.3*k)+')'; w.style.opacity=E(ramp(t,a+0.15,a+0.45));
@@ -235,7 +236,7 @@ function seek(t){
     ee.style.opacity=ex; ee.style.transform='translateY('+(18-18*ex)+'px)'; }
 
   if(MODE==="num"){
-    [['n2',2.60],['n3',5.70]].forEach(([id,a])=>{
+    [['n2',AT.n2],['n3',AT.n3]].forEach(([id,a])=>{
       const k=easeOutBack(ramp(t,a,a+0.55));
       $('#'+id+' .big').style.transform='scale('+(0.55+0.45*k)+')';
       const c=easeOut(ramp(t,a+0.30,a+0.85)), cap=$('#'+id+' .cap');
@@ -245,7 +246,7 @@ function seek(t){
     });
   } else {
     /* 한자 — 한 글자가 크게 찍힌다 */
-    { const a=7.00;
+    { const a=AT.h3;
       $('#h3 .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
       const k=easeOutBack(ramp(t,a+0.10,a+0.75)), c=$('#h3 .c');
       c.style.opacity=E(ramp(t,a+0.10,a+0.40));
@@ -256,7 +257,7 @@ function seek(t){
       us.style.opacity=u; us.style.transform='translateY('+(18-18*u)+'px)'; }
 
     /* 사자성어 — 한 글자씩 떨어진다 */
-    { const b=10.20;
+    { const b=AT.i4;
       $('#i4 .lab').style.opacity=easeOut(ramp(t,b,b+0.35));
       /* 뜻을 읽을 시간을 벌려고 글자 간격과 뒤 요소를 당겼다 */
       document.querySelectorAll('#i4 .han span').forEach((el,i)=>{
@@ -271,7 +272,7 @@ function seek(t){
   }
 
   /* 마무리 — 버튼이 살짝 숨쉬어 누르고 싶게 만든다 */
-  { const a=12.90, k=easeOutBack(ramp(t,a,a+0.55));
+  { const a=AT.s5, k=easeOutBack(ramp(t,a,a+0.55));
     $('#s5 .m').style.transform='scale('+(0.7+0.3*k)+')';
     const h=easeOut(ramp(t,a+0.20,a+0.80)), hh=$('#s5 .h');
     hh.style.opacity=h; hh.style.transform='translateY('+(24-24*h)+'px)';

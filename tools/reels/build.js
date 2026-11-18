@@ -10,7 +10,7 @@ const WEEK = process.argv[2];
 const OUTDIR = path.resolve(process.argv[3] || path.join(HEREish(), 'out'));
 function HEREish(){ return __dirname; }
 const HERE = __dirname, TOOLS = path.join(HERE, '..');
-const FPS = 30, SEC = 16.5;
+const FPS = 30, SEC = 20;
 if(!WEEK){ console.error('쓰는 법: node build.js 2026-11-23 [출력폴더]'); process.exit(1); }
 
 const CAT = {"기념일":"#f08c2e","인물":"#8b5cf6","사회":"#2f7fd1","정치":"#3b5f9e",
