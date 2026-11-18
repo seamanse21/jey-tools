@@ -10,13 +10,20 @@ body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
     align-items:center;justify-content:center;padding:0 88px;text-align:center}
 .jua{font-family:"Jua",sans-serif;line-height:1.3}
 
-/* 1 훅 */
-#s1{background:var(--cat)}
-#s1 .ic{margin-bottom:44px}
+/* 1 훅 — 사실 먼저, 위쪽 1/3, 큰 숫자 */
+#s1{background:var(--cat);justify-content:flex-start;padding-top:300px}
+#s1 .ic{margin-bottom:30px}
 #s1 .pill{display:inline-block;background:var(--orange);color:#fff;font-family:"Jua",sans-serif;
-  font-size:38px;padding:11px 32px;border-radius:999px;margin-bottom:44px}
-#s1 h1{font-size:96px;color:#fff;text-wrap:balance;letter-spacing:-.02em}
-#s1 .free{margin-top:34px;font-size:50px;color:#ffd79a;font-family:"Jua",sans-serif}
+  font-size:38px;padding:11px 32px;border-radius:999px;margin-bottom:38px}
+#s1 h1{font-size:92px;color:#fff;text-wrap:balance;letter-spacing:-.02em}
+#s1 .big{margin-top:58px;background:#fff;border-radius:40px;padding:34px 72px;
+  box-shadow:0 20px 50px rgba(0,0,0,.28);display:flex;align-items:flex-end;gap:12px}
+#s1 .big i{font-style:normal;font-family:"Jua",sans-serif;font-size:210px;color:var(--orange);
+  line-height:1.05;letter-spacing:-.03em}
+#s1 .big u{text-decoration:none;font-family:"Jua",sans-serif;font-size:86px;color:var(--orange);
+  line-height:1.05;padding-bottom:16px}
+#s1 .free{margin-top:40px;font-size:50px;color:#ffd79a;font-family:"Jua",sans-serif;
+  text-wrap:balance;line-height:1.45}
 
 /* 목록 장면 */
 .lst{background:var(--cream)}
@@ -59,6 +66,7 @@ body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
   </div>
   <div class="pill"></div>
   <h1 class="jua"></h1>
+  <div class="big"><i></i><u></u></div>
   <div class="free"></div>
 </div>
 
@@ -109,6 +117,10 @@ function buildDOM(data){
   D=data;
   $('#s1 .pill').textContent=data.cat||'자료';
   $('#s1 h1').innerHTML=data.hook;
+  const bg=$('#s1 .big');
+  if(data.big && data.big.v){ bg.style.display='flex';
+    $('#s1 .big i').textContent=data.big.v; $('#s1 .big u').textContent=data.big.u||''; }
+  else { bg.style.display='none'; }
   $('#s1 .free').innerHTML=data.free||'';
   fillList('#l1', data.what);
   fillList('#l2', data.how);
@@ -132,7 +144,9 @@ function seek(t){
   SCENES.forEach(([id,a,b])=>{
     const el=document.getElementById(id);
     let o=0;
-    if(t>=a-XF && t<=b+0.01) o=E(Math.min(ramp(t,a-XF,a+XF*0.6), 1-ramp(t,b-XF,b)));
+    /* 첫 장면은 페이드인 없이 t=0 부터 100% — 자동 썸네일이 흐려지지 않게 */
+    const fin = (a<=0) ? 1 : ramp(t,a-XF,a+XF*0.6);
+    if(t>=a-XF && t<=b+0.01) o=E(Math.min(fin, 1-ramp(t,b-XF,b)));
     el.style.opacity=o;
   });
 
@@ -141,6 +155,12 @@ function seek(t){
     $('#s1 .ic').style.transform='rotate('+(t*6)+'deg)';
     $('#s1 .pill').style.opacity=1;
     const h=$('#s1 h1'); h.style.opacity=1; h.style.transform='none';
+    const bg=$('#s1 .big');
+    if(bg && bg.style.display!=='none'){
+      const k=easeOut(ramp(t,0,0.45));           // 1.22 -> 1.00, 프레임 0 에도 글자는 보인다
+      const pulse=1+0.018*Math.sin((t-0.45)*5.2);
+      bg.style.opacity=1;
+      bg.style.transform='scale('+((1.22-0.22*k)*(t>0.45?pulse:1))+')'; }
     const ff=$('#s1 .free'); ff.style.opacity=1;
     ff.style.transform='scale('+(1+0.015*Math.sin(t*2.6))+')'; }
 

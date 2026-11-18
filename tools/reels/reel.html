@@ -213,7 +213,9 @@ function seek(t){
   SCENES.forEach(([id,a,b])=>{
     const el=document.getElementById(id);
     let o=0;
-    if(t>=a-XF && t<=b+0.01) o=E(Math.min(ramp(t,a-XF,a+XF*0.6), 1-ramp(t,b-XF,b)));
+    /* 첫 장면은 페이드인 없이 t=0 부터 100% — 자동 썸네일이 흐려지지 않게 */
+    const fin = (a<=0) ? 1 : ramp(t,a-XF,a+XF*0.6);
+    if(t>=a-XF && t<=b+0.01) o=E(Math.min(fin, 1-ramp(t,b-XF,b)));
     el.style.opacity=o;
   });
 
