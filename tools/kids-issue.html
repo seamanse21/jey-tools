@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10분 키즈뉴스</title>
+<style>
+  :root { --bg:#fafaf9; --fg:#1c1c1a; --muted:#6b6b66; --card:#fff; --line:#e5e4e1;
+          --accent:#c4145b; --ok:#1a7f4b; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#191918; --fg:#f0efec; --muted:#9a9995; --card:#222221;
+      --line:#333331; --accent:#ec3d82; --ok:#4cc38a; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:40px 16px 64px; background:var(--bg); color:var(--fg);
+         font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
+  .wrap { max-width:720px; margin:0 auto; }
+  a.back { color:var(--muted); text-decoration:none; font-size:.86rem; }
+  a.back:hover { color:var(--fg); }
+  h1 { font-size:1.6rem; margin:14px 0 6px; letter-spacing:-.02em; }
+  p.sub { color:var(--muted); margin:0 0 28px; font-size:.92rem; line-height:1.6; }
+  .issue { background:var(--card); border:1px solid var(--line); border-radius:12px;
+           padding:18px 20px; margin-bottom:12px; }
+  .top { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .no { font-weight:700; font-size:1.05rem; }
+  .when { color:var(--muted); font-size:.86rem; }
+  ul.heads { list-style:none; padding:0; margin:12px 0 0; }
+  ul.heads li { color:var(--muted); font-size:.86rem; line-height:1.7; }
+  ul.heads li b { color:var(--fg); font-weight:600; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; align-items:center; }
+  .btn { display:inline-block; font:inherit; font-weight:600; font-size:.9rem; padding:9px 15px;
+         border-radius:9px; border:1px solid var(--accent); background:var(--accent); color:#fff;
+         text-decoration:none; cursor:pointer; }
+  .btn.ghost { background:transparent; color:var(--fg); border-color:var(--line); font-weight:500; }
+  .btn.ghost:hover { border-color:var(--muted); }
+  .size { color:var(--muted); font-size:.8rem; }
+  .note { color:var(--muted); font-size:.84rem; line-height:1.7; margin:0; }
+  .warn { color:var(--accent); }
+  .panel { border:1px dashed var(--line); border-radius:12px; padding:18px 20px; margin-top:22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="./index.html">← Jey Tools</a>
+  <h1>10분 키즈뉴스</h1>
+  <p class="sub">주차별로 발행한 호를 PDF로 받아 인쇄하세요. A4 양면으로 뽑으면 한 주치가 한 묶음이 됩니다.</p>
+
+  <div id="list"><p class="note">목록을 가져오는 중…</p></div>
+
+  <div class="panel">
+    <p class="note">
+      <b>인쇄 설정</b> — 용지 A4, 배율 100%(“페이지에 맞춤” 끄기), 여백 없음, 배경 그래픽 켜기.<br>
+      하루치는 <b>기사면 1장 + 활동지 1장</b>입니다. 활동지의 정답은 지면 맨 아래에 거꾸로 적혀 있습니다.
+    </p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, "0");
+
+  function fmtRange(week, end){
+    const a = new Date(week + "T00:00:00");
+    const b = end ? new Date(end + "T00:00:00") : null;
+    if (isNaN(a)) return week + (end ? " ~ " + end : "");
+    let s = a.getFullYear() + ". " + pad(a.getMonth()+1) + ". " + pad(a.getDate());
+    if (b && !isNaN(b)) s += " ~ " + pad(b.getMonth()+1) + ". " + pad(b.getDate());
+    return s;
+  }
+  function mb(bytes){ return (bytes/1048576).toFixed(1) + "MB"; }
+
+  function card(it){
+    const box = document.createElement("div");
+    box.className = "issue";
+
+    const top = document.createElement("div");
+    top.className = "top";
+    const no = document.createElement("span");
+    no.className = "no"; no.textContent = "제 " + (it.issue || "?") + "호";
+    const when = document.createElement("span");
+    when.className = "when"; when.textContent = fmtRange(it.week, it.end);
+    top.append(no, when);
+    box.appendChild(top);
+
+    const heads = (it.heads || []);
+    if (heads.length){
+      const ul = document.createElement("ul");
+      ul.className = "heads";
+      heads.forEach((h, i) => {
+        const li = document.createElement("li");
+        const cat = (it.cats || [])[i];
+        li.innerHTML = (cat ? cat + " · " : "") + "<b></b>";
+        li.querySelector("b").textContent = h;
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = '<span class="note">PDF 확인하는 중…</span>';
+    box.appendChild(row);
+
+    const url = "./issues/pdf/" + it.week + ".pdf";
+    fetch(url, { method: "HEAD" })
+      .then(r => {
+        if (!r.ok) throw new Error(r.status);
+        const len = +(r.headers.get("content-length") || 0);
+        row.innerHTML = "";
+        const a = document.createElement("a");
+        a.className = "btn"; a.href = url;
+        a.download = "10분키즈뉴스_제" + (it.issue || "") + "호_" + it.week + ".pdf";
+        a.textContent = "PDF 내려받기";
+        const v = document.createElement("a");
+        v.className = "btn ghost"; v.href = url; v.target = "_blank"; v.rel = "noopener";
+        v.textContent = "브라우저에서 보기";
+        row.append(a, v);
+        if (len) {
+          const s = document.createElement("span");
+          s.className = "size"; s.textContent = mb(len);
+          row.appendChild(s);
+        }
+      })
+      .catch(() => {
+        row.innerHTML = "";
+        const p = document.createElement("span");
+        p.className = "note warn";
+        p.textContent = "이 호는 아직 PDF가 없습니다.";
+        const v = document.createElement("a");
+        v.className = "btn ghost"; v.href = "./kids-weekly.html";
+        v.textContent = "발행기에서 열어 인쇄";
+        row.append(p, v);
+      });
+
+    return box;
+  }
+
+  fetch("./issues/index.json?t=" + Date.now())
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(idx => {
+      const list = (idx.issues || []).slice().sort((a, b) => a.week < b.week ? 1 : -1);
+      const host = $("list"); host.innerHTML = "";
+      if (!list.length){
+        host.innerHTML = '<p class="note">아직 발행한 호가 없습니다.</p>';
+        return;
+      }
+      list.forEach(it => host.appendChild(card(it)));
+    })
+    .catch(e => {
+      $("list").innerHTML = '<p class="note warn">목록을 가져오지 못했습니다 (' + e.message + ').<br>'
+        + '인터넷에 연결된 상태에서 seamanse21.github.io 주소로 열었을 때만 됩니다.</p>';
+    });
+})();
+</script>
+</body>
+</html>
