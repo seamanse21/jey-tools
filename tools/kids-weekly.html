@@ -1892,7 +1892,7 @@ textarea{resize:vertical;line-height:1.6}
     <details>
       <summary>활동지</summary>
       <div class="fields">
-        <label for="fQuiz">맞혀 보기 — 한 줄에 하나씩, <b>문장 | O</b> 또는 <b>문장 | X</b></label>
+        <label for="fQuiz">내용 확인 — 한 줄에 하나씩, <b>문장 | O</b> 또는 <b>문장 | X</b></label>
         <textarea id="fQuiz" rows="4" placeholder="세계 관용의 날은 11월 16일이다. | O"></textarea>
         <label for="fFill">낱말 채우기 — <b>빈칸은 ___ 로, 끝에 | 정답</b></label>
         <textarea id="fFill" rows="2" placeholder="생각이 달라도 서로를 ___하면 사이좋게 지낼 수 있어요. | 존중"></textarea>
@@ -4613,7 +4613,7 @@ function actHTML(d,i){
    +   '<span>'+esc(S.title)+' 오늘의 한 장</span></div>';
 
   if(quiz.length){
-    out += '<div class="sec"><h3><i>1</i>맞혀 보기<small>맞으면 O, 아니면 X 에 동그라미</small></h3>'
+    out += '<div class="sec"><h3><i>1</i>내용 확인<small>맞으면 O, 아니면 X 에 동그라미</small></h3>'
       + quiz.map((q,n)=>'<div class="qline"><span class="no">'+(n+1)+'</span><span class="t">'+esc(q.a)
         +'</span><span class="ox"><b>O</b><b>X</b></span></div>').join("")
       + '</div>';
