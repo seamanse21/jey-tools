@@ -1,0 +1,170 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+:root{ --cat:#1b2a4a; --cream:#fdf6e8; --navy:#22304a; --orange:#f08c2e; --ink:#2b2a24; }
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
+     word-break:keep-all;overflow-wrap:break-word}
+.sc{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:0 88px;text-align:center}
+.jua{font-family:"Jua",sans-serif;line-height:1.3}
+
+/* 1 훅 */
+#s1{background:var(--cat)}
+#s1 .ic{margin-bottom:44px}
+#s1 .pill{display:inline-block;background:var(--orange);color:#fff;font-family:"Jua",sans-serif;
+  font-size:38px;padding:11px 32px;border-radius:999px;margin-bottom:44px}
+#s1 h1{font-size:96px;color:#fff;text-wrap:balance;letter-spacing:-.02em}
+#s1 .free{margin-top:34px;font-size:50px;color:#ffd79a;font-family:"Jua",sans-serif}
+
+/* 목록 장면 */
+.lst{background:var(--cream)}
+.lst .lab{font-family:"Jua",sans-serif;font-size:48px;color:var(--cat);margin-bottom:56px;
+  text-wrap:balance;line-height:1.35}
+.lst .items{width:100%;display:flex;flex-direction:column;gap:30px}
+.lst .it{opacity:0;background:#fff;border-radius:26px;padding:34px 36px;text-align:left;
+  box-shadow:0 8px 24px rgba(34,48,74,.09);display:flex;gap:26px;align-items:flex-start}
+.lst .n{flex:none;width:62px;height:62px;border-radius:50%;background:var(--orange);color:#fff;
+  font-family:"Jua",sans-serif;font-size:36px;display:flex;align-items:center;justify-content:center}
+.lst .tx b{display:block;font-family:"Jua",sans-serif;font-size:50px;color:var(--navy);
+  line-height:1.3;margin-bottom:10px}
+.lst .tx span{display:block;font-size:40px;color:#6b6a60;line-height:1.5}
+
+/* 받는 곳 */
+#gt{background:var(--cat)}
+#gt .lab{font-family:"Jua",sans-serif;font-size:46px;color:#9fb3cf;margin-bottom:46px}
+#gt .url{font-family:"Jua",sans-serif;font-size:72px;color:#fff;line-height:1.6;opacity:0}
+#gt .note{margin-top:52px;font-size:42px;color:#ffd79a;line-height:1.5;text-wrap:balance}
+
+/* 5 마무리 */
+#s5{background:var(--orange)}
+#s5 .m{margin-bottom:40px}
+#s5 .h{font-family:"Jua",sans-serif;font-size:92px;color:#fff;line-height:1.32}
+#s5 .who{font-size:46px;color:#fff6e7;margin-top:28px}
+#s5 .btn{margin-top:64px;background:#fff;border-radius:34px;padding:48px 70px;
+  box-shadow:0 18px 44px rgba(0,0,0,.22);display:flex;flex-direction:column;gap:16px}
+#s5 .btn .k{font-family:"Jua",sans-serif;font-size:52px;color:var(--orange)}
+#s5 .btn .v{font-family:"Jua",sans-serif;font-size:70px;color:var(--navy);line-height:1.32}
+#s5 .f{margin-top:44px;font-family:"Jua",sans-serif;font-size:46px;color:#fff;opacity:.92}
+</style></head><body>
+
+<div class="sc" id="s1">
+  <div class="ic">
+    <svg width="160" height="160" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2.6l2.3 6.3 6.3 2.3-6.3 2.3L12 19.8l-2.3-6.3L3.4 11.2l6.3-2.3z" fill="#f08c2e"/>
+      <circle cx="19" cy="4.6" r="1.5" fill="#fff"/><circle cx="5" cy="18" r="1.2" fill="#fff"/>
+      <circle cx="20" cy="17" r="1" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="pill"></div>
+  <h1 class="jua"></h1>
+  <div class="free"></div>
+</div>
+
+<div class="sc lst" id="l1"><div class="lab"></div><div class="items"></div></div>
+<div class="sc lst" id="l2"><div class="lab"></div><div class="items"></div></div>
+
+<div class="sc" id="gt">
+  <div class="lab"></div><div class="url"></div><div class="note"></div>
+</div>
+
+<div class="sc" id="s5">
+  <div class="m">
+    <svg width="170" height="170" viewBox="0 0 64 64">
+      <path d="M32 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="32" cy="7" r="3.4" fill="#fff"/>
+      <rect x="12" y="15" width="40" height="36" rx="11" fill="#fff"/>
+      <circle cx="24.6" cy="30.5" r="4.2" fill="#e8891f"/><circle cx="40.4" cy="30.5" r="4.2" fill="#e8891f"/>
+      <rect x="25" y="43" width="14" height="3.6" rx="1.8" fill="#e8891f"/>
+      <rect x="6" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+      <rect x="53" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="h">하루 10분,<br>매일매일 똑똑해져요</div>
+  <div class="who">7세 – 초등 4학년</div>
+  <div class="btn">
+    <div class="k">프로필 링크에서</div>
+    <div class="v">무료로 받아 가세요</div>
+  </div>
+  <div class="f">@10minkids</div>
+</div>
+
+<script>
+const E=x=>Math.min(1,Math.max(0,x));
+const easeOut=x=>1-Math.pow(1-x,3);
+const easeOutBack=x=>{const c1=2.0,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+const ramp=(t,a,b)=>E((t-a)/(b-a));
+const $=s=>document.querySelector(s);
+let SCENES=[], AT={}, D=null;
+const XF=0.18;
+
+function fillList(sel, o){
+  $(sel+' .lab').innerHTML=o.label;
+  $(sel+' .items').innerHTML=o.items.map((x,i)=>
+    '<div class="it"><div class="n">'+(i+1)+'</div><div class="tx">'
+    +'<b>'+x.t+'</b>'+(x.s?'<span>'+x.s+'</span>':'')+'</div></div>').join('');
+}
+function buildDOM(data){
+  D=data;
+  $('#s1 .pill').textContent=data.cat||'자료';
+  $('#s1 h1').innerHTML=data.hook;
+  $('#s1 .free').innerHTML=data.free||'';
+  fillList('#l1', data.what);
+  fillList('#l2', data.how);
+  $('#gt .lab').innerHTML=data.get.label;
+  $('#gt .url').innerHTML=data.get.url;
+  $('#gt .note').innerHTML=data.get.note||'';
+  SCENES=[['s1',0,3.20],['l1',3.20,8.60],['l2',8.60,14.00],['gt',14.00,16.60],['s5',16.60,20.00]];
+  AT={}; SCENES.forEach(([id,a])=>{ AT[id]=a; });
+}
+
+function animList(t, sel, o, a){
+  $(sel+' .lab').style.opacity=easeOut(ramp(t,a,a+0.40));
+  document.querySelectorAll(sel+' .it').forEach((el,i)=>{
+    const s0=a+0.34+i*0.52, k=easeOutBack(ramp(t,s0,s0+0.52));
+    el.style.opacity=E(ramp(t,s0,s0+0.28));
+    el.style.transform='translateY('+(30*(1-k))+'px) scale('+(0.94+0.06*k)+')';
+  });
+}
+
+function seek(t){
+  SCENES.forEach(([id,a,b])=>{
+    const el=document.getElementById(id);
+    let o=0;
+    if(t>=a-XF && t<=b+0.01) o=E(Math.min(ramp(t,a-XF,a+XF*0.6), 1-ramp(t,b-XF,b)));
+    el.style.opacity=o;
+  });
+
+  { const k=easeOutBack(ramp(t,0,0.55));
+    $('#s1 .ic').style.transform='rotate('+(-18+18*k)+'deg) scale('+(0.6+0.4*k)+')';
+    $('#s1 .ic').style.opacity=E(ramp(t,0,0.30));
+    $('#s1 .pill').style.opacity=easeOut(ramp(t,0.18,0.55));
+    const p=easeOut(ramp(t,0.28,0.78)), h=$('#s1 h1');
+    h.style.opacity=p; h.style.transform='translateY('+(30-30*p)+'px)';
+    const f=easeOutBack(ramp(t,0.70,1.30)), ff=$('#s1 .free');
+    ff.style.opacity=E(ramp(t,0.70,1.00));
+    ff.style.transform='scale('+(0.8+0.2*f)+')'; }
+
+  animList(t, '#l1', D.what, AT.l1);
+  animList(t, '#l2', D.how,  AT.l2);
+
+  { const a=AT.gt;
+    $('#gt .lab').style.opacity=easeOut(ramp(t,a,a+0.35));
+    const k=easeOut(ramp(t,a+0.22,a+0.80)), u=$('#gt .url');
+    u.style.opacity=k; u.style.transform='translateY('+(24-24*k)+'px)';
+    const n=easeOut(ramp(t,a+0.70,a+1.25)), nn=$('#gt .note');
+    nn.style.opacity=n; nn.style.transform='translateY('+(18-18*n)+'px)'; }
+
+  { const a=AT.s5, k=easeOutBack(ramp(t,a,a+0.55));
+    $('#s5 .m').style.transform='scale('+(0.7+0.3*k)+')';
+    const h=easeOut(ramp(t,a+0.20,a+0.80)), hh=$('#s5 .h');
+    hh.style.opacity=h; hh.style.transform='translateY('+(24-24*h)+'px)';
+    $('#s5 .who').style.opacity=easeOut(ramp(t,a+0.45,a+1.00));
+    const bt=easeOutBack(ramp(t,a+0.70,a+1.30)), btn=$('#s5 .btn');
+    btn.style.opacity=E(ramp(t,a+0.70,a+1.00));
+    const pulse=1+0.022*Math.sin((t-a-1.3)*7.5);
+    btn.style.transform='scale('+((0.86+0.14*bt)*(t>a+1.3?pulse:1))+')';
+    $('#s5 .f').style.opacity=easeOut(ramp(t,a+1.10,a+1.70)); }
+}
+</script></body></html>

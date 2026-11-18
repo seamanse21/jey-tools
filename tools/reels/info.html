@@ -1,0 +1,209 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+:root{ --cat:#3b5f9e; --cream:#fdf6e8; --navy:#22304a; --orange:#f08c2e; --ink:#2b2a24; }
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
+     word-break:keep-all;overflow-wrap:break-word}
+.sc{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:0 90px;text-align:center}
+.jua{font-family:"Jua",sans-serif;line-height:1.3}
+
+/* 1 훅 */
+#s1{background:var(--navy)}
+#s1 .pill{display:inline-block;background:var(--orange);color:#fff;font-family:"Jua",sans-serif;
+  font-size:40px;padding:12px 34px;border-radius:999px;margin-bottom:46px}
+#s1 h1{font-size:96px;color:#fff;text-wrap:balance;letter-spacing:-.02em}
+#s1 .ic{margin-bottom:46px}
+
+/* 비교 장면 — 막대 2~5개 */
+.cmp{background:var(--cream);justify-content:center}
+.cmp .lab{font-family:"Jua",sans-serif;font-size:46px;color:var(--cat);margin-bottom:54px;
+  text-wrap:balance;line-height:1.35}
+.cmp .rows{width:100%}
+.cmp .row{width:100%;margin-bottom:34px;text-align:left;opacity:0}
+.cmp .who{font-size:40px;color:#6b6a60;margin-bottom:12px}
+.cmp .barwrap{display:flex;align-items:center;gap:24px}
+.cmp .bar{height:62px;border-radius:10px;background:#c3bdb0;width:0}
+.cmp .val{font-family:"Jua",sans-serif;font-size:62px;color:#8d8880;white-space:nowrap}
+.cmp .val .u{font-size:38px;margin-left:3px}
+/* 강조할 줄 */
+.cmp .row.on .bar{background:var(--cat)}
+.cmp .row.on .val{color:var(--cat)}
+.cmp .row.on .who{color:var(--cat);font-family:"Jua",sans-serif}
+.cmp .row.warn .bar{background:var(--orange)}
+.cmp .row.warn .val{color:var(--orange)}
+.cmp .row.warn .who{color:var(--orange);font-family:"Jua",sans-serif}
+.cmp .src{position:absolute;bottom:420px;font-size:28px;color:#a39d91;text-align:center;
+  line-height:1.5;padding:0 90px}
+
+/* 큰 숫자 한 개 */
+#st{background:var(--navy)}
+#st .lab{font-family:"Jua",sans-serif;font-size:44px;color:#9fb3cf;margin-bottom:40px;
+  text-wrap:balance;line-height:1.4}
+#st .big{font-family:"Jua",sans-serif;font-size:210px;color:var(--orange);line-height:1}
+#st .big .u{font-size:92px}
+#st .body{font-size:54px;color:#fff;margin-top:42px;line-height:1.5;text-wrap:balance}
+#st .src{position:absolute;bottom:420px;font-size:28px;color:#7e90ab;text-align:center;
+  line-height:1.5;padding:0 90px}
+
+/* 통찰 */
+#in{background:var(--cat)}
+#in .h{font-family:"Jua",sans-serif;font-size:84px;color:#fff;line-height:1.38;text-wrap:balance}
+#in .b{font-size:52px;color:#fff;opacity:.9;margin-top:40px;line-height:1.5;text-wrap:balance}
+
+/* 5 마무리 */
+#s5{background:var(--orange)}
+#s5 .m{margin-bottom:40px}
+#s5 .h{font-family:"Jua",sans-serif;font-size:92px;color:#fff;line-height:1.32}
+#s5 .who{font-size:46px;color:#fff6e7;margin-top:28px}
+#s5 .btn{margin-top:64px;background:#fff;border-radius:34px;padding:48px 70px;
+  box-shadow:0 18px 44px rgba(0,0,0,.22);display:flex;flex-direction:column;gap:16px}
+#s5 .btn .k{font-family:"Jua",sans-serif;font-size:52px;color:var(--orange)}
+#s5 .btn .v{font-family:"Jua",sans-serif;font-size:70px;color:var(--navy);line-height:1.32}
+#s5 .f{margin-top:44px;font-family:"Jua",sans-serif;font-size:46px;color:#fff;opacity:.92}
+</style></head><body>
+
+<div class="sc" id="s1">
+  <div class="ic">
+    <svg width="150" height="150" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="13.5" r="8" stroke="#fff" stroke-width="1.7"/>
+      <path d="M12 9.5v4.2l2.8 1.7" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/>
+      <path d="M9.6 2.6h4.8M12 2.6v2.9" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="pill"></div>
+  <h1 class="jua"></h1>
+</div>
+
+<div class="sc cmp" id="c1">
+  <div class="lab"></div><div class="rows"></div><div class="src"></div>
+</div>
+
+<div class="sc" id="st">
+  <div class="lab"></div><div class="big"></div><div class="body"></div><div class="src"></div>
+</div>
+
+<div class="sc" id="in"><div class="h jua"></div><div class="b"></div></div>
+
+<div class="sc" id="s5">
+  <div class="m">
+    <svg width="170" height="170" viewBox="0 0 64 64">
+      <path d="M32 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="32" cy="7" r="3.4" fill="#fff"/>
+      <rect x="12" y="15" width="40" height="36" rx="11" fill="#fff"/>
+      <circle cx="24.6" cy="30.5" r="4.2" fill="#e8891f"/><circle cx="40.4" cy="30.5" r="4.2" fill="#e8891f"/>
+      <rect x="25" y="43" width="14" height="3.6" rx="1.8" fill="#e8891f"/>
+      <rect x="6" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+      <rect x="53" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="h">하루 10분,<br>매일매일 똑똑해져요</div>
+  <div class="who">7세 – 초등 4학년</div>
+  <div class="btn">
+    <div class="k">프로필 링크에서</div>
+    <div class="v">무료로 받아 가세요</div>
+  </div>
+  <div class="f">@10minkids</div>
+</div>
+
+<script>
+const E=x=>Math.min(1,Math.max(0,x));
+const easeOut=x=>1-Math.pow(1-x,3);
+const easeOutBack=x=>{const c1=2.0,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);};
+const ramp=(t,a,b)=>E((t-a)/(b-a));
+const $=s=>document.querySelector(s);
+let SCENES=[], AT={}, D=null;
+const XF=0.18;
+
+function buildDOM(data){
+  D=data;
+  $('#s1 .pill').textContent=data.cat||'정보';
+  $('#s1 h1').innerHTML=data.hook;
+
+  /* 막대 — 2~5개. 강조할 줄은 mark 로 지정한다 (on=우리 주장, warn=문제) */
+  const c=data.bars;
+  $('#c1 .lab').innerHTML=c.label;
+  $('#c1 .rows').innerHTML = c.items.map(o=>
+    '<div class="row'+(o.mark?' '+o.mark:'')+'">'
+    + '<div class="who">'+o.t+'</div>'
+    + '<div class="barwrap"><div class="bar"></div><div class="val"></div></div></div>').join('');
+  $('#c1 .src').innerHTML=c.source||data.source||'';
+
+  $('#st .lab').innerHTML=data.stat.label;
+  $('#st .body').innerHTML=data.stat.body;
+  $('#st .src').innerHTML=data.stat.source||data.source||'';
+
+  $('#in .h').innerHTML=data.insight.head;
+  $('#in .b').innerHTML=data.insight.body;
+
+  SCENES=[['s1',0,3.00],['c1',3.00,9.40],['st',9.40,13.60],['in',13.60,16.40],['s5',16.40,20.00]];
+  AT={}; SCENES.forEach(([id,x])=>{ AT[id]=x; });
+}
+
+function seek(t){
+  SCENES.forEach(([id,a,b])=>{
+    const el=document.getElementById(id);
+    let o=0;
+    if(t>=a-XF && t<=b+0.01) o=E(Math.min(ramp(t,a-XF,a+XF*0.6), 1-ramp(t,b-XF,b)));
+    el.style.opacity=o;
+  });
+
+  /* 훅 */
+  { const k=easeOutBack(ramp(t,0,0.55));
+    $('#s1 .ic').style.transform='scale('+(0.7+0.3*k)+')';
+    $('#s1 .ic').style.opacity=E(ramp(t,0,0.30));
+    $('#s1 .pill').style.opacity=easeOut(ramp(t,0.18,0.55));
+    const p=easeOut(ramp(t,0.30,0.80)), h=$('#s1 h1');
+    h.style.opacity=p; h.style.transform='translateY('+(30-30*p)+'px)'; }
+
+  /* 막대 — 위에서부터 하나씩 자란다. 가장 큰 값이 가득 찬다 */
+  { const a=AT.c1, c=D.bars, FULL=560;
+    $('#c1 .lab').style.opacity=easeOut(ramp(t,a,a+0.40));
+    const big=Math.max(...c.items.map(o=>o.v));
+    document.querySelectorAll('#c1 .row').forEach((row,i)=>{
+      const o=c.items[i], d=0.32+i*0.34;
+      const app=easeOut(ramp(t,a+d,a+d+0.40));
+      row.style.opacity=app;
+      row.style.transform='translateY('+(16-16*app)+'px)';
+      const g=easeOut(ramp(t,a+d+0.10,a+d+0.95));
+      row.querySelector('.bar').style.width=(FULL*(o.v/big)*g)+'px';
+      const shown = o.v%1 ? (o.v*g).toFixed(1) : Math.round(o.v*g);
+      row.querySelector('.val').innerHTML=shown+'<span class="u">'+(o.u||'')+'</span>';
+    });
+    const last=0.32+(c.items.length-1)*0.34+1.0;
+    $('#c1 .src').style.opacity=easeOut(ramp(t,a+last,a+last+0.5))*0.9; }
+
+  /* 큰 숫자 */
+  { const a=AT.st, s0=D.stat;
+    $('#st .lab').style.opacity=easeOut(ramp(t,a,a+0.40));
+    const k=easeOutBack(ramp(t,a+0.15,a+0.85)), big=$('#st .big');
+    big.style.opacity=E(ramp(t,a+0.15,a+0.45));
+    big.style.transform='scale('+(0.62+0.38*k)+')';
+    const g=easeOut(ramp(t,a+0.15,a+1.00));
+    const shown = s0.v%1 ? (s0.v*g).toFixed(1) : Math.round(s0.v*g);
+    big.innerHTML=(s0.prefix||'')+shown+'<span class="u">'+(s0.u||'')+'</span>';
+    const bd=easeOut(ramp(t,a+0.80,a+1.40)), bb=$('#st .body');
+    bb.style.opacity=bd; bb.style.transform='translateY('+(22-22*bd)+'px)';
+    $('#st .src').style.opacity=easeOut(ramp(t,a+1.50,a+2.00))*0.9; }
+
+  /* 통찰 */
+  { const a=AT.in, k=easeOut(ramp(t,a,a+0.55)), h=$('#in .h');
+    h.style.opacity=k; h.style.transform='translateY('+(26-26*k)+'px)';
+    const b2=easeOut(ramp(t,a+0.45,a+1.05)), bb=$('#in .b');
+    bb.style.opacity=b2*0.9; bb.style.transform='translateY('+(20-20*b2)+'px)'; }
+
+  /* 마무리 */
+  { const a=AT.s5, k=easeOutBack(ramp(t,a,a+0.55));
+    $('#s5 .m').style.transform='scale('+(0.7+0.3*k)+')';
+    const h=easeOut(ramp(t,a+0.20,a+0.80)), hh=$('#s5 .h');
+    hh.style.opacity=h; hh.style.transform='translateY('+(24-24*h)+'px)';
+    $('#s5 .who').style.opacity=easeOut(ramp(t,a+0.45,a+1.00));
+    const bt=easeOutBack(ramp(t,a+0.70,a+1.30)), btn=$('#s5 .btn');
+    btn.style.opacity=E(ramp(t,a+0.70,a+1.00));
+    const pulse=1+0.022*Math.sin((t-a-1.3)*7.5);
+    btn.style.transform='scale('+((0.86+0.14*bt)*(t>a+1.3?pulse:1))+')';
+    $('#s5 .f').style.opacity=easeOut(ramp(t,a+1.10,a+1.70)); }
+}
+</script></body></html>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#eef3fa"/>
+  <rect x="0" y="186" width="480" height="54" fill="#dde6f3"/>
+  <!-- 저금통 -->
+  <g transform="translate(96 118)">
+    <ellipse cx="0" cy="62" rx="62" ry="10" fill="#cbd8ea"/>
+    <ellipse cx="0" cy="8" rx="58" ry="44" fill="#f6a8c0"/>
+    <ellipse cx="-20" cy="2" rx="34" ry="26" fill="#ffc2d4" opacity=".55"/>
+    <circle cx="26" cy="-2" r="4.5" fill="#6b4150"/>
+    <ellipse cx="48" cy="10" rx="13" ry="11" fill="#ef8fac"/>
+    <circle cx="45" cy="9" r="2.4" fill="#b96d85"/><circle cx="52" cy="9" r="2.4" fill="#b96d85"/>
+    <path d="M-16 -40h32l-6 10h-20z" fill="#e07d9b"/>
+    <rect x="-34" y="40" width="16" height="16" rx="4" fill="#ef8fac"/>
+    <rect x="18" y="40" width="16" height="16" rx="4" fill="#ef8fac"/>
+  </g>
+  <!-- 동전 -->
+  <g fill="#f5c344" stroke="#d9a21f" stroke-width="2">
+    <circle cx="108" cy="52" r="13"/><circle cx="140" cy="38" r="11"/><circle cx="76" cy="40" r="10"/>
+  </g>
+  <!-- 세 상자: 학교 / 책 / 신호등 -->
+  <g transform="translate(226 96)">
+    <rect x="0" y="36" width="72" height="56" rx="6" fill="#fff" stroke="#b9cbe4" stroke-width="3"/>
+    <path d="M10 36h52l-6-20H16z" fill="#7fa8d8"/>
+    <path d="M22 62h28v26H22z" fill="#9ec4ea"/><rect x="32" y="72" width="8" height="16" fill="#6a93c6"/>
+  </g>
+  <g transform="translate(310 96)">
+    <rect x="0" y="36" width="72" height="56" rx="6" fill="#fff" stroke="#b9cbe4" stroke-width="3"/>
+    <rect x="14" y="50" width="14" height="34" rx="2" fill="#e8795f"/>
+    <rect x="30" y="46" width="14" height="38" rx="2" fill="#f0b43f"/>
+    <rect x="46" y="54" width="14" height="30" rx="2" fill="#7fb77e"/>
+  </g>
+  <g transform="translate(394 96)">
+    <rect x="0" y="36" width="60" height="56" rx="6" fill="#fff" stroke="#b9cbe4" stroke-width="3"/>
+    <rect x="22" y="44" width="16" height="42" rx="7" fill="#4a5a70"/>
+    <circle cx="30" cy="54" r="4.6" fill="#e8795f"/><circle cx="30" cy="65" r="4.6" fill="#f0b43f"/>
+    <circle cx="30" cy="76" r="4.6" fill="#7fb77e"/>
+  </g>
+  <!-- 화살표 -->
+  <g fill="none" stroke="#8aa6c8" stroke-width="4" stroke-linecap="round">
+    <path d="M166 120h40"/><path d="M196 112l12 8-12 8"/>
+  </g>
+</svg>

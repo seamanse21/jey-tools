@@ -1,0 +1,186 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<link rel="stylesheet" href="_fonts.css">
+<style>
+:root{ --cat:#e35d8a; --cream:#fdf6e8; --navy:#22304a; --ink:#2b2a24; --orange:#f08c2e; }
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:"Gowun Dodum",sans-serif;color:var(--ink)}
+.sc{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:0 90px;text-align:center}
+.jua{font-family:"Jua",sans-serif;line-height:1.26}
+
+/* 1 훅 */
+#s1{background:#000}
+#s1 .ph{position:absolute;inset:0;background:url(photo.jpg) center/cover;filter:brightness(.42) saturate(1.05)}
+#s1 .in{position:relative;transform:translateY(-60px)}
+#s1 .pill{display:inline-block;background:var(--cat);color:#fff;font-family:"Jua",sans-serif;
+  font-size:40px;padding:12px 34px;border-radius:999px;margin-bottom:44px}
+#s1 h1{font-size:104px;color:#fff;letter-spacing:-.02em}
+
+/* 숫자 장면 공통 */
+.num{background:var(--cream)}
+.num .big{font-family:"Jua",sans-serif;font-size:400px;color:var(--cat);line-height:1}
+.num .cap{font-size:58px;color:#6b6a60;margin-top:10px}
+.num .sub{font-size:44px;color:#9a978c;margin-top:22px}
+
+/* 4 합치기 */
+#s4{background:var(--cat)}
+#s4 .row{display:flex;align-items:baseline;gap:18px;font-family:"Jua",sans-serif;
+  font-size:190px;color:#fff;line-height:1}
+#s4 .u{font-size:96px}
+#s4 .tag{font-size:62px;color:#ffe3ee;margin-top:48px;font-family:"Jua",sans-serif}
+
+/* 5 유네스코 */
+#s5{background:var(--navy)}
+#s5 .y{font-family:"Jua",sans-serif;font-size:220px;color:var(--orange);line-height:1}
+#s5 .t{font-size:62px;color:#fff;margin-top:26px;line-height:1.45}
+
+/* 6 CTA */
+#s6{background:var(--orange)}
+#s6 .m{margin-bottom:54px}
+#s6 .h{font-family:"Jua",sans-serif;font-size:96px;color:#fff;line-height:1.3}
+#s6 .d{font-size:52px;color:#fff6e7;margin-top:34px}
+#s6 .f{position:absolute;bottom:520px;font-family:"Jua",sans-serif;font-size:46px;color:#fff}
+</style></head><body>
+
+<div class="sc" id="s1">
+  <div class="ph"></div>
+  <div class="in">
+    <div class="pill">문화</div>
+    <h1 class="jua">김치의 날이<br>왜 11월 22일일까?</h1>
+  </div>
+</div>
+
+<div class="sc num" id="s2">
+  <div class="big">11</div>
+  <div class="cap">김치에 들어가는 재료</div>
+  <div class="sub">배추, 무, 고춧가루, 마늘…</div>
+</div>
+
+<div class="sc num" id="s3">
+  <div class="big">22</div>
+  <div class="cap">몸에 주는 좋은 점</div>
+  <div class="sub">유산균이 만드는 힘</div>
+</div>
+
+<div class="sc" id="s4">
+  <div class="row"><span>11</span><span class="u">월</span><span>22</span><span class="u">일</span></div>
+  <div class="tag">그래서 '김치의 날'</div>
+</div>
+
+<div class="sc" id="s5">
+  <div class="y">2013</div>
+  <div class="t">유네스코가 '김장 문화'를<br>인류무형문화유산으로 올린 해</div>
+</div>
+
+<div class="sc" id="s6">
+  <div class="m">
+    <svg width="190" height="190" viewBox="0 0 64 64">
+      <path d="M32 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="32" cy="7" r="3.4" fill="#fff"/>
+      <rect x="12" y="15" width="40" height="36" rx="11" fill="#fff"/>
+      <circle cx="24.6" cy="30.5" r="4.2" fill="#e8891f"/><circle cx="40.4" cy="30.5" r="4.2" fill="#e8891f"/>
+      <rect x="25" y="43" width="14" height="3.6" rx="1.8" fill="#e8891f"/>
+      <rect x="6" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+      <rect x="53" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="h">하루 10분,<br>한 장으로 읽는 뉴스</div>
+  <div class="d">프로필 링크에서 1주일치 14쪽 무료</div>
+  <div class="f">@10minkids · 10minkids.com</div>
+</div>
+
+<script>
+const E = x => Math.min(1, Math.max(0, x));
+const easeOut     = x => 1 - Math.pow(1-x, 3);
+const easeOutBack = x => { const c1=2.0, c3=c1+1;
+  return 1 + c3*Math.pow(x-1,3) + c1*Math.pow(x-1,2); };
+const ramp = (t,a,b) => E((t-a)/(b-a));
+
+/* 장면 구간 — 끝에서 0.18초씩 겹쳐 넘긴다 */
+const SC = [
+  {el:'s1', a:0.00, b:2.60},
+  {el:'s2', a:2.60, b:5.70},
+  {el:'s3', a:5.70, b:8.70},
+  {el:'s4', a:8.70, b:11.30},
+  {el:'s5', a:11.30, b:13.40},
+  {el:'s6', a:13.40, b:15.00},
+];
+const XF = 0.18;
+
+function seek(t){
+  SC.forEach(s=>{
+    const el = document.getElementById(s.el);
+    let o = 0;
+    if (t >= s.a - XF && t <= s.b + 0.01){
+      o = Math.min(ramp(t, s.a-XF, s.a+XF*0.6), 1 - ramp(t, s.b-XF, s.b));
+      o = E(o);
+    }
+    el.style.opacity = o;
+  });
+
+  /* 1 훅 : 글자가 아래에서 올라오고 사진이 아주 천천히 밀린다 */
+  {
+    const p = easeOut(ramp(t, 0.02, 0.50));
+    const inn = document.querySelector('#s1 .in');
+    inn.style.transform = 'translateY(' + (-60 + 46*(1-p)) + 'px)';
+    inn.style.opacity = p;
+    const z = 1 + 0.07 * ramp(t, 0, 2.6);
+    document.querySelector('#s1 .ph').style.transform = 'scale(' + z + ')';
+  }
+
+  /* 2·3 숫자 : 튀어나오듯 커진다 */
+  [['s2',2.60],['s3',5.70]].forEach(([id,a])=>{
+    const k = easeOutBack(ramp(t, a, a+0.55));
+    const big = document.querySelector('#'+id+' .big');
+    big.style.transform = 'scale(' + (0.55 + 0.45*k) + ')';
+    const cap = document.querySelector('#'+id+' .cap');
+    const sub = document.querySelector('#'+id+' .sub');
+    const c = easeOut(ramp(t, a+0.30, a+0.85));
+    cap.style.opacity = c; cap.style.transform = 'translateY(' + (18-18*c) + 'px)';
+    const u = easeOut(ramp(t, a+0.55, a+1.10));
+    sub.style.opacity = u; sub.style.transform = 'translateY(' + (16-16*u) + 'px)';
+  });
+
+  /* 4 합치기 : 11 과 22 가 양쪽에서 모인다 */
+  {
+    const a = 8.70;
+    const k = easeOut(ramp(t, a, a+0.70));
+    const sp = document.querySelectorAll('#s4 .row span');
+    sp[0].style.transform = 'translateX(' + (-220*(1-k)) + 'px)';
+    sp[1].style.opacity = k;
+    sp[2].style.transform = 'translateX(' + ( 220*(1-k)) + 'px)';
+    sp[3].style.opacity = k;
+    const g = easeOutBack(ramp(t, a+0.60, a+1.25));
+    const tag = document.querySelector('#s4 .tag');
+    tag.style.opacity = E(ramp(t, a+0.60, a+0.95));
+    tag.style.transform = 'scale(' + (0.86 + 0.14*g) + ')';
+  }
+
+  /* 5 연도 : 숫자가 세어 올라간다 */
+  {
+    const a = 11.30;
+    const k = easeOut(ramp(t, a, a+0.85));
+    const y = document.querySelector('#s5 .y');
+    y.textContent = String(Math.round(1990 + (2013-1990)*k));
+    y.style.transform = 'scale(' + (0.9 + 0.1*k) + ')';
+    const c = easeOut(ramp(t, a+0.55, a+1.15));
+    const tt = document.querySelector('#s5 .t');
+    tt.style.opacity = c; tt.style.transform = 'translateY(' + (20-20*c) + 'px)';
+  }
+
+  /* 6 마무리 */
+  {
+    const a = 13.40;
+    const k = easeOutBack(ramp(t, a, a+0.60));
+    document.querySelector('#s6 .m').style.transform = 'scale(' + (0.7 + 0.3*k) + ')';
+    const h = easeOut(ramp(t, a+0.25, a+0.85));
+    const hh = document.querySelector('#s6 .h');
+    hh.style.opacity = h; hh.style.transform = 'translateY(' + (24-24*h) + 'px)';
+    const d = easeOut(ramp(t, a+0.55, a+1.15));
+    document.querySelector('#s6 .d').style.opacity = d;
+    document.querySelector('#s6 .f').style.opacity = easeOut(ramp(t, a+0.80, a+1.40));
+  }
+}
+seek(0);
+</script></body></html>
