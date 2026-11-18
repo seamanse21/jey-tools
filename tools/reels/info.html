@@ -17,19 +17,35 @@ body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
 #s1 h1{font-size:96px;color:#fff;text-wrap:balance;letter-spacing:-.02em}
 #s1 .ic{margin-bottom:46px}
 
-/* 비교 장면 */
+/* 비교 장면 — 막대 2~5개 */
 .cmp{background:var(--cream);justify-content:center}
-.cmp .lab{font-family:"Jua",sans-serif;font-size:46px;color:var(--cat);margin-bottom:62px;
+.cmp .lab{font-family:"Jua",sans-serif;font-size:46px;color:var(--cat);margin-bottom:54px;
   text-wrap:balance;line-height:1.35}
-.cmp .row{width:100%;margin-bottom:54px;text-align:left}
-.cmp .who{font-size:42px;color:#6b6a60;margin-bottom:16px}
-.cmp .barwrap{display:flex;align-items:center;gap:26px}
-.cmp .bar{height:74px;border-radius:12px;background:var(--cat);width:0}
-.cmp .row.lo .bar{background:#c3bdb0}
-.cmp .val{font-family:"Jua",sans-serif;font-size:76px;color:var(--cat);white-space:nowrap}
-.cmp .row.lo .val{color:#8d8880}
-.cmp .val .u{font-size:44px;margin-left:4px}
-.cmp .src{position:absolute;bottom:430px;font-size:30px;color:#a39d91;text-align:center;
+.cmp .rows{width:100%}
+.cmp .row{width:100%;margin-bottom:34px;text-align:left;opacity:0}
+.cmp .who{font-size:40px;color:#6b6a60;margin-bottom:12px}
+.cmp .barwrap{display:flex;align-items:center;gap:24px}
+.cmp .bar{height:62px;border-radius:10px;background:#c3bdb0;width:0}
+.cmp .val{font-family:"Jua",sans-serif;font-size:62px;color:#8d8880;white-space:nowrap}
+.cmp .val .u{font-size:38px;margin-left:3px}
+/* 강조할 줄 */
+.cmp .row.on .bar{background:var(--cat)}
+.cmp .row.on .val{color:var(--cat)}
+.cmp .row.on .who{color:var(--cat);font-family:"Jua",sans-serif}
+.cmp .row.warn .bar{background:var(--orange)}
+.cmp .row.warn .val{color:var(--orange)}
+.cmp .row.warn .who{color:var(--orange);font-family:"Jua",sans-serif}
+.cmp .src{position:absolute;bottom:420px;font-size:28px;color:#a39d91;text-align:center;
+  line-height:1.5;padding:0 90px}
+
+/* 큰 숫자 한 개 */
+#st{background:var(--navy)}
+#st .lab{font-family:"Jua",sans-serif;font-size:44px;color:#9fb3cf;margin-bottom:40px;
+  text-wrap:balance;line-height:1.4}
+#st .big{font-family:"Jua",sans-serif;font-size:210px;color:var(--orange);line-height:1}
+#st .big .u{font-size:92px}
+#st .body{font-size:54px;color:#fff;margin-top:42px;line-height:1.5;text-wrap:balance}
+#st .src{position:absolute;bottom:420px;font-size:28px;color:#7e90ab;text-align:center;
   line-height:1.5;padding:0 90px}
 
 /* 통찰 */
@@ -62,21 +78,11 @@ body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
 </div>
 
 <div class="sc cmp" id="c1">
-  <div class="lab"></div>
-  <div class="row hi"><div class="who"></div>
-    <div class="barwrap"><div class="bar"></div><div class="val"></div></div></div>
-  <div class="row lo"><div class="who"></div>
-    <div class="barwrap"><div class="bar"></div><div class="val"></div></div></div>
-  <div class="src"></div>
+  <div class="lab"></div><div class="rows"></div><div class="src"></div>
 </div>
 
-<div class="sc cmp" id="c2">
-  <div class="lab"></div>
-  <div class="row hi"><div class="who"></div>
-    <div class="barwrap"><div class="bar"></div><div class="val"></div></div></div>
-  <div class="row lo"><div class="who"></div>
-    <div class="barwrap"><div class="bar"></div><div class="val"></div></div></div>
-  <div class="src"></div>
+<div class="sc" id="st">
+  <div class="lab"></div><div class="big"></div><div class="body"></div><div class="src"></div>
 </div>
 
 <div class="sc" id="in"><div class="h jua"></div><div class="b"></div></div>
@@ -111,40 +117,29 @@ const $=s=>document.querySelector(s);
 let SCENES=[], AT={}, D=null;
 const XF=0.18;
 
-function fillCmp(sel, c, src){
-  $(sel+' .lab').innerHTML=c.label;
-  const hi=document.querySelector(sel+' .row.hi'), lo=document.querySelector(sel+' .row.lo');
-  hi.querySelector('.who').textContent=c.a.t;
-  lo.querySelector('.who').textContent=c.b.t;
-  $(sel+' .src').innerHTML=src;
-}
 function buildDOM(data){
   D=data;
   $('#s1 .pill').textContent=data.cat||'정보';
   $('#s1 h1').innerHTML=data.hook;
-  fillCmp('#c1', data.compare,  data.source);
-  fillCmp('#c2', data.compare2, data.source);
+
+  /* 막대 — 2~5개. 강조할 줄은 mark 로 지정한다 (on=우리 주장, warn=문제) */
+  const c=data.bars;
+  $('#c1 .lab').innerHTML=c.label;
+  $('#c1 .rows').innerHTML = c.items.map(o=>
+    '<div class="row'+(o.mark?' '+o.mark:'')+'">'
+    + '<div class="who">'+o.t+'</div>'
+    + '<div class="barwrap"><div class="bar"></div><div class="val"></div></div></div>').join('');
+  $('#c1 .src').innerHTML=c.source||data.source||'';
+
+  $('#st .lab').innerHTML=data.stat.label;
+  $('#st .body').innerHTML=data.stat.body;
+  $('#st .src').innerHTML=data.stat.source||data.source||'';
+
   $('#in .h').innerHTML=data.insight.head;
   $('#in .b').innerHTML=data.insight.body;
-  SCENES=[['s1',0,3.00],['c1',3.00,8.20],['c2',8.20,12.40],['in',12.40,15.60],['s5',15.60,20.00]];
-  AT={}; SCENES.forEach(([id,a])=>{ AT[id]=a; });
-}
 
-/* 막대가 자라고 숫자가 같이 올라간다. 긴 쪽을 가득 채우고 짧은 쪽은 그 비율로 */
-function animCmp(t, sel, c, a){
-  $(sel+' .lab').style.opacity=easeOut(ramp(t,a,a+0.40));
-  const FULL=640, big=Math.max(c.a.v, c.b.v);
-  [['hi',c.a,0.30],['lo',c.b,0.62]].forEach(([cls,o,d])=>{
-    const row=document.querySelector(sel+' .row.'+cls);
-    const app=easeOut(ramp(t,a+d,a+d+0.45));
-    row.style.opacity=app;
-    row.style.transform='translateY('+(20-20*app)+'px)';
-    const g=easeOut(ramp(t,a+d+0.15,a+d+1.05));
-    row.querySelector('.bar').style.width=(FULL*(o.v/big)*g)+'px';
-    const shown = o.v % 1 ? (o.v*g).toFixed(1) : Math.round(o.v*g);
-    row.querySelector('.val').innerHTML=shown+'<span class="u">'+o.u+'</span>';
-  });
-  $(sel+' .src').style.opacity=easeOut(ramp(t,a+1.60,a+2.20))*0.9;
+  SCENES=[['s1',0,3.00],['c1',3.00,9.40],['st',9.40,13.60],['in',13.60,16.40],['s5',16.40,20.00]];
+  AT={}; SCENES.forEach(([id,x])=>{ AT[id]=x; });
 }
 
 function seek(t){
@@ -155,6 +150,7 @@ function seek(t){
     el.style.opacity=o;
   });
 
+  /* 훅 */
   { const k=easeOutBack(ramp(t,0,0.55));
     $('#s1 .ic').style.transform='scale('+(0.7+0.3*k)+')';
     $('#s1 .ic').style.opacity=E(ramp(t,0,0.30));
@@ -162,14 +158,43 @@ function seek(t){
     const p=easeOut(ramp(t,0.30,0.80)), h=$('#s1 h1');
     h.style.opacity=p; h.style.transform='translateY('+(30-30*p)+'px)'; }
 
-  animCmp(t, '#c1', D.compare,  AT.c1);
-  animCmp(t, '#c2', D.compare2, AT.c2);
+  /* 막대 — 위에서부터 하나씩 자란다. 가장 큰 값이 가득 찬다 */
+  { const a=AT.c1, c=D.bars, FULL=560;
+    $('#c1 .lab').style.opacity=easeOut(ramp(t,a,a+0.40));
+    const big=Math.max(...c.items.map(o=>o.v));
+    document.querySelectorAll('#c1 .row').forEach((row,i)=>{
+      const o=c.items[i], d=0.32+i*0.34;
+      const app=easeOut(ramp(t,a+d,a+d+0.40));
+      row.style.opacity=app;
+      row.style.transform='translateY('+(16-16*app)+'px)';
+      const g=easeOut(ramp(t,a+d+0.10,a+d+0.95));
+      row.querySelector('.bar').style.width=(FULL*(o.v/big)*g)+'px';
+      const shown = o.v%1 ? (o.v*g).toFixed(1) : Math.round(o.v*g);
+      row.querySelector('.val').innerHTML=shown+'<span class="u">'+(o.u||'')+'</span>';
+    });
+    const last=0.32+(c.items.length-1)*0.34+1.0;
+    $('#c1 .src').style.opacity=easeOut(ramp(t,a+last,a+last+0.5))*0.9; }
 
+  /* 큰 숫자 */
+  { const a=AT.st, s0=D.stat;
+    $('#st .lab').style.opacity=easeOut(ramp(t,a,a+0.40));
+    const k=easeOutBack(ramp(t,a+0.15,a+0.85)), big=$('#st .big');
+    big.style.opacity=E(ramp(t,a+0.15,a+0.45));
+    big.style.transform='scale('+(0.62+0.38*k)+')';
+    const g=easeOut(ramp(t,a+0.15,a+1.00));
+    const shown = s0.v%1 ? (s0.v*g).toFixed(1) : Math.round(s0.v*g);
+    big.innerHTML=(s0.prefix||'')+shown+'<span class="u">'+(s0.u||'')+'</span>';
+    const bd=easeOut(ramp(t,a+0.80,a+1.40)), bb=$('#st .body');
+    bb.style.opacity=bd; bb.style.transform='translateY('+(22-22*bd)+'px)';
+    $('#st .src').style.opacity=easeOut(ramp(t,a+1.50,a+2.00))*0.9; }
+
+  /* 통찰 */
   { const a=AT.in, k=easeOut(ramp(t,a,a+0.55)), h=$('#in .h');
     h.style.opacity=k; h.style.transform='translateY('+(26-26*k)+'px)';
     const b2=easeOut(ramp(t,a+0.45,a+1.05)), bb=$('#in .b');
     bb.style.opacity=b2*0.9; bb.style.transform='translateY('+(20-20*b2)+'px)'; }
 
+  /* 마무리 */
   { const a=AT.s5, k=easeOutBack(ramp(t,a,a+0.55));
     $('#s5 .m').style.transform='scale('+(0.7+0.3*k)+')';
     const h=easeOut(ramp(t,a+0.20,a+0.80)), hh=$('#s5 .h');
