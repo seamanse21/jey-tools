@@ -4,7 +4,8 @@
 :root{ --cat:#f08c2e; --cream:#fdf6e8; --navy:#22304a; --orange:#f08c2e; --ink:#2b2a24; }
 *{box-sizing:border-box;margin:0}
 html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
-body{font-family:"Gowun Dodum",sans-serif;color:var(--ink)}
+body{font-family:"Gowun Dodum",sans-serif;color:var(--ink);
+     word-break:keep-all;overflow-wrap:break-word}
 .sc{position:absolute;inset:0;opacity:0;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:0 90px;text-align:center}
 .jua{font-family:"Jua",sans-serif;line-height:1.26}
@@ -12,7 +13,10 @@ em{font-style:normal}
 
 /* 1 훅 ─ 공통 */
 #s1{background:#000}
-#s1 .ph{position:absolute;inset:0;filter:brightness(.40) saturate(1.05)}
+#s1 .ph{position:absolute;inset:0;filter:brightness(.34) saturate(1.05)}
+#s1 .scrim{position:absolute;left:0;right:0;top:28%;height:44%;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,.52) 0%, rgba(0,0,0,0) 72%)}
+#s1.illu .scrim{display:none}
 #s1 .card{display:none}
 #s1 .in{position:relative;transform:translateY(-70px)}
 #s1 .pill{display:inline-block;background:var(--cat);color:#fff;font-family:"Jua",sans-serif;
@@ -74,7 +78,7 @@ em{font-style:normal}
 #i4 .han span{font-family:"Jua",sans-serif;font-size:150px;color:#fff;line-height:1;
   opacity:0;display:inline-block}
 #i4 .rd{font-family:"Jua",sans-serif;font-size:62px;color:#fff;margin-top:40px}
-#i4 .mn{font-size:46px;color:#fff;opacity:.85;margin-top:28px;line-height:1.5}
+#i4 .mn{font-size:48px;color:#fff;opacity:.95;margin-top:28px;line-height:1.5}
 
 /* 5 마무리 ─ 공통 */
 #s5{background:var(--orange)}
@@ -85,11 +89,12 @@ em{font-style:normal}
   box-shadow:0 18px 44px rgba(0,0,0,.22);display:flex;flex-direction:column;gap:16px}
 #s5 .btn .k{font-family:"Jua",sans-serif;font-size:52px;color:var(--orange)}
 #s5 .btn .v{font-family:"Jua",sans-serif;font-size:70px;color:var(--navy);line-height:1.32}
-#s5 .f{position:absolute;bottom:520px;font-family:"Jua",sans-serif;font-size:46px;color:#fff}
+#s5 .f{margin-top:44px;font-family:"Jua",sans-serif;font-size:46px;color:#fff;opacity:.92}
 </style></head><body>
 
 <div class="sc" id="s1">
   <div class="ph"></div>
+  <div class="scrim"></div>
   <div class="card"><div class="im"></div></div>
   <div class="in"><div class="pill"></div><h1 class="jua"></h1></div>
 </div>
@@ -165,7 +170,14 @@ function buildDOM(data){
     $('#s1 .ph').style.background='url("'+data.photo+'") center/cover no-repeat';
   } else { $('#s1 .ph').style.background=data.catColor; }
   $('#s1 .pill').textContent=data.cat;
-  $('#s1 h1').innerHTML=data.hook;
+  const h1=$('#s1 h1');
+  h1.innerHTML=data.hook;
+  /* 길면 줄여서 담는다. 글자가 화면을 넘치면 읽히지 않는다 */
+  const maxH = s1.classList.contains('illu') ? 300 : 580;
+  for(let px=100; px>=62; px-=3){
+    h1.style.fontSize=px+'px';
+    if(h1.scrollHeight<=maxH) break;
+  }
 
   /* 오늘의 낱말 — 글자가 길면 크기를 줄인다 */
   $('#w2 .w').textContent=data.word.w;
@@ -177,7 +189,7 @@ function buildDOM(data){
     const fill=(sel,o)=>{ $(sel+' .big').innerHTML=o.num+(o.unit?'<span class="u">'+o.unit+'</span>':'');
       $(sel+' .cap').textContent=o.cap; $(sel+' .sub').textContent=o.sub||''; };
     fill('#n2', data.a); fill('#n3', data.b);
-    SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['w2',8.70,12.90],['s5',12.90,15.00]];
+    SCENES=[['s1',0,2.60],['n2',2.60,5.70],['n3',5.70,8.70],['w2',8.70,12.90],['s5',12.90,16.50]];
   } else {
     $('#h3 .c').textContent=data.hanja.c;
     $('#h3 .rd').textContent=data.hanja.read;
@@ -185,7 +197,7 @@ function buildDOM(data){
     $('#i4 .han').innerHTML=[...data.idiom.han].map(c=>'<span>'+c+'</span>').join('');
     $('#i4 .rd').textContent=data.idiom.read;
     $('#i4 .mn').innerHTML=data.idiom.mean;
-    SCENES=[['s1',0,2.60],['w2',2.60,7.00],['h3',7.00,10.20],['i4',10.20,12.90],['s5',12.90,15.00]];
+    SCENES=[['s1',0,2.60],['w2',2.60,7.00],['h3',7.00,10.20],['i4',10.20,12.90],['s5',12.90,16.50]];
   }
 }
 
@@ -246,14 +258,15 @@ function seek(t){
     /* 사자성어 — 한 글자씩 떨어진다 */
     { const b=10.20;
       $('#i4 .lab').style.opacity=easeOut(ramp(t,b,b+0.35));
+      /* 뜻을 읽을 시간을 벌려고 글자 간격과 뒤 요소를 당겼다 */
       document.querySelectorAll('#i4 .han span').forEach((el,i)=>{
-        const s0=b+0.25+i*0.16, kk=easeOutBack(ramp(t,s0,s0+0.50));
-        el.style.opacity=E(ramp(t,s0,s0+0.25));
+        const s0=b+0.20+i*0.11, kk=easeOutBack(ramp(t,s0,s0+0.42));
+        el.style.opacity=E(ramp(t,s0,s0+0.22));
         el.style.transform='translateY('+(-34*(1-kk))+'px) scale('+(0.8+0.2*kk)+')';
       });
-      const r=easeOut(ramp(t,b+1.05,b+1.55)), rd=$('#i4 .rd');
+      const r=easeOut(ramp(t,b+0.72,b+1.15)), rd=$('#i4 .rd');
       rd.style.opacity=r; rd.style.transform='translateY('+(18-18*r)+'px)';
-      const m2=easeOut(ramp(t,b+1.40,b+2.00)), mm=$('#i4 .mn');
+      const m2=easeOut(ramp(t,b+1.00,b+1.45)), mm=$('#i4 .mn');
       mm.style.opacity=m2; mm.style.transform='translateY('+(18-18*m2)+'px)'; }
   }
 
