@@ -21,7 +21,9 @@ em{font-style:normal}
 #s1 .in{position:relative;transform:translateY(-70px)}
 #s1 .pill{display:inline-block;background:var(--cat);color:#fff;font-family:"Jua",sans-serif;
   font-size:40px;padding:12px 34px;border-radius:999px;margin-bottom:44px}
-#s1 h1{font-size:100px;color:#fff;letter-spacing:-.02em}
+#s1 .kick{font-size:54px;color:#fff;opacity:.88;margin-bottom:22px;line-height:1.4;
+  font-family:"Gowun Dodum",sans-serif;text-wrap:balance}
+#s1 h1{font-size:100px;color:#fff;letter-spacing:-.02em;text-wrap:balance}
 /* 일러스트는 밝고 단순해서 어둡게 덮으면 망가진다. 흰 카드에 올리고 글자는 아래에 둔다 */
 #s1.illu{background:var(--cat);justify-content:flex-start;padding-top:250px}
 #s1.illu .ph{display:none}
@@ -31,6 +33,7 @@ em{font-style:normal}
   background-size:contain;background-repeat:no-repeat}
 #s1.illu .in{transform:none;margin-top:70px}
 #s1.illu .pill{background:#fff;color:var(--cat);margin-bottom:34px}
+#s1.illu .kick{font-size:46px;margin-bottom:18px}
 
 /* 숫자 장면 */
 .numsc{background:var(--cream)}
@@ -96,7 +99,7 @@ em{font-style:normal}
   <div class="ph"></div>
   <div class="scrim"></div>
   <div class="card"><div class="im"></div></div>
-  <div class="in"><div class="pill"></div><h1 class="jua"></h1></div>
+  <div class="in"><div class="pill"></div><div class="kick"></div><h1 class="jua"></h1></div>
 </div>
 
 <div class="sc numsc" id="n2"><div class="big"></div><div class="cap"></div><div class="sub"></div></div>
@@ -170,13 +173,17 @@ function buildDOM(data){
     $('#s1 .ph').style.background='url("'+data.photo+'") center/cover no-repeat';
   } else { $('#s1 .ph').style.background=data.catColor; }
   $('#s1 .pill').textContent=data.cat;
-  const h1=$('#s1 h1');
-  h1.innerHTML=data.hook;
-  /* 길면 줄여서 담는다. 글자가 화면을 넘치면 읽히지 않는다 */
-  const maxH = s1.classList.contains('illu') ? 300 : 580;
-  for(let px=100; px>=62; px-=3){
+  /* 부제는 작게, 제목은 크게. 한 덩어리로 두면 둘 다 넘쳐 줄이 엉킨다 */
+  const kick=$('#s1 .kick'), h1=$('#s1 h1');
+  kick.textContent = data.kicker || '';
+  kick.style.display = data.kicker ? 'block' : 'none';
+  h1.textContent = data.title;
+  /* 제목이 두 줄을 넘지 않을 때까지 줄인다. 세 줄이 되면 마지막 줄에 한 낱말만 남는다 */
+  const illu = s1.classList.contains('illu');
+  const base = illu ? 86 : 100, lo = illu ? 54 : 60;
+  for(let px=base; px>=lo; px-=2){
     h1.style.fontSize=px+'px';
-    if(h1.scrollHeight<=maxH) break;
+    if(h1.scrollHeight <= Math.ceil(px*1.26*2)+4) break;
   }
 
   /* 오늘의 낱말 — 글자가 길면 크기를 줄인다 */

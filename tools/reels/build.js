@@ -39,7 +39,8 @@ function dataFor(d, i){
   const fit = (d.photo||'').endsWith('.svg') ? 'contain' : 'cover';
   const id = parts(d.idiom), hj = parts(d.hanja);
   const word = { w:d.w, mean:String(d.m||'').replace(/\.$/,''), ex: emph(d.ex) };
-  const base = { cat:d.cat, catColor:color, photo, fit, hook:hookOf(d), word };
+  const base = { cat:d.cat, catColor:color, photo, fit,
+                 kicker:String(d.kicker||'').trim(), title:String(d.head||'').trim(), word };
 
   /* 요일마다 번갈아 쓴다. 모든 기사에 숫자가 있어 숫자 개수로 나누면 전부 숫자형이 된다.
      월·수·금 숫자형, 화·목 어휘형. 숫자가 모자라면 어휘형으로 넘긴다. */
@@ -54,10 +55,6 @@ function dataFor(d, i){
     idiom:{ han:id[0]||'', read:id[1]||'',
             mean:String(id[2]||'').replace(/이에요\.$/,'').replace(/\.$/,'') }
   });
-}
-function hookOf(d){
-  const k=String(d.kicker||'').trim(), h=String(d.head||'').trim();
-  return (k? k+'<br>' : '') + h;
 }
 
 (async()=>{
