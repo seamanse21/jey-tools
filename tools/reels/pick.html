@@ -136,15 +136,13 @@ function seek(t){
     el.style.opacity=o;
   });
 
-  { const k=easeOutBack(ramp(t,0,0.55));
-    $('#s1 .ic').style.transform='rotate('+(-18+18*k)+'deg) scale('+(0.6+0.4*k)+')';
-    $('#s1 .ic').style.opacity=E(ramp(t,0,0.30));
-    $('#s1 .pill').style.opacity=easeOut(ramp(t,0.18,0.55));
-    const p=easeOut(ramp(t,0.28,0.78)), h=$('#s1 h1');
-    h.style.opacity=p; h.style.transform='translateY('+(30-30*p)+'px)';
-    const f=easeOutBack(ramp(t,0.70,1.30)), ff=$('#s1 .free');
-    ff.style.opacity=E(ramp(t,0.70,1.00));
-    ff.style.transform='scale('+(0.8+0.2*f)+')'; }
+  /* 훅은 첫 프레임부터 다 보인다. 별 아이콘만 천천히 돈다 */
+  { $('#s1 .ic').style.opacity=1;
+    $('#s1 .ic').style.transform='rotate('+(t*6)+'deg)';
+    $('#s1 .pill').style.opacity=1;
+    const h=$('#s1 h1'); h.style.opacity=1; h.style.transform='none';
+    const ff=$('#s1 .free'); ff.style.opacity=1;
+    ff.style.transform='scale('+(1+0.015*Math.sin(t*2.6))+')'; }
 
   animList(t, '#l1', D.what, AT.l1);
   animList(t, '#l2', D.how,  AT.l2);

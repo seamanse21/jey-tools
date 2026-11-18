@@ -151,12 +151,11 @@ function seek(t){
   });
 
   /* 훅 */
-  { const k=easeOutBack(ramp(t,0,0.55));
-    $('#s1 .ic').style.transform='scale('+(0.7+0.3*k)+')';
-    $('#s1 .ic').style.opacity=E(ramp(t,0,0.30));
-    $('#s1 .pill').style.opacity=easeOut(ramp(t,0.18,0.55));
-    const p=easeOut(ramp(t,0.30,0.80)), h=$('#s1 h1');
-    h.style.opacity=p; h.style.transform='translateY('+(30-30*p)+'px)'; }
+  /* 훅은 첫 프레임부터 다 보인다. 아이콘만 살짝 숨 쉰다 */
+  { $('#s1 .ic').style.opacity=1;
+    $('#s1 .ic').style.transform='scale('+(1+0.03*Math.sin(t*2.2))+')';
+    $('#s1 .pill').style.opacity=1;
+    const h=$('#s1 h1'); h.style.opacity=1; h.style.transform='none'; }
 
   /* 막대 — 위에서부터 하나씩 자란다. 가장 큰 값이 가득 찬다 */
   { const a=AT.c1, c=D.bars, FULL=560;
