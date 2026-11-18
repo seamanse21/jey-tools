@@ -3,9 +3,11 @@
 ## 무엇
 발행한 주차별 호를 **PDF로 내려받는 페이지**. 만드는 도구가 아니라 받는 도구다.
 목록(`tools/index.html`)에는 이 페이지만 올리고, 만드는 도구 두 개
-(`kids-cards.html` 카드뉴스, `kids-weekly.html` 발행기)와 `kids-news.html` 하루한장은
-2026-11-18 에 목록에서 뺐다.
-**파일은 지우지 않았다** — 주소로 직접 들어가면 그대로 쓸 수 있고, PDF 를 만들 때도 쓴다.
+(`kids-cards.html` 카드뉴스, `kids-weekly.html` 발행기)는 2026-11-18 에 목록에서 뺐다.
+**이 둘은 파일을 지우지 않았다** — 주소로 직접 들어가면 쓸 수 있고, 특히 발행기는
+PDF 를 뽑을 때 쓰므로 지우면 안 된다.
+같은 날 `kids-news.html` 하루한장 키즈신문은 **파일까지 지웠다.** 되살리려면
+`git log --diff-filter=D -- tools/kids-news.html` 로 지운 커밋을 찾아 복원한다.
 
 ## 동작
 - `tools/issues/index.json` 을 읽어 호 목록을 그린다
