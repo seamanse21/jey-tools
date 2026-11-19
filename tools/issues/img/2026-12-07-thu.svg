@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#fdf3e8"/>
+  <!-- 지구 -->
+  <g transform="translate(240 118)">
+    <circle cx="0" cy="0" r="78" fill="#cfe6f2"/>
+    <circle cx="0" cy="0" r="78" fill="none" stroke="#9cc6de" stroke-width="4"/>
+    <path d="M-62 -24c22-10 36 6 56 0s36 4 48-8" fill="none" stroke="#9cc6de" stroke-width="3"/>
+    <path d="M-66 24c24 10 40-6 60 0s34-2 46 8" fill="none" stroke="#9cc6de" stroke-width="3"/>
+    <path d="M-44 -46c-14 24-14 68 0 92" fill="none" stroke="#9cc6de" stroke-width="3"/>
+    <path d="M44 -46c14 24 14 68 0 92" fill="none" stroke="#9cc6de" stroke-width="3"/>
+    <path d="M-52 -14c14-14 20 4 34-6s22 6 34-4c6 16-2 28-12 32-14 6-18-6-30 0s-24-6-26-22z" fill="#8fc89a"/>
+    <path d="M-10 28c12-8 26 0 32 10 4 10-4 18-14 16-14-2-24-18-18-26z" fill="#8fc89a"/>
+  </g>
+  <!-- 손잡은 사람들 -->
+  <g>
+    <g transform="translate(52 150)" fill="#f08c2e"><circle cx="0" cy="-24" r="17"/><path d="M-20 34c0-22 9-34 20-34s20 12 20 34z"/></g>
+    <g transform="translate(142 170)" fill="#e35d8a"><circle cx="0" cy="-24" r="17"/><path d="M-20 34c0-22 9-34 20-34s20 12 20 34z"/></g>
+    <g transform="translate(240 182)" fill="#2f7fd1"><circle cx="0" cy="-24" r="17"/><path d="M-20 34c0-22 9-34 20-34s20 12 20 34z"/></g>
+    <g transform="translate(338 170)" fill="#2fa36b"><circle cx="0" cy="-24" r="17"/><path d="M-20 34c0-22 9-34 20-34s20 12 20 34z"/></g>
+    <g transform="translate(428 150)" fill="#8b5cf6"><circle cx="0" cy="-24" r="17"/><path d="M-20 34c0-22 9-34 20-34s20 12 20 34z"/></g>
+    <g fill="none" stroke="#b08968" stroke-width="7" stroke-linecap="round">
+      <path d="M70 156l54 12"/><path d="M160 176l62 8"/><path d="M258 184l62-8"/><path d="M356 168l54-12"/>
+    </g>
+  </g>
+</svg>

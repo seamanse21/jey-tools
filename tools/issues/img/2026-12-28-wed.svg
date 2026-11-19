@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#fdf7e8"/>
+  <!-- 체크리스트 -->
+  <g transform="translate(34 6)">
+    <rect x="0" y="10" width="236" height="188" rx="12" fill="#fff" stroke="#e2d5b4" stroke-width="4"/>
+    <rect x="0" y="10" width="236" height="26" rx="12" fill="#dba400"/>
+    <rect x="0" y="26" width="236" height="10" fill="#dba400"/>
+    <g>
+      <rect x="22" y="54" width="26" height="26" rx="7" fill="#dba400"/>
+      <path d="M28 67l6 7 12-14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="60" y="62" width="150" height="10" rx="5" fill="#e6dcc2"/>
+    </g>
+    <g>
+      <rect x="22" y="98" width="26" height="26" rx="7" fill="#dba400"/>
+      <path d="M28 111l6 7 12-14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="60" y="106" width="118" height="10" rx="5" fill="#e6dcc2"/>
+    </g>
+    <g>
+      <rect x="22" y="142" width="26" height="26" rx="7" fill="#fff" stroke="#d8c9a4" stroke-width="4"/>
+      <rect x="60" y="150" width="136" height="10" rx="5" fill="#eee5cf"/>
+    </g>
+  </g>
+  <!-- 달력 동그라미 -->
+  <g transform="translate(298 34)">
+    <rect x="0" y="0" width="150" height="150" rx="12" fill="#fff" stroke="#e2d5b4" stroke-width="4"/>
+    <g fill="#ece2c9">
+      <rect x="16" y="20" width="22" height="22" rx="5"/><rect x="46" y="20" width="22" height="22" rx="5"/>
+      <rect x="76" y="20" width="22" height="22" rx="5"/><rect x="106" y="20" width="22" height="22" rx="5"/>
+      <rect x="16" y="50" width="22" height="22" rx="5"/><rect x="46" y="50" width="22" height="22" rx="5"/>
+      <rect x="76" y="50" width="22" height="22" rx="5"/><rect x="106" y="50" width="22" height="22" rx="5"/>
+      <rect x="16" y="80" width="22" height="22" rx="5"/><rect x="46" y="80" width="22" height="22" rx="5"/>
+      <rect x="76" y="80" width="22" height="22" rx="5"/><rect x="106" y="80" width="22" height="22" rx="5"/>
+      <rect x="16" y="110" width="22" height="22" rx="5"/><rect x="46" y="110" width="22" height="22" rx="5"/>
+      <rect x="76" y="110" width="22" height="22" rx="5"/><rect x="106" y="110" width="22" height="22" rx="5"/>
+    </g>
+    <g fill="none" stroke="#e05c7a" stroke-width="4">
+      <circle cx="27" cy="31" r="13"/><circle cx="57" cy="31" r="13"/><circle cx="87" cy="31" r="13"/>
+      <circle cx="117" cy="31" r="13"/><circle cx="27" cy="61" r="13"/><circle cx="57" cy="61" r="13"/>
+    </g>
+  </g>
+</svg>

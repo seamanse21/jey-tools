@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#fdf2ee"/>
+  <!-- 온도탑 -->
+  <g transform="translate(96 0)">
+    <rect x="-20" y="4" width="40" height="166" rx="20" fill="#fff" stroke="#e3b9ad" stroke-width="4"/>
+    <circle cx="0" cy="190" r="34" fill="#fff" stroke="#e3b9ad" stroke-width="4"/>
+    <circle cx="0" cy="190" r="24" fill="#e04b3a"/>
+    <rect x="-8" y="96" width="16" height="96" fill="#e04b3a"/>
+    <rect x="-8" y="96" width="16" height="16" rx="8" fill="#e04b3a"/>
+    <g stroke="#dba79a" stroke-width="3" stroke-linecap="round">
+      <path d="M8 30h12"/><path d="M8 54h12"/><path d="M8 78h12"/><path d="M8 102h12"/><path d="M8 126h12"/>
+    </g>
+  </g>
+  <!-- 손에서 손으로 -->
+  <g transform="translate(258 92)">
+    <path d="M-72 44c-10-14-6-32 6-38 6-3 12 0 14 6l6 16c2-10 10-14 16-12 4-8 14-8 18-1 8-3 15 3 14 12-2 18-14 34-32 38-16 4-32-5-42-21z" fill="#f2bb9a"/>
+    <path d="M152 4c10 14 6 32-6 38-6 3-12 0-14-6l-6-16c-2 10-10 14-16 12-4 8-14 8-18 1-8 3-15-3-14-12 2-18 14-34 32-38 16-4 32 5 42 21z" fill="#f2bb9a" transform="translate(-10 0)"/>
+  </g>
+  <!-- 하트 동전들 -->
+  <g>
+    <g transform="translate(252 38)"><path d="M0 26c-20-14-26-24-26-34a14 14 0 0 1 26-7 14 14 0 0 1 26 7c0 10-6 20-26 34z" fill="#e05c7a"/></g>
+    <g transform="translate(316 16) scale(.72)"><path d="M0 26c-20-14-26-24-26-34a14 14 0 0 1 26-7 14 14 0 0 1 26 7c0 10-6 20-26 34z" fill="#f0909f"/></g>
+    <g transform="translate(200 24) scale(.6)"><path d="M0 26c-20-14-26-24-26-34a14 14 0 0 1 26-7 14 14 0 0 1 26 7c0 10-6 20-26 34z" fill="#f0909f"/></g>
+    <g fill="#f3c54a" stroke="#d8a62c" stroke-width="2">
+      <circle cx="384" cy="86" r="16"/><circle cx="420" cy="62" r="13"/><circle cx="414" cy="110" r="11"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <defs>
+    <linearGradient id="sky1228" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f5a86"/><stop offset=".55" stop-color="#e8865c"/><stop offset="1" stop-color="#f6c45c"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="-13" width="480" height="265" fill="url(#sky1228)"/>
+  <circle cx="300" cy="168" r="52" fill="#fde9a8"/>
+  <circle cx="300" cy="168" r="38" fill="#fff6d4"/>
+  <g stroke="#fde9a8" stroke-width="5" stroke-linecap="round" opacity=".7">
+    <path d="M300 92v-22"/><path d="M372 120l18-12"/><path d="M228 120l-18-12"/><path d="M398 168h22"/><path d="M202 168h-22"/>
+  </g>
+  <!-- 바다 -->
+  <path d="M0 186h480v66H0z" fill="#2f4a72"/>
+  <g fill="#3d5d8a">
+    <rect x="0" y="196" width="480" height="8"/><rect x="0" y="216" width="480" height="8"/><rect x="0" y="236" width="480" height="8"/>
+  </g>
+  <path d="M250 186h100l-50 66z" fill="#f0b05c" opacity=".55"/>
+  <!-- 섬 -->
+  <g transform="translate(416 142)">
+    <path d="M-34 44c4-26 12-44 22-44s16 12 20 26c4-10 10-14 16-6 6 8 8 16 10 24z" fill="#223a5e"/>
+  </g>
+  <!-- 보는 사람 둘 -->
+  <g transform="translate(88 136)">
+    <circle cx="0" cy="0" r="16" fill="#243a5c"/>
+    <path d="M-20 50c0-28 9-42 20-42s20 14 20 42z" fill="#243a5c"/>
+    <g transform="translate(42 12)">
+      <circle cx="0" cy="0" r="12" fill="#243a5c"/>
+      <path d="M-15 38c0-21 7-32 15-32s15 11 15 32z" fill="#243a5c"/>
+    </g>
+  </g>
+</svg>

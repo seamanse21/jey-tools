@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#f3eef8"/>
+  <!-- 노래하는 세 사람 -->
+  <g transform="translate(96 96)">
+    <circle cx="0" cy="-20" r="28" fill="#f2bb9a"/>
+    <path d="M-34 70c0-32 15-48 34-48s34 16 34 48z" fill="#8b5cf6"/>
+    <ellipse cx="0" cy="-6" rx="8" ry="11" fill="#7a3f3f"/>
+    <path d="M-34 -36c0-16 14-26 34-26s34 10 34 26z" fill="#4a3a2e"/>
+    <path d="M-30 46h60v8h-60z" fill="#fff"/>
+  </g>
+  <g transform="translate(190 112)">
+    <circle cx="0" cy="-20" r="26" fill="#f6cfae"/>
+    <path d="M-32 60c0-30 14-44 32-44s32 14 32 44z" fill="#2fa36b"/>
+    <ellipse cx="0" cy="-6" rx="7" ry="10" fill="#7a3f3f"/>
+    <path d="M-30 -34c0-15 12-24 30-24s30 9 30 24z" fill="#6b4a2a"/>
+  </g>
+  <g transform="translate(282 100)">
+    <circle cx="0" cy="-20" r="27" fill="#f2bb9a"/>
+    <path d="M-33 66c0-31 15-46 33-46s33 15 33 46z" fill="#e05c7a"/>
+    <ellipse cx="0" cy="-6" rx="7" ry="10" fill="#7a3f3f"/>
+    <path d="M-32 -34c0-16 13-26 32-26s32 10 32 26z" fill="#2f2a26"/>
+  </g>
+  <!-- 음표 -->
+  <g fill="#5b3fa8">
+    <g transform="translate(366 24)">
+      <ellipse cx="0" cy="40" rx="15" ry="11" transform="rotate(-20 0 40)"/>
+      <rect x="11" y="-6" width="5" height="44"/>
+      <path d="M16 -6c14 4 22 12 22 22-6-8-14-10-22-10z"/>
+    </g>
+    <g transform="translate(424 86) scale(.78)">
+      <ellipse cx="0" cy="40" rx="15" ry="11" transform="rotate(-20 0 40)"/>
+      <rect x="11" y="-6" width="5" height="44"/>
+      <path d="M16 -6c14 4 22 12 22 22-6-8-14-10-22-10z"/>
+    </g>
+    <g transform="translate(352 140) scale(.62)">
+      <ellipse cx="0" cy="40" rx="15" ry="11" transform="rotate(-20 0 40)"/>
+      <rect x="11" y="-6" width="5" height="44"/>
+      <path d="M16 -6c14 4 22 12 22 22-6-8-14-10-22-10z"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#eaf4f6"/>
+  <!-- 왼쪽: 남극 = 땅 위의 두꺼운 얼음 -->
+  <g>
+    <path d="M0 150h228v102H0z" fill="#8b7f74"/>
+    <path d="M0 150h228V96c-18-10-40-6-56 4-20-14-46-12-64 2-22-8-44 0-56 14-18-6-38-2-52 10z" fill="#fff"/>
+    <path d="M0 120c14-12 34-16 52-10 12-14 34-22 56-14 18-14 44-16 64-2 16-10 38-14 56-4" fill="none" stroke="#cfe0e6" stroke-width="3"/>
+    <g transform="translate(72 150)">
+      <ellipse cx="0" cy="34" rx="26" ry="5" fill="#cbd8dd"/>
+      <path d="M-17 28c0-26 4-44 17-44s17 18 17 44z" fill="#2f3a42"/>
+      <path d="M-10 30c0-20 3-34 10-34s10 14 10 34z" fill="#fff"/>
+      <circle cx="0" cy="-20" r="13" fill="#2f3a42"/>
+      <circle cx="-4" cy="-22" r="2.4" fill="#fff"/><circle cx="5" cy="-22" r="2.4" fill="#fff"/>
+      <path d="M-3 -16h9l-5 7z" fill="#f0a93c"/>
+      <path d="M-14 6l-8 16h8z" fill="#f0a93c"/><path d="M10 28h12l-4 6H8z" fill="#f0a93c"/>
+    </g>
+    <text x="26" y="14" font-family="sans-serif" font-size="21" font-weight="700" fill="#2f3a42">남극 · 땅</text>
+  </g>
+  <!-- 오른쪽: 북극 = 바다 위에 뜬 얼음 -->
+  <g>
+    <path d="M252 150h228v102H252z" fill="#3f6f96"/>
+    <path d="M252 168h228v10H252zM252 196h228v10H252zM252 224h228v10H252z" fill="#5386ab" opacity=".6"/>
+    <path d="M266 150h88l-10-30h-66zM380 150h86l-12-22h-62z" fill="#fff"/>
+    <path d="M266 150h88l-10-30h-66z" fill="#f2f8fa"/>
+    <g transform="translate(310 120)">
+      <ellipse cx="-2" cy="24" rx="30" ry="6" fill="#dbe7ec"/>
+      <ellipse cx="0" cy="8" rx="28" ry="17" fill="#fdfdf7"/>
+      <ellipse cx="-24" cy="0" rx="13" ry="11" fill="#fdfdf7"/>
+      <circle cx="-26" cy="-8" r="4" fill="#fdfdf7"/><circle cx="-18" cy="-10" r="4" fill="#fdfdf7"/>
+      <circle cx="-30" cy="0" r="2.2" fill="#55606a"/>
+      <circle cx="-33" cy="3" r="2.8" fill="#39434b"/>
+      <rect x="-14" y="20" width="9" height="8" rx="3" fill="#e9eff2"/>
+      <rect x="12" y="20" width="9" height="8" rx="3" fill="#e9eff2"/>
+    </g>
+    <text x="296" y="14" font-family="sans-serif" font-size="21" font-weight="700" fill="#2f3a42">북극 · 바다</text>
+  </g>
+  <rect x="234" y="-13" width="12" height="265" fill="#eaf4f6"/>
+</svg>

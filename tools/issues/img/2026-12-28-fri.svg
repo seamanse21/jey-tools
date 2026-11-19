@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#fdf2f0"/>
+  <!-- 2027 -->
+  <text x="240" y="92" text-anchor="middle" font-family="sans-serif" font-size="76" font-weight="800" fill="#e05c4a">2027</text>
+  <!-- 떡국 그릇 -->
+  <g transform="translate(142 150)">
+    <ellipse cx="0" cy="62" rx="82" ry="11" fill="#eddcd6"/>
+    <path d="M-74 6h148c0 36-32 60-74 60S-74 42-74 6z" fill="#fdf8f2" stroke="#ddc7bf" stroke-width="4"/>
+    <ellipse cx="0" cy="6" rx="74" ry="17" fill="#f3ece2"/>
+    <g fill="#fff" stroke="#e0d2c4" stroke-width="2">
+      <ellipse cx="-36" cy="2" rx="16" ry="9"/><ellipse cx="-4" cy="8" rx="17" ry="9"/>
+      <ellipse cx="30" cy="0" rx="15" ry="9"/><ellipse cx="12" cy="-8" rx="14" ry="8"/>
+    </g>
+    <path d="M44 4h18v4H44z" fill="#2f7a52"/><path d="M-50 10h16v4h-16z" fill="#2f7a52"/>
+    <path d="M18 10h14v5H18z" fill="#d9a04a"/>
+  </g>
+  <!-- 폭죽 / 별 -->
+  <g transform="translate(336 160)">
+    <g stroke="#f0b43f" stroke-width="6" stroke-linecap="round">
+      <path d="M0 0v-42"/><path d="M-34 -22L-58 -44"/><path d="M34 -22L58 -44"/>
+      <path d="M-44 10h-32"/><path d="M44 10h32"/>
+    </g>
+    <circle cx="0" cy="18" r="24" fill="#e05c7a"/>
+    <circle cx="-56" cy="-62" r="9" fill="#8b5cf6"/>
+    <circle cx="58" cy="-58" r="7" fill="#2fa36b"/>
+    <circle cx="0" cy="-58" r="8" fill="#3d7fc1"/>
+  </g>
+</svg>

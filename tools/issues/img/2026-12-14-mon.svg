@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#eaf5f5"/>
+  <!-- 체온계 -->
+  <g transform="translate(96 0)">
+    <rect x="-22" y="6" width="44" height="178" rx="22" fill="#fff" stroke="#9fc4c4" stroke-width="4"/>
+    <circle cx="0" cy="196" r="36" fill="#fff" stroke="#9fc4c4" stroke-width="4"/>
+    <circle cx="0" cy="196" r="26" fill="#e05c4a"/>
+    <rect x="-9" y="80" width="18" height="110" fill="#e05c4a"/>
+    <rect x="-9" y="80" width="18" height="16" rx="8" fill="#e05c4a"/>
+    <g stroke="#7fa6a6" stroke-width="3" stroke-linecap="round">
+      <path d="M8 36h12"/><path d="M8 56h7"/><path d="M8 76h12"/><path d="M8 96h7"/>
+      <path d="M8 116h12"/><path d="M8 136h7"/><path d="M8 156h12"/>
+    </g>
+  </g>
+  <!-- 눈금 표시 -->
+  <g transform="translate(176 56)">
+    <rect x="0" y="0" width="120" height="44" rx="12" fill="#0f9b9b"/>
+    <path d="M-10 22l12-9v18z" fill="#0f9b9b"/>
+    <text x="60" y="32" text-anchor="middle" font-family="sans-serif" font-size="25" font-weight="800" fill="#fff">36.5</text>
+  </g>
+  <!-- 땀 / 떨림 아이콘 -->
+  <g transform="translate(360 44)">
+    <circle cx="0" cy="0" r="42" fill="#fff" stroke="#f0b43f" stroke-width="4"/>
+    <circle cx="-13" cy="-6" r="4" fill="#4a5a60"/><circle cx="13" cy="-6" r="4" fill="#4a5a60"/>
+    <path d="M-13 14c8 7 18 7 26 0" fill="none" stroke="#4a5a60" stroke-width="4" stroke-linecap="round"/>
+    <path d="M30 -30c6 8 9 13 9 18a9 9 0 0 1-18 0c0-5 3-10 9-18z" fill="#63b6e0"/>
+  </g>
+  <g transform="translate(360 162)">
+    <circle cx="0" cy="0" r="42" fill="#fff" stroke="#63b6e0" stroke-width="4"/>
+    <circle cx="-13" cy="-6" r="4" fill="#4a5a60"/><circle cx="13" cy="-6" r="4" fill="#4a5a60"/>
+    <path d="M-14 16h28" stroke="#4a5a60" stroke-width="4" stroke-linecap="round"/>
+    <path d="M-15 10h30" stroke="#4a5a60" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+    <g stroke="#63b6e0" stroke-width="4" stroke-linecap="round">
+      <path d="M-56 -16c6-6 6 6 12 0"/><path d="M-56 4c6-6 6 6 12 0"/>
+      <path d="M44 -16c6-6 6 6 12 0"/><path d="M44 4c6-6 6 6 12 0"/>
+    </g>
+  </g>
+</svg>

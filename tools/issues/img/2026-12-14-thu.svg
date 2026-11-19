@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#edf4ee"/>
+  <!-- 왼쪽: 전나무(상록수) -->
+  <g transform="translate(120 10)">
+    <rect x="-13" y="178" width="26" height="36" rx="4" fill="#8a6a4a"/>
+    <path d="M0 0l48 62H-48zM0 42l58 72H-58zM0 92l68 86H-68z" fill="#2f7a52"/>
+    <path d="M0 0l48 62H0zM0 42l58 72H0zM0 92l68 86H0z" fill="#368c5d"/>
+    <circle cx="-26" cy="92" r="7" fill="#e05c4a"/><circle cx="30" cy="132" r="7" fill="#f0b43f"/>
+    <circle cx="-34" cy="156" r="7" fill="#f0b43f"/><circle cx="26" cy="64" r="6" fill="#e05c4a"/>
+    <path d="M0 -14l6 12 12-2-8 10 8 10-12-2-6 12-6-12-12 2 8-10-8-10 12 2z" fill="#f3c54a"/>
+  </g>
+  <!-- 오른쪽: 잎 비교 -->
+  <g transform="translate(300 24)">
+    <rect x="-10" y="0" width="190" height="96" rx="14" fill="#fff" stroke="#bcd4c2" stroke-width="4"/>
+    <g stroke="#368c5d" stroke-width="5" stroke-linecap="round">
+      <path d="M22 70V18"/>
+      <path d="M22 60l-16-12M22 60l16-12M22 44l-16-12M22 44l16-12M22 28l-14-10M22 28l14-10"/>
+    </g>
+    <text x="110" y="46" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="#2f7a52">바늘 잎</text>
+    <text x="110" y="74" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#6b8b74">잘 마르지 않아요</text>
+  </g>
+  <g transform="translate(300 134)">
+    <rect x="-10" y="0" width="190" height="96" rx="14" fill="#fff" stroke="#e0d2bc" stroke-width="4"/>
+    <path d="M22 72c-24-12-24-44 0-56 24 12 24 44 0 56z" fill="#c89a4e"/>
+    <path d="M22 16v56" stroke="#a87c38" stroke-width="3"/>
+    <text x="114" y="46" text-anchor="middle" font-family="sans-serif" font-size="19" font-weight="700" fill="#8a6a2a">넓은 잎</text>
+    <text x="114" y="74" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#9c8560">겨울에 떨어져요</text>
+  </g>
+</svg>

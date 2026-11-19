@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#f6f1e6"/>
+  <!-- 메달 -->
+  <g transform="translate(140 36)">
+    <path d="M-40 -30l26 58-26 10-16-54z" fill="#5b7fb5"/>
+    <path d="M40 -30l-26 58 26 10 16-54z" fill="#3f5f92"/>
+    <circle cx="0" cy="86" r="62" fill="#e0a92a"/>
+    <circle cx="0" cy="86" r="52" fill="#f3c54a"/>
+    <circle cx="0" cy="86" r="42" fill="none" stroke="#dfa623" stroke-width="3"/>
+    <g transform="translate(0 86)">
+      <circle cx="0" cy="-10" r="13" fill="#c9941c"/>
+      <path d="M-15 16c0-13 7-21 15-21s15 8 15 21z" fill="#c9941c"/>
+      <path d="M-34 4c-6-12-4-24 2-30 8 4 12 16 8 28z" fill="#c9941c"/>
+      <path d="M34 4c6-12 4-24-2-30-8 4-12 16-8 28z" fill="#c9941c"/>
+    </g>
+  </g>
+  <!-- 달력 12월 10일 -->
+  <g transform="translate(262 46)">
+    <rect x="0" y="10" width="176" height="150" rx="12" fill="#fff" stroke="#d8cdb6" stroke-width="4"/>
+    <rect x="0" y="10" width="176" height="38" rx="12" fill="#8b5cf6"/>
+    <rect x="0" y="36" width="176" height="12" fill="#8b5cf6"/>
+    <rect x="34" y="-2" width="12" height="26" rx="6" fill="#6f46c8"/>
+    <rect x="130" y="-2" width="12" height="26" rx="6" fill="#6f46c8"/>
+    <text x="88" y="40" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#fff">12월</text>
+    <text x="88" y="126" text-anchor="middle" font-family="sans-serif" font-size="74" font-weight="800" fill="#4a3f63">10</text>
+  </g>
+</svg>

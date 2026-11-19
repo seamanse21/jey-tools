@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#fdf1f2"/>
+  <!-- 봉투 -->
+  <g transform="translate(36 54)">
+    <rect x="0" y="0" width="212" height="142" rx="8" fill="#fff" stroke="#e0b8bd" stroke-width="4"/>
+    <path d="M4 6l102 74L208 6" fill="none" stroke="#e0b8bd" stroke-width="4"/>
+    <rect x="152" y="12" width="46" height="36" rx="3" fill="#f3d9c0" stroke="#d9b48e" stroke-width="2"/>
+    <path d="M160 42l12-16 8 10 7-8 11 14z" fill="#8fb77e"/>
+    <circle cx="168" cy="24" r="4" fill="#f0b43f"/>
+    <g stroke="#dcc6c8" stroke-width="4" stroke-linecap="round">
+      <path d="M22 104h86"/><path d="M22 120h58"/>
+    </g>
+  </g>
+  <!-- 카드 -->
+  <g transform="translate(262 20)">
+    <rect x="0" y="0" width="186" height="176" rx="10" fill="#fff" stroke="#c8d8c6" stroke-width="4"/>
+    <rect x="0" y="0" width="186" height="14" rx="7" fill="#2fa36b"/>
+    <g transform="translate(60 72)">
+      <path d="M0 -40l44 56H-44z" fill="#2f7a52"/><path d="M0 -14l54 50H-54z" fill="#368c5d"/>
+      <rect x="-8" y="36" width="16" height="18" rx="3" fill="#8a6a4a"/>
+      <path d="M0 -52l4 9 9-2-5 8 5 8-9-2-4 9-4-9-9 2 5-8-5-8 9 2z" fill="#f3c54a"/>
+    </g>
+    <g stroke="#cfe0d4" stroke-width="4" stroke-linecap="round">
+      <path d="M112 54h56"/><path d="M112 74h48"/><path d="M112 94h56"/><path d="M112 114h34"/>
+    </g>
+    <path d="M22 146c-14-10-18-17-18-24a10 10 0 0 1 18-5 10 10 0 0 1 18 5c0 7-4 14-18 24z" fill="#e05c7a"/>
+  </g>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265">
+  <rect x="0" y="-13" width="480" height="265" fill="#2b3350"/>
+  <g fill="#fdf6d8">
+    <circle cx="46" cy="18" r="2.6"/><circle cx="118" cy="-2" r="2"/><circle cx="196" cy="24" r="2.4"/>
+    <circle cx="300" cy="4" r="2.2"/><circle cx="398" cy="30" r="2.6"/><circle cx="444" cy="-4" r="2"/>
+    <circle cx="352" cy="58" r="1.8"/><circle cx="82" cy="64" r="1.8"/>
+  </g>
+  <!-- 종루 기둥 -->
+  <g transform="translate(240 -8)">
+    <rect x="-150" y="0" width="300" height="18" rx="6" fill="#7a4f3a"/>
+    <path d="M-168 0h336l-20-16H-148z" fill="#8f5d44"/>
+    <rect x="-146" y="18" width="14" height="22" fill="#6b4a36"/>
+  </g>
+  <!-- 종 -->
+  <g transform="translate(206 20)">
+    <rect x="-5" y="0" width="10" height="20" fill="#8a7f5c"/>
+    <path d="M-64 150c0-16 4-24 8-40 5-20 2-40 0-56 16 8 40 10 56 10s40-2 56-10c-2 16-5 36 0 56 4 16 8 24 8 40z" fill="#a89a6e"/>
+    <path d="M-64 150c0-16 4-24 8-40 5-20 2-40 0-56 10 5 22 8 34 9-4 28-6 60-4 87z" fill="#bcad7e"/>
+    <rect x="-74" y="150" width="148" height="16" rx="7" fill="#8e8158"/>
+    <circle cx="0" cy="88" r="15" fill="#8e8158"/>
+    <circle cx="-34" cy="70" r="7" fill="#8e8158"/><circle cx="34" cy="70" r="7" fill="#8e8158"/>
+  </g>
+  <!-- 당목 -->
+  <g transform="translate(348 118)">
+    <rect x="0" y="0" width="92" height="22" rx="11" fill="#9c6b48"/>
+    <rect x="0" y="0" width="22" height="22" rx="11" fill="#7d5438"/>
+    <g stroke="#6f7fa0" stroke-width="3">
+      <path d="M26 0v-52"/><path d="M74 0v-52"/>
+    </g>
+  </g>
+  <!-- 울림 -->
+  <g fill="none" stroke="#f0d98a" stroke-width="4" stroke-linecap="round" opacity=".75">
+    <path d="M116 84c-16 16-16 48 0 64"/><path d="M92 68c-26 26-26 80 0 106"/>
+    <path d="M296 84c16 16 16 48 0 64"/><path d="M320 68c26 26 26 80 0 106"/>
+  </g>
+  <text x="400" y="222" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="800" fill="#f0d98a">33</text>
+</svg>
