@@ -43,7 +43,7 @@
 <div class="wrap">
   <a class="back" href="./index.html">← Jey Tools</a>
   <h1>10분 키즈뉴스</h1>
-  <p class="sub">주차별로 발행한 호를 PDF로 받아 인쇄하세요. A4 양면으로 뽑으면 한 주치가 한 묶음이 됩니다.</p>
+  <p class="sub">주차별로 발행한 신문을 PDF로 받아 인쇄하세요. A4 양면으로 뽑으면 한 주치가 한 묶음이 됩니다.</p>
 
   <div id="list"><p class="note">목록을 가져오는 중…</p></div>
 
@@ -58,15 +58,13 @@
 <script>
 (function(){
   const $ = id => document.getElementById(id);
-  const pad = n => String(n).padStart(2, "0");
 
-  function fmtRange(week, end){
-    const a = new Date(week + "T00:00:00");
-    const b = end ? new Date(end + "T00:00:00") : null;
-    if (isNaN(a)) return week + (end ? " ~ " + end : "");
-    let s = a.getFullYear() + ". " + pad(a.getMonth()+1) + ". " + pad(a.getDate());
-    if (b && !isNaN(b)) s += " ~ " + pad(b.getMonth()+1) + ". " + pad(b.getDate());
-    return s;
+  /* 파일 이름 규칙 — yymmdd (docs/kids-paper-strategy.md) */
+  function ymd(iso){ return String(iso || "").slice(2).replace(/-/g, ""); }
+  /* 한 주를 가리키는 이름 — 호수를 쓰지 않는다 (docs/decisions-log.md) */
+  function krRange(week, end){
+    const f = d => (+String(d).slice(5,7)) + "월 " + (+String(d).slice(8,10)) + "일";
+    return end ? f(week) + " ~ " + f(end) : f(week) + " 주";
   }
   function mb(bytes){ return (bytes/1048576).toFixed(1) + "MB"; }
 
@@ -77,9 +75,10 @@
     const top = document.createElement("div");
     top.className = "top";
     const no = document.createElement("span");
-    no.className = "no"; no.textContent = "제 " + (it.issue || "?") + "호";
+    no.className = "no"; no.textContent = krRange(it.week, it.end);
     const when = document.createElement("span");
-    when.className = "when"; when.textContent = fmtRange(it.week, it.end);
+    when.className = "when";
+    when.textContent = String(it.week).slice(0, 4) + "년 · 평일 " + ((it.heads || []).length || 5) + "일치";
     top.append(no, when);
     box.appendChild(top);
 
@@ -110,7 +109,7 @@
         row.innerHTML = "";
         const a = document.createElement("a");
         a.className = "btn"; a.href = url;
-        a.download = "10분키즈뉴스_제" + (it.issue || "") + "호_" + it.week + ".pdf";
+        a.download = ymd(it.week) + "_" + ymd(it.end || it.week) + "_10min_kidsnews_weekly.pdf";
         a.textContent = "PDF 내려받기";
         const v = document.createElement("a");
         v.className = "btn ghost"; v.href = url; v.target = "_blank"; v.rel = "noopener";
@@ -126,7 +125,7 @@
         row.innerHTML = "";
         const p = document.createElement("span");
         p.className = "note warn";
-        p.textContent = "이 호는 아직 PDF가 없습니다.";
+        p.textContent = "이 주는 아직 PDF가 없습니다.";
         const v = document.createElement("a");
         v.className = "btn ghost"; v.href = "./kids-weekly.html";
         v.textContent = "발행기에서 열어 인쇄";
@@ -142,7 +141,7 @@
       const list = (idx.issues || []).slice().sort((a, b) => a.week < b.week ? 1 : -1);
       const host = $("list"); host.innerHTML = "";
       if (!list.length){
-        host.innerHTML = '<p class="note">아직 발행한 호가 없습니다.</p>';
+        host.innerHTML = '<p class="note">아직 발행한 신문이 없습니다.</p>';
         return;
       }
       list.forEach(it => host.appendChild(card(it)));
