@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265" role="img" aria-label="점형 블록과 선형 블록, 계단 옆의 경사로">
+  <rect x="0" y="-13" width="480" height="265" fill="#eef1f4"/>
+  <rect x="0" y="150" width="480" height="102" fill="#d9dee4"/>
+  <!-- 점형 블록 -->
+  <g transform="translate(44 60)">
+    <rect x="0" y="0" width="92" height="92" rx="6" fill="#f0b53c" stroke="#c98f22" stroke-width="3"/>
+    <g fill="#c98f22">
+      <circle cx="23" cy="23" r="7"/><circle cx="46" cy="23" r="7"/><circle cx="69" cy="23" r="7"/>
+      <circle cx="23" cy="46" r="7"/><circle cx="46" cy="46" r="7"/><circle cx="69" cy="46" r="7"/>
+      <circle cx="23" cy="69" r="7"/><circle cx="46" cy="69" r="7"/><circle cx="69" cy="69" r="7"/>
+    </g>
+    <path d="M46 112v18M38 122l8 8 8-8" stroke="#8a93a0" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- 선형 블록 -->
+  <g transform="translate(156 60)">
+    <rect x="0" y="0" width="92" height="92" rx="6" fill="#f0b53c" stroke="#c98f22" stroke-width="3"/>
+    <g fill="#c98f22">
+      <rect x="14" y="16" width="64" height="11" rx="5"/><rect x="14" y="35" width="64" height="11" rx="5"/>
+      <rect x="14" y="54" width="64" height="11" rx="5"/><rect x="14" y="73" width="64" height="11" rx="5"/>
+    </g>
+    <path d="M28 122h36M56 114l8 8-8 8" stroke="#8a93a0" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- 계단과 경사로 -->
+  <g transform="translate(286 44)">
+    <path d="M0 108h34V86h30V64h30V42h32v66z" fill="#b9c2cd"/>
+    <path d="M0 108L126 40v10L14 108z" fill="#7fb77e" opacity=".9"/>
+    <path d="M0 108L126 40" stroke="#5e9a5e" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <!-- 휠체어 -->
+    <g transform="translate(58 62)">
+      <circle cx="0" cy="18" r="15" fill="none" stroke="#3f5168" stroke-width="4"/>
+      <circle cx="0" cy="18" r="3" fill="#3f5168"/>
+      <circle cx="19" cy="27" r="6" fill="none" stroke="#3f5168" stroke-width="3"/>
+      <path d="M-4 4h16l6 14" stroke="#3f5168" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <circle cx="-2" cy="-7" r="7" fill="#e0893f"/>
+    </g>
+  </g>
+</svg>

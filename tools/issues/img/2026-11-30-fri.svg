@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -13 480 265" width="480" height="265" role="img" aria-label="낙엽과 겉흙, 지렁이와 뿌리가 보이는 흙 단면">
+  <rect x="0" y="-13" width="480" height="265" fill="#eaf0e4"/>
+  <!-- 낙엽층 -->
+  <rect x="0" y="54" width="480" height="26" fill="#c99a5a"/>
+  <g fill="#d8a964">
+    <ellipse cx="54" cy="56" rx="26" ry="10" transform="rotate(-10 54 56)"/>
+    <ellipse cx="160" cy="54" rx="24" ry="9" transform="rotate(8 160 54)"/>
+    <ellipse cx="282" cy="57" rx="27" ry="10" transform="rotate(-6 282 57)"/>
+    <ellipse cx="400" cy="54" rx="23" ry="9" transform="rotate(12 400 54)"/>
+  </g>
+  <!-- 식물 -->
+  <g transform="translate(96 54)">
+    <path d="M0 0v-42" stroke="#6d9455" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="-16" cy="-30" rx="16" ry="8" fill="#86b06a" transform="rotate(-24 -16 -30)"/>
+    <ellipse cx="16" cy="-38" rx="16" ry="8" fill="#9bc47e" transform="rotate(22 16 -38)"/>
+  </g>
+  <g transform="translate(330 54)">
+    <path d="M0 0v-34" stroke="#6d9455" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="-14" cy="-24" rx="14" ry="7" fill="#86b06a" transform="rotate(-24 -14 -24)"/>
+    <ellipse cx="14" cy="-30" rx="14" ry="7" fill="#9bc47e" transform="rotate(22 14 -30)"/>
+  </g>
+  <!-- 겉흙 -->
+  <rect x="0" y="80" width="480" height="68" fill="#7d5a3c"/>
+  <!-- 속흙 -->
+  <rect x="0" y="148" width="480" height="104" fill="#a07a52"/>
+  <g fill="#8d6845"><circle cx="70" cy="186" r="11"/><circle cx="246" cy="214" r="14"/><circle cx="398" cy="178" r="10"/><circle cx="148" cy="232" r="9"/></g>
+  <!-- 뿌리 -->
+  <g stroke="#6d4f36" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M96 80v52M96 104l-20 18M96 116l18 16M96 132v16"/>
+    <path d="M330 80v44M330 98l16 14M330 110l-14 14"/>
+  </g>
+  <!-- 지렁이 -->
+  <g transform="translate(196 118)">
+    <path d="M0 0c16-14 32 10 48-4s28 6 40-4" fill="none" stroke="#e08a94" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="88" cy="-8" r="6.5" fill="#cf7680"/>
+    <circle cx="90" cy="-10" r="1.7" fill="#6b3c42"/>
+  </g>
+  <!-- 작은 생물 -->
+  <g fill="#f0f4ea" opacity=".8">
+    <circle cx="140" cy="166" r="3.2"/><circle cx="300" cy="158" r="2.6"/><circle cx="420" cy="208" r="3"/>
+    <circle cx="60" cy="226" r="2.6"/><circle cx="352" cy="196" r="2.4"/>
+  </g>
+</svg>
