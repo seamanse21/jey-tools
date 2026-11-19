@@ -13,7 +13,8 @@
   body { margin:0; padding:48px 16px 64px; background:var(--bg); color:var(--fg);
          font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; }
   .wrap { max-width:960px; margin:0 auto; }
-  .cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 28px; align-items:start; }
+  .cols { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px 24px; align-items:start; }
+  @media (max-width:980px) { .cols { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 28px; } }
   @media (max-width:720px) { .cols { grid-template-columns:minmax(0,1fr); gap:0; } }
   h1 { font-size:1.6rem; margin:0 0 6px; letter-spacing:-.02em; }
   p.sub { color:var(--muted); margin:0 0 36px; font-size:.92rem; }
@@ -53,6 +54,16 @@
   </section>
 
   <section>
+    <h2>10minkids</h2>
+    <ul>
+      <li><a class="card" href="./kids-issue.html">
+        <div class="name">10분 키즈뉴스</div>
+        <div class="desc">주차별로 발행한 어린이 신문을 PDF로 받습니다. 하루치가 기사면 한 장 + 활동지 한 장이고, A4로 인쇄해서 바로 풀면 됩니다.</div>
+      </a></li>
+    </ul>
+  </section>
+
+  <section>
     <h2>With HwiMin</h2>
     <ul>
       <li><a class="card" href="./english-quiz.html">
@@ -62,10 +73,6 @@
       <li><a class="card" href="./kr-history-quiz.html">
         <div class="name">한국사 기출 퀴즈</div>
         <div class="desc">한국사능력검정시험 기출 PDF를 문항별로 잘라 퀴즈로 풉니다. 정답표도 자동으로 읽고, 틀린 문항은 오답노트에 모입니다.</div>
-      </a></li>
-      <li><a class="card" href="./kids-issue.html">
-        <div class="name">10분 키즈뉴스</div>
-        <div class="desc">주차별로 발행한 어린이 신문을 PDF로 받습니다. 하루치가 기사면 한 장 + 활동지 한 장이고, A4로 인쇄해서 바로 풀면 됩니다.</div>
       </a></li>
       <li><a class="card" href="./hanja-quiz.html">
         <div class="name">한자 급수 퀴즈</div>
