@@ -1632,6 +1632,21 @@ function loadImage(src){
 /* ============================================================
    카드 다섯 장
    ============================================================ */
+/* 다음 장으로 넘기게 만드는 장치 — 점 다섯 개와 화살표.
+   캐러셀은 1장에서 80%가 떨어진다. "더 있다"를 눈에 보이게 해야 넘긴다. */
+function pager(g, idx, cat, label){
+  const n=5, r=7, gap=26, cx=W/2, y=H-120;
+  const total=(n-1)*gap;
+  for(let i=0;i<n;i++){
+    g.beginPath(); g.arc(cx-total/2+i*gap, y, i===idx?r+1.5:r, 0, Math.PI*2);
+    g.fillStyle = i===idx ? cat : "rgba(23,23,15,.18)"; g.fill();
+  }
+  if(label!==""){
+    g.fillStyle=cat; g.font='400 30px "Jua","Apple SD Gothic Neo",sans-serif';
+    g.textAlign="right"; g.fillText((label||"넘겨 보세요")+"  →", W-64, y+11); g.textAlign="left";
+  }
+}
+
 function footer(g, cat){
   g.fillStyle="#17170f"; g.font='600 26px "Apple SD Gothic Neo",sans-serif';
   g.textAlign="left"; g.globalAlpha=.45;
@@ -1671,11 +1686,19 @@ async function card1(g, d, dt, cat){
   g.fillStyle="#17170f"; g.font='400 84px "Jua","Apple SD Gothic Neo",sans-serif';
   let y = drawLines(g, wrap(g, plain(d.head), W-128, true), 64, 930, 100);
 
-  const id4=parts(d.idiom), hj=parts(d.hanja), en=parts(d.eng);
-  g.fillStyle=cat; g.font='400 36px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("오늘의 낱말 · "+plain(d.w), 64, y+60);
-  g.fillStyle="#8d8b80"; g.font='400 30px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-  g.fillText("사자성어 "+(id4[1]||"")+"   ·   한자 "+(hj[0]||"")+"   ·   영단어 "+(en[0]||""), 64, y+116);
+  /* 어휘 나열은 뺐다 — 표지에서 다 보여 주면 넘길 이유가 없어진다.
+     대신 기사에서 가장 센 숫자 하나를 던진다. 숫자는 설명 없이도 눈이 멈춘다. */
+  const n0 = rows(d.nums)[0];
+  if(n0){
+    g.font='400 58px "Jua","Apple SD Gothic Neo",sans-serif';
+    const cw = g.measureText(n0.a).width + 64;
+    g.fillStyle=cat; rrect(g, 64, y+22, cw, 92, 46); g.fill();
+    g.fillStyle="#fff"; g.textBaseline="middle";
+    g.fillText(n0.a, 64+32, y+70); g.textBaseline="alphabetic";
+    g.fillStyle="#55544c"; g.font='400 32px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
+    drawLines(g, wrap(g, n0.b, W-160-cw).slice(0,2), 64+cw+26, y+58, 42);
+  }
+  pager(g, 0, cat, "왜 그런지 보기");
   footer(g, cat);
 }
 
@@ -1694,8 +1717,9 @@ async function card2(g, d, dt, cat){
   for(const p of paras){
     const lines = wrap(g, p, S-128).slice(0,6);
     y = drawLines(g, lines, 64, y, 56) + 30;
-    if(y > 1150) break;
+    if(y > 1120) break;
   }
+  pager(g, 1, cat);
   footer(g, cat);
 }
 
@@ -1712,7 +1736,7 @@ async function card3(g, d, dt, cat){
     g.fillStyle="#fff"; g.font='400 26px "Jua","Apple SD Gothic Neo",sans-serif';
     g.textAlign="center"; g.fillText(title, x+w/2, y+38);
     g.fillStyle="#17170f"; g.font=font;
-    g.fillText(big, x+w/2, y+h*0.62);
+    g.fillText(big, x+w/2, y+h*0.58);
     g.fillStyle="#6b6a60"; g.font='400 28px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
     const ls=wrap(g, sub, w-30).slice(0,2);
     ls.forEach((l,i)=>g.fillText(l, x+w/2, y+h-70+i*34));
@@ -1727,13 +1751,22 @@ async function card3(g, d, dt, cat){
   g.fillStyle="#55544c"; g.font='400 30px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
   drawLines(g, wrap(g, plain(d.m), W-480, true).slice(0,3), 440, 310, 42);
 
-  const w3=(W-128-48)/3, y3=520, h3=640;
+  const w3=(W-128-48)/3, y3=500, h3=540;   // 아래 생각거리·페이저와 겹치지 않게
   box(64,        y3, w3, h3, "사자성어", id4[0]||"", (id4[1]||""),
       '400 52px "AppleMyungjo","Nanum Myeongjo","Batang",serif');
   box(64+w3+24,  y3, w3, h3, "한자", hj[0]||"", (hj[1]||"")+" · "+(hj[2]||""),
       '900 150px "AppleMyungjo","Nanum Myeongjo","Batang",serif');
   box(64+2*(w3+24), y3, w3, h3, "영단어", en[0]||"", (en[2]||""),
       '700 50px "Apple SD Gothic Neo",sans-serif');
+  const think = plain(d.oneline||d.q1||"");
+  if(think){
+    g.fillStyle="#f6f4ee"; rrect(g, 64, y3+h3+28, W-128, 118, 22); g.fill();
+    g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
+    g.fillText("함께 이야기 나눠 보세요", 100, y3+h3+78);
+    g.fillStyle="#3f3e36"; g.font='400 31px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
+    g.fillText(wrap(g, think, W-320)[0], 100, y3+h3+124);
+  }
+  pager(g, 3, cat, "매일 받는 법");
   footer(g, cat);
 }
 
@@ -1766,56 +1799,66 @@ async function card4(g, d, dt, cat){
       y += 180;
     }
   }
+  pager(g, 2, cat);
   footer(g, cat);
 }
 
-/* 5. 마무리 — 생각거리와 안내 */
+/* 5. 마지막 장 — 혜택을 말하고 행동을 시킨다.
+   앞 네 장이 "이게 재미있다"를 보여 줬으니 여기서는 "이걸 매일 받는 법"만 말한다.
+   생각거리는 4번 카드로 옮겼다. CTA 장에 두 가지를 섞으면 둘 다 흐려진다. */
 async function card5(g, d, dt, cat){
   g.fillStyle=cat; g.fillRect(0,0,W,H);
 
-  /* 글이 짧으면 상자가 휑해 보인다. 먼저 줄 수를 재어 상자를 내용에 맞춘다 */
-  g.font='400 46px "Jua","Apple SD Gothic Neo",sans-serif';
-  const head = wrap(g, plain(d.oneline||d.q1||""), S-260, true);
-  g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
-  const cta  = wrap(g, "프로필 링크에서 1주일치 14쪽을 무료로 받으세요", S-260);
-  const sub  = ["기사 전문과 활동지는", "이번 주 신문에 담겨 있어요"];
+  g.textAlign="center";
+  g.fillStyle="rgba(255,255,255,.85)"; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("방금 보신 이 한 장이", W/2, 168);
+  g.fillStyle="#fff"; g.font='400 92px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("매일 아침 옵니다", W/2, 288);
 
-  const PAD=92, G1=74, G2=78, G3=72;
-  const inner = 34 + G1 + head.length*62 + G2 + sub.length*44 + G3 + cta.length*46;
-  /* 마지막 줄의 베이스라인 아래 여유를 한 번 빼야 위아래 여백이 같아 보인다 */
-  const boxH  = inner + PAD*2 - 34;
-  const boxY  = Math.round((H - 120 - boxH) / 2) + 20;
+  /* 하루치가 어떻게 생겼는지 — 말보다 모양이 빠르다 */
+  const bx=118, by=380, bw=(W-236-30)/2, bh=300;
+  const sheet=(x,label,lines,mark)=>{
+    g.fillStyle="#fff"; rrect(g,x,by,bw,bh,24); g.fill();
+    g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
+    g.textAlign="left"; g.fillText(label, x+28, by+54);
+    g.fillStyle="#e3ded3";
+    for(let i=0;i<lines;i++) g.fillRect(x+28, by+88+i*30, bw-56-(i===lines-1?70:0), 11);
+    if(mark){ g.fillStyle=cat; for(let i=0;i<3;i++){ g.beginPath();
+      g.arc(x+44, by+104+i*52, 13, 0, Math.PI*2); g.fill(); } }
+    g.textAlign="center";
+  };
+  sheet(bx, "기사 한 장", 6, false);
+  sheet(bx+bw+30, "활동지 한 장", 4, true);
 
-  g.fillStyle="rgba(255,255,255,.96)"; rrect(g,64,boxY,S-128,boxH,34); g.fill();
+  g.fillStyle="rgba(255,255,255,.92)"; g.font='400 34px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
+  g.fillText("낱말 · 사자성어 · 한자 · 영단어까지 한 장에", W/2, 752);
+  g.fillText("읽고 풀면 하루 10분", W/2, 806);
 
-  let y = boxY + PAD + 34;
-  g.fillStyle=cat; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.textAlign="center"; g.fillText("함께 이야기 나눠 보세요", S/2, y);
-  g.textAlign="left";
+  /* 행동 — 버튼처럼 보이게. 무엇을 받는지 숫자로 못박는다 */
+  const by2=886, bh2=146;
+  g.fillStyle="#fff"; rrect(g, 110, by2, W-220, bh2, 73); g.fill();
+  g.fillStyle=cat; g.font='400 50px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("체험본 1주일치 14쪽 무료", W/2, by2+92);
 
-  y += G1 + 46;
-  g.fillStyle="#17170f"; g.font='400 46px "Jua","Apple SD Gothic Neo",sans-serif';
-  y = drawLines(g, head, S/2, y, 62, "center") - 62;
+  g.fillStyle="rgba(255,255,255,.95)"; g.font='400 36px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("프로필 링크 → 10minkids.com", W/2, by2+bh2+78);
+  g.fillStyle="rgba(255,255,255,.72)"; g.font='400 29px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
+  g.fillText("이메일만 넣으면 바로 받습니다 · 결제 정보는 받지 않습니다", W/2, by2+bh2+132);
 
-  y += G2 + 30;
-  g.fillStyle="#6b6a60"; g.font='400 30px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-  y = drawLines(g, sub, S/2, y, 44, "center") - 44;
-
-  y += G3 + 34;
-  g.fillStyle=cat; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
-  drawLines(g, cta, S/2, y, 46, "center");
-
-  g.fillStyle="#fff"; g.font='600 26px "Apple SD Gothic Neo",sans-serif';
-  g.textAlign="center"; g.fillText(HANDLE+"   ·   "+SITE, W/2, H-56);
+  g.fillStyle="rgba(255,255,255,.8)"; g.font='600 28px "Apple SD Gothic Neo",sans-serif';
+  g.fillText(HANDLE, W/2, H-64);
   g.textAlign="left";
 }
 
+/* 넘기게 만드는 차례다. 훅 → 답 → 놀라움 → 배우는 것 → 행동.
+   어휘(card3)를 숫자(card4) 뒤로 옮겼다. 어휘는 "이걸 매일 배운다"는 증거라
+   CTA 바로 앞에 있어야 값이 산다. (2026-11-20) */
 const CARDS = [
-  {name:"1 표지", fn:card1},
-  {name:"2 기사", fn:card2},
-  {name:"3 어휘", fn:card3},
-  {name:"4 숫자", fn:card4},
-  {name:"5 안내", fn:card5},
+  {name:"1 훅",   fn:card1},
+  {name:"2 이야기", fn:card2},
+  {name:"3 숫자",  fn:card4},
+  {name:"4 어휘",  fn:card3},
+  {name:"5 받기",  fn:card5},
 ];
 
 /* ============================================================
@@ -1843,6 +1886,11 @@ async function preloadFonts(d, dt){
                 BRAND, HANDLE, SITE, fmt(dt),
                 "함께 이야기 나눠 보세요 기사 전문과 활동지는 이번 주 신문에 담겨 있어요",
                 "프로필 링크에서 1주일치 14쪽을 무료로 받으세요",
+                "방금 보신 이 한 장이 매일 아침 옵니다 기사 한 장 활동지 한 장",
+                "낱말 사자성어 한자 영단어까지 한 장에 읽고 풀면 하루 10분",
+                "체험본 1주일치 14쪽 무료 프로필 링크 10minkids.com",
+                "이메일만 넣으면 바로 받습니다 결제 정보는 받지 않습니다",
+                "넘겨 보세요 왜 그런지 보기 매일 받는 법",
                 "오늘의 이야기 오늘의 낱말 숫자로 보는 뉴스 기사에 안 나온 이야기",
                 "사자성어 한자 영단어 뜻 쓰임새 훈음 급수 획수"]
                .filter(Boolean).join(" ");
