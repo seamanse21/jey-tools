@@ -1801,6 +1801,8 @@ async function card4(g, d, dt, cat){
 /* 5. 마지막 장 — 릴스 CTA 와 같은 말을 쓴다.
    릴스: 방금 보신 이 기사 → 한 장에 한자·영단어·활동지 → 읽고 풀면 10분
          → 매일 쌓이면 읽는 습관 → 1주일치 14쪽 샘플은 프로필 링크에서.
+   카드 쪽 마지막 두 줄만 Jey 가 다시 손봤다 (2026-11-23):
+   「매일 읽는 습관이 지식이 됩니다」 · 버튼 「체험본 살펴보기」.
    두 채널이 다른 말을 하면 아무것도 남지 않는다. 문구를 바꿀 때는 같이 바꾼다
    (`~/.claude/skills/kids-reel/templates/cta-scenes.js`). */
 async function card5(g, d, dt, cat){
@@ -1833,12 +1835,12 @@ async function card5(g, d, dt, cat){
   g.fillText("딱 10분이에요", W/2, 842);
 
   g.fillStyle="#fff"; g.font='400 52px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("매일 쌓이면 읽는 습관이 됩니다", W/2, 944);
+  g.fillText("매일 읽는 습관이 지식이 됩니다", W/2, 944);
 
   const by2=1002, bh2=140;
   g.fillStyle="#fff"; rrect(g, 110, by2, W-220, bh2, 70); g.fill();
   g.fillStyle=cat; g.font='400 50px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("1주일치 14쪽 샘플 무료", W/2, by2+90);
+  g.fillText("체험본 살펴보기", W/2, by2+90);
 
   g.fillStyle="rgba(255,255,255,.95)"; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
   g.fillText("프로필 링크에서 확인하세요", W/2, by2+bh2+66);
@@ -1886,8 +1888,8 @@ async function preloadFonts(d, dt){
                 "프로필 링크에서 1주일치 14쪽을 무료로 받으세요",
                 "방금 보신 이 기사 10분 키즈뉴스 하루치예요 기사 한 장 활동지 한 장",
                 "읽고 퀴즈 풀고 가족과 이야기하면 딱 10분이에요",
-                "매일 쌓이면 읽는 습관이 됩니다",
-                "1주일치 14쪽 샘플 무료 프로필 링크에서 확인하세요",
+                "매일 읽는 습관이 지식이 됩니다",
+                "체험본 살펴보기 프로필 링크에서 확인하세요",
                 "한 장에 한자와 영단어 활동지까지 들어 있어요",
                 d.hook,
                 "오늘의 이야기 오늘의 낱말 숫자로 보는 뉴스 기사에 안 나온 이야기",
