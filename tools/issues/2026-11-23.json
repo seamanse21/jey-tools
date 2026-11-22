@@ -90,7 +90,8 @@
       "searchq": "국회 예산 심사",
       "eng": "budget | 버짓 | 예산 | We make a budget every year.",
       "photo": "issues/img/2026-11-23-wed.svg",
-      "cap": "출처 · 10분 키즈뉴스"
+      "cap": "출처 · 10분 키즈뉴스",
+      "hook": "내년에 나라가 쓸 돈은\n12월 2일까지\n정해야 해요."
     },
     {
       "cat": "사회",
@@ -119,7 +120,8 @@
       "searchq": "추수감사절 유래",
       "eng": "harvest | 하비스트 | 수확 | They share the autumn harvest.",
       "photo": "issues/img/2026-11-23-thu.jpg",
-      "cap": "출처 · Ms Jones, CC BY 2.0 (위키미디어 커먼즈)"
+      "cap": "출처 · Ms Jones, CC BY 2.0 (위키미디어 커먼즈)",
+      "hook": "1620년에 건너온 사람들이\n첫 수확을 나눈 사흘.\n그게 오늘의 시작이에요."
     },
     {
       "cat": "경제",
@@ -148,7 +150,8 @@
       "searchq": "블랙프라이데이 뜻",
       "eng": "sale | 세일 | 할인 판매 | The shop has a big sale.",
       "photo": "issues/img/2026-11-23-fri.svg",
-      "cap": "출처 · 10분 키즈뉴스"
+      "cap": "출처 · 10분 키즈뉴스",
+      "hook": "손해는 빨간 글씨,\n이익은 검은 글씨.\n그래서 '검은' 금요일이에요."
     }
   ]
 }
