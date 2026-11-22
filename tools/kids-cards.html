@@ -1817,18 +1817,26 @@ async function card5(g, d, dt, cat){
 
   /* 하루치가 어떻게 생겼는지 — 말보다 모양이 빠르다 */
   const bx=118, by=430, bw=(W-236-30)/2, bh=286;
-  const sheet=(x,label,lines,mark)=>{
+  const bar=(x,cy,w)=>{ g.fillStyle="#e3ded3"; rrect(g, x, cy-5.5, w, 11, 5.5); g.fill(); };
+  const sheet=(x,label,quiz)=>{
     g.fillStyle="#fff"; rrect(g,x,by,bw,bh,24); g.fill();
     g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
     g.textAlign="left"; g.fillText(label, x+28, by+52);
-    g.fillStyle="#e3ded3";
-    for(let i=0;i<lines;i++) g.fillRect(x+28, by+84+i*30, bw-56-(i===lines-1?70:0), 11);
-    if(mark){ g.fillStyle=cat; for(let i=0;i<3;i++){ g.beginPath();
-      g.arc(x+44, by+100+i*50, 13, 0, Math.PI*2); g.fill(); } }
+    if(quiz){
+      /* 문항 세 줄. 동그라미와 선의 **가운데를 같은 높이에** 둔다 */
+      const top=by+112, gap=60;
+      for(let i=0;i<3;i++){
+        const cy=top+i*gap;
+        g.fillStyle=cat; g.beginPath(); g.arc(x+46, cy, 12, 0, Math.PI*2); g.fill();
+        bar(x+76, cy, bw-104-(i===2?64:0));
+      }
+    } else {
+      for(let i=0;i<6;i++) bar(x+28, by+92+i*30, bw-56-(i===5?70:0));
+    }
     g.textAlign="center";
   };
-  sheet(bx, "기사 한 장", 6, false);
-  sheet(bx+bw+30, "활동지 한 장", 4, true);
+  sheet(bx, "기사 한 장", false);
+  sheet(bx+bw+30, "활동지 한 장", true);
 
   g.fillStyle="rgba(255,255,255,.92)"; g.font='400 34px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
   g.fillText("읽고, 퀴즈 풀고, 가족과 이야기하면", W/2, 790);
