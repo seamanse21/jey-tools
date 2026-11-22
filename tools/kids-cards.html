@@ -1823,15 +1823,23 @@ async function card5(g, d, dt, cat){
     g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
     g.textAlign="left"; g.fillText(label, x+28, by+52);
     if(quiz){
-      /* 문항 세 줄. 동그라미와 선의 **가운데를 같은 높이에** 둔다 */
-      const top=by+112, gap=60;
-      for(let i=0;i<3;i++){
-        const cy=top+i*gap;
-        g.fillStyle=cat; g.beginPath(); g.arc(x+46, cy, 12, 0, Math.PI*2); g.fill();
-        bar(x+76, cy, bw-104-(i===2?64:0));
-      }
+      /* 문항 → 빈칸 → 밑줄. 선을 동그라미보다 **아래**에 둬서
+         "위 공란에 답을 쓴다"가 보이게 한다 */
+      [by+104, by+194].forEach((top,i)=>{
+        g.fillStyle=cat; g.beginPath(); g.arc(x+46, top, 11, 0, Math.PI*2); g.fill();
+        bar(x+72, top, bw-100-(i?70:20));            // 질문
+        g.fillStyle="#ded8cd";                        // 답 쓰는 밑줄
+        rrect(g, x+46, top+50, bw-92, 4, 2); g.fill();
+      });
     } else {
-      for(let i=0;i<6;i++) bar(x+28, by+92+i*30, bw-56-(i===5?70:0));
+      /* 그림 자리 + 글줄 — 기사면에는 사진과 본문이 있다 */
+      g.fillStyle="#e7e2d8"; rrect(g, x+28, by+76, bw-56, 94, 14); g.fill();
+      g.fillStyle="#d5cfc3";
+      g.beginPath(); g.arc(x+28+(bw-56)*0.34, by+112, 13, 0, Math.PI*2); g.fill();
+      g.beginPath();
+      g.moveTo(x+40, by+162); g.lineTo(x+28+(bw-56)*0.52, by+118);
+      g.lineTo(x+28+(bw-56)*0.74, by+162); g.closePath(); g.fill();
+      for(let i=0;i<3;i++) bar(x+28, by+202+i*30, bw-56-(i===2?70:0));
     }
     g.textAlign="center";
   };
