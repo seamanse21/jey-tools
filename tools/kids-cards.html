@@ -1634,17 +1634,15 @@ function loadImage(src){
    ============================================================ */
 /* 다음 장으로 넘기게 만드는 장치 — 점 다섯 개와 화살표.
    캐러셀은 1장에서 80%가 떨어진다. "더 있다"를 눈에 보이게 해야 넘긴다. */
-function pager(g, idx, cat, label){
+function pager(g, idx, cat){
   const n=5, r=7, gap=26, cx=W/2, y=H-120;
   const total=(n-1)*gap;
   for(let i=0;i<n;i++){
     g.beginPath(); g.arc(cx-total/2+i*gap, y, i===idx?r+1.5:r, 0, Math.PI*2);
     g.fillStyle = i===idx ? cat : "rgba(23,23,15,.18)"; g.fill();
   }
-  if(label!==""){
-    g.fillStyle=cat; g.font='400 30px "Jua","Apple SD Gothic Neo",sans-serif';
-    g.textAlign="right"; g.fillText((label||"넘겨 보세요")+"  →", W-64, y+11); g.textAlign="left";
-  }
+  g.fillStyle=cat; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.textAlign="right"; g.fillText("→", W-64, y+13); g.textAlign="left";
 }
 
 function footer(g, cat){
@@ -1669,36 +1667,35 @@ function badge(g, text, cat, x, y){
 async function card1(g, d, dt, cat){
   g.fillStyle="#fff"; g.fillRect(0,0,W,H);
   const img = await loadImage(d.photo ? "./"+d.photo : "");
-  if(img) drawCover(g, img, 0, 0, W, 800);
-  else { g.fillStyle="#f1efe8"; g.fillRect(0,0,W,800); }
-  // 아래쪽 어둡게 깔아 글자가 읽히게
-  const grad=g.createLinearGradient(0,470,0,800);
-  grad.addColorStop(0,"rgba(0,0,0,0)"); grad.addColorStop(1,"rgba(0,0,0,.55)");
-  g.fillStyle=grad; g.fillRect(0,470,W,330);
+  if(img) drawCover(g, img, 0, 0, W, 700);
+  else { g.fillStyle="#f1efe8"; g.fillRect(0,0,W,700); }
+  /* 제목이 그림 위에 얹히므로 아래쪽을 충분히 어둡게 깐다.
+     일러스트에 밝은 도형이 있으면 .6 으로는 글자가 묻힌다 (11/24 종의 기원에서 겪음) */
+  const grad=g.createLinearGradient(0,380,0,700);
+  grad.addColorStop(0,"rgba(0,0,0,0)"); grad.addColorStop(0.55,"rgba(0,0,0,.45)");
+  grad.addColorStop(1,"rgba(0,0,0,.82)");
+  g.fillStyle=grad; g.fillRect(0,380,W,320);
 
   const bw = badge(g, d.cat, cat, 64, 56);
   g.fillStyle="rgba(255,255,255,.92)"; g.font='600 28px "Apple SD Gothic Neo",sans-serif';
   g.fillText(fmt(dt), 64+bw+18, 92);
 
-  g.fillStyle="#fff"; g.font='400 40px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText(plain(d.kicker), 64, 718);
+  /* 사진 위에는 제목만. 작게 둔다 — 주인공은 아래 훅이다 */
+  g.fillStyle="#fff"; g.font='400 46px "Jua","Apple SD Gothic Neo",sans-serif';
+  drawLines(g, wrap(g, plain(d.head), W-128, true).slice(0,2), 64, 622, 56);
 
-  g.fillStyle="#17170f"; g.font='400 84px "Jua","Apple SD Gothic Neo",sans-serif';
-  let y = drawLines(g, wrap(g, plain(d.head), W-128, true), 64, 930, 100);
+  /* 훅 — 원고의 hook 칸. 기사에서 가장 흥미로운 사실을 선언으로 쓴다.
+     없으면 리드(kicker)로 때우지만, 그건 임시다. hook 을 적어 두는 쪽이 늘 낫다. */
+  const hook = plain(d.hook || d.kicker || d.head);
+  const hl = hook.split(/\n+/).flatMap(line => {
+    g.font='400 82px "Jua","Apple SD Gothic Neo",sans-serif';
+    return wrap(g, line, W-128, true);
+  }).slice(0,4);
+  g.fillStyle="#17170f"; g.font='400 82px "Jua","Apple SD Gothic Neo",sans-serif';
+  const hTop = 700 + Math.max(60, (H-700-200 - hl.length*104)/2) + 70;
+  drawLines(g, hl, 64, hTop, 104);
 
-  /* 어휘 나열은 뺐다 — 표지에서 다 보여 주면 넘길 이유가 없어진다.
-     대신 기사에서 가장 센 숫자 하나를 던진다. 숫자는 설명 없이도 눈이 멈춘다. */
-  const n0 = rows(d.nums)[0];
-  if(n0){
-    g.font='400 58px "Jua","Apple SD Gothic Neo",sans-serif';
-    const cw = g.measureText(n0.a).width + 64;
-    g.fillStyle=cat; rrect(g, 64, y+22, cw, 92, 46); g.fill();
-    g.fillStyle="#fff"; g.textBaseline="middle";
-    g.fillText(n0.a, 64+32, y+70); g.textBaseline="alphabetic";
-    g.fillStyle="#55544c"; g.font='400 32px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-    drawLines(g, wrap(g, n0.b, W-160-cw).slice(0,2), 64+cw+26, y+58, 42);
-  }
-  pager(g, 0, cat, "왜 그런지 보기");
+  pager(g, 0, cat);
   footer(g, cat);
 }
 
@@ -1758,15 +1755,13 @@ async function card3(g, d, dt, cat){
       '900 150px "AppleMyungjo","Nanum Myeongjo","Batang",serif');
   box(64+2*(w3+24), y3, w3, h3, "영단어", en[0]||"", (en[2]||""),
       '700 50px "Apple SD Gothic Neo",sans-serif');
-  const think = plain(d.oneline||d.q1||"");
-  if(think){
-    g.fillStyle="#f6f4ee"; rrect(g, 64, y3+h3+28, W-128, 118, 22); g.fill();
-    g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
-    g.fillText("함께 이야기 나눠 보세요", 100, y3+h3+78);
-    g.fillStyle="#3f3e36"; g.font='400 31px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-    g.fillText(wrap(g, think, W-320)[0], 100, y3+h3+124);
-  }
-  pager(g, 3, cat, "매일 받는 법");
+  /* 릴스 CTA 의 C02 와 같은 말을 쓴다. 두 채널에서 같은 문장을 들으면 각인된다 */
+  g.fillStyle=cat; rrect(g, 64, y3+h3+32, W-128, 104, 22); g.fill();
+  g.fillStyle="#fff"; g.font='400 36px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.textAlign="center";
+  g.fillText("한 장에 한자와 영단어, 활동지까지 들어 있어요", W/2, y3+h3+96);
+  g.textAlign="left";
+  pager(g, 3, cat);
   footer(g, cat);
 }
 
@@ -1803,50 +1798,53 @@ async function card4(g, d, dt, cat){
   footer(g, cat);
 }
 
-/* 5. 마지막 장 — 혜택을 말하고 행동을 시킨다.
-   앞 네 장이 "이게 재미있다"를 보여 줬으니 여기서는 "이걸 매일 받는 법"만 말한다.
-   생각거리는 4번 카드로 옮겼다. CTA 장에 두 가지를 섞으면 둘 다 흐려진다. */
+/* 5. 마지막 장 — 릴스 CTA 와 같은 말을 쓴다.
+   릴스: 방금 보신 이 기사 → 한 장에 한자·영단어·활동지 → 읽고 풀면 10분
+         → 매일 쌓이면 읽는 습관 → 1주일치 14쪽 샘플은 프로필 링크에서.
+   두 채널이 다른 말을 하면 아무것도 남지 않는다. 문구를 바꿀 때는 같이 바꾼다
+   (`~/.claude/skills/kids-reel/templates/cta-scenes.js`). */
 async function card5(g, d, dt, cat){
   g.fillStyle=cat; g.fillRect(0,0,W,H);
-
   g.textAlign="center";
-  g.fillStyle="rgba(255,255,255,.85)"; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("방금 보신 이 한 장이", W/2, 168);
-  g.fillStyle="#fff"; g.font='400 92px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("매일 아침 옵니다", W/2, 288);
+
+  g.fillStyle="rgba(255,255,255,.85)"; g.font='400 36px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("방금 보신 이 기사,", W/2, 160);
+  g.fillStyle="#fff"; g.font='400 76px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("10분 키즈뉴스", W/2, 268);
+  g.fillText("하루치예요", W/2, 356);
 
   /* 하루치가 어떻게 생겼는지 — 말보다 모양이 빠르다 */
-  const bx=118, by=380, bw=(W-236-30)/2, bh=300;
+  const bx=118, by=430, bw=(W-236-30)/2, bh=286;
   const sheet=(x,label,lines,mark)=>{
     g.fillStyle="#fff"; rrect(g,x,by,bw,bh,24); g.fill();
     g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
-    g.textAlign="left"; g.fillText(label, x+28, by+54);
+    g.textAlign="left"; g.fillText(label, x+28, by+52);
     g.fillStyle="#e3ded3";
-    for(let i=0;i<lines;i++) g.fillRect(x+28, by+88+i*30, bw-56-(i===lines-1?70:0), 11);
+    for(let i=0;i<lines;i++) g.fillRect(x+28, by+84+i*30, bw-56-(i===lines-1?70:0), 11);
     if(mark){ g.fillStyle=cat; for(let i=0;i<3;i++){ g.beginPath();
-      g.arc(x+44, by+104+i*52, 13, 0, Math.PI*2); g.fill(); } }
+      g.arc(x+44, by+100+i*50, 13, 0, Math.PI*2); g.fill(); } }
     g.textAlign="center";
   };
   sheet(bx, "기사 한 장", 6, false);
   sheet(bx+bw+30, "활동지 한 장", 4, true);
 
   g.fillStyle="rgba(255,255,255,.92)"; g.font='400 34px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-  g.fillText("낱말 · 사자성어 · 한자 · 영단어까지 한 장에", W/2, 752);
-  g.fillText("읽고 풀면 하루 10분", W/2, 806);
+  g.fillText("읽고, 퀴즈 풀고, 가족과 이야기하면", W/2, 790);
+  g.fillText("딱 10분이에요", W/2, 842);
 
-  /* 행동 — 버튼처럼 보이게. 무엇을 받는지 숫자로 못박는다 */
-  const by2=886, bh2=146;
-  g.fillStyle="#fff"; rrect(g, 110, by2, W-220, bh2, 73); g.fill();
+  g.fillStyle="#fff"; g.font='400 52px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("매일 쌓이면 읽는 습관이 됩니다", W/2, 944);
+
+  const by2=1002, bh2=140;
+  g.fillStyle="#fff"; rrect(g, 110, by2, W-220, bh2, 70); g.fill();
   g.fillStyle=cat; g.font='400 50px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("체험본 1주일치 14쪽 무료", W/2, by2+92);
+  g.fillText("1주일치 14쪽 샘플 무료", W/2, by2+90);
 
-  g.fillStyle="rgba(255,255,255,.95)"; g.font='400 36px "Jua","Apple SD Gothic Neo",sans-serif';
-  g.fillText("프로필 링크 → 10minkids.com", W/2, by2+bh2+78);
-  g.fillStyle="rgba(255,255,255,.72)"; g.font='400 29px "Gowun Dodum","Apple SD Gothic Neo",sans-serif';
-  g.fillText("이메일만 넣으면 바로 받습니다 · 결제 정보는 받지 않습니다", W/2, by2+bh2+132);
+  g.fillStyle="rgba(255,255,255,.95)"; g.font='400 34px "Jua","Apple SD Gothic Neo",sans-serif';
+  g.fillText("프로필 링크에서 확인하세요", W/2, by2+bh2+66);
 
-  g.fillStyle="rgba(255,255,255,.8)"; g.font='600 28px "Apple SD Gothic Neo",sans-serif';
-  g.fillText(HANDLE, W/2, H-64);
+  g.fillStyle="rgba(255,255,255,.75)"; g.font='600 28px "Apple SD Gothic Neo",sans-serif';
+  g.fillText(HANDLE+"   ·   "+SITE, W/2, H-62);
   g.textAlign="left";
 }
 
@@ -1886,11 +1884,12 @@ async function preloadFonts(d, dt){
                 BRAND, HANDLE, SITE, fmt(dt),
                 "함께 이야기 나눠 보세요 기사 전문과 활동지는 이번 주 신문에 담겨 있어요",
                 "프로필 링크에서 1주일치 14쪽을 무료로 받으세요",
-                "방금 보신 이 한 장이 매일 아침 옵니다 기사 한 장 활동지 한 장",
-                "낱말 사자성어 한자 영단어까지 한 장에 읽고 풀면 하루 10분",
-                "체험본 1주일치 14쪽 무료 프로필 링크 10minkids.com",
-                "이메일만 넣으면 바로 받습니다 결제 정보는 받지 않습니다",
-                "넘겨 보세요 왜 그런지 보기 매일 받는 법",
+                "방금 보신 이 기사 10분 키즈뉴스 하루치예요 기사 한 장 활동지 한 장",
+                "읽고 퀴즈 풀고 가족과 이야기하면 딱 10분이에요",
+                "매일 쌓이면 읽는 습관이 됩니다",
+                "1주일치 14쪽 샘플 무료 프로필 링크에서 확인하세요",
+                "한 장에 한자와 영단어 활동지까지 들어 있어요",
+                d.hook,
                 "오늘의 이야기 오늘의 낱말 숫자로 보는 뉴스 기사에 안 나온 이야기",
                 "사자성어 한자 영단어 뜻 쓰임새 훈음 급수 획수"]
                .filter(Boolean).join(" ");
