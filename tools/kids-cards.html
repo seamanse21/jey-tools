@@ -1823,22 +1823,19 @@ async function card5(g, d, dt, cat){
     g.fillStyle=cat; g.font='400 28px "Jua","Apple SD Gothic Neo",sans-serif';
     g.textAlign="left"; g.fillText(label, x+28, by+52);
     if(quiz){
-      /* 문항 → 빈칸 → 밑줄. 선을 동그라미보다 **아래**에 둬서
-         "위 공란에 답을 쓴다"가 보이게 한다 */
-      [by+104, by+194].forEach((top,i)=>{
+      /* 동그라미 하나와 **그보다 아래에 있는 밑줄** 하나가 한 벌.
+         옆을 비워 둬야 밑줄 위 공란에 답을 쓴다는 게 보인다 */
+      [by+98, by+160, by+222].forEach((top)=>{
         g.fillStyle=cat; g.beginPath(); g.arc(x+46, top, 11, 0, Math.PI*2); g.fill();
-        bar(x+72, top, bw-100-(i?70:20));            // 질문
-        g.fillStyle="#ded8cd";                        // 답 쓰는 밑줄
-        rrect(g, x+46, top+50, bw-92, 4, 2); g.fill();
+        g.fillStyle="#ded8cd";
+        rrect(g, x+46, top+30, bw-92, 4, 2); g.fill();
       });
     } else {
-      /* 그림 자리 + 글줄 — 기사면에는 사진과 본문이 있다 */
-      g.fillStyle="#e7e2d8"; rrect(g, x+28, by+76, bw-56, 94, 14); g.fill();
-      g.fillStyle="#d5cfc3";
-      g.beginPath(); g.arc(x+28+(bw-56)*0.34, by+112, 13, 0, Math.PI*2); g.fill();
-      g.beginPath();
-      g.moveTo(x+40, by+162); g.lineTo(x+28+(bw-56)*0.52, by+118);
-      g.lineTo(x+28+(bw-56)*0.74, by+162); g.closePath(); g.fill();
+      /* 왼쪽 절반에 그림 자리(빈 네모), 오른쪽과 아래에 글줄 */
+      const iw=(bw-56)/2 - 8;
+      g.fillStyle="#e7e2d8"; rrect(g, x+28, by+76, iw, 94, 14); g.fill();
+      const tx=x+28+iw+16, tw=(bw-56)-iw-16;
+      for(let i=0;i<3;i++) bar(tx, by+88+i*30, tw-(i===2?48:0));
       for(let i=0;i<3;i++) bar(x+28, by+202+i*30, bw-56-(i===2?70:0));
     }
     g.textAlign="center";
