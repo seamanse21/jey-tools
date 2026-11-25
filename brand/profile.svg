@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 64 64">
+  <!-- 10분 키즈뉴스 프로필 이미지. 마스코트는 릴스 템플릿(tools/reels/*.html)과 같은 도형이다. -->
+  <rect width="64" height="64" fill="#f08c2e"/>
+  <g transform="translate(32 34.4) scale(0.92) translate(-32 -27.3)">
+    <path d="M32 6.5v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="32" cy="7" r="3.4" fill="#fff"/>
+    <rect x="12" y="15" width="40" height="36" rx="11" fill="#fff"/>
+    <circle cx="24.6" cy="30.5" r="4.2" fill="#e8891f"/>
+    <circle cx="40.4" cy="30.5" r="4.2" fill="#e8891f"/>
+    <rect x="25" y="43" width="14" height="3.6" rx="1.8" fill="#e8891f"/>
+    <rect x="6" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+    <rect x="53" y="28" width="5" height="11" rx="2.5" fill="#fff"/>
+  </g>
+</svg>
