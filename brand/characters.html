@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<title>10분 키즈뉴스 — 엄마·아이 캐릭터</title>
+<!--
+  대화형 릴스용 캐릭터. 엄마(설명) ↔ 초2 아들(질문).
+
+  ## 왜 손으로 그리나 (이미지 생성 모델을 안 쓴 이유)
+  포즈를 여러 장 뽑을 때 가장 어려운 건 **장마다 얼굴이 달라지는 것**이다.
+  여기서는 몸·얼굴이 같은 코드에서 나오고 **팔과 입만 바뀌므로 얼굴이 절대 안 흔들린다.**
+  브랜드 로봇(brand/profile.svg)과 같은 조형을 쓰므로 한 식구로 보인다 —
+  둥근 사각 머리 · 원 눈 + 흰 반짝임 · 막대 입 · 플랫 단색.
+
+  ## 쓰는 법
+    ?sheet          전체 대조표 (기본)
+    ?one=mom-think  한 포즈만 투명배경으로 (PNG 내보내기용)
+  PNG 로 뽑는 법은 README 참고.
+-->
+<style>
+  :root{
+    --orange:#f08c2e; --orange-d:#e8891f; --ink:#2b2a24;
+    --navy:#22304a; --cream:#fdf6e8; --line:#e4e0d6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;font-family:'Apple SD Gothic Neo',sans-serif}
+  body.one{background:transparent}
+  .sheet{padding:28px 24px 60px}
+  h2{font-size:17px;margin:26px 0 10px;color:#6c7789;font-weight:700;letter-spacing:-.3px}
+  .row{display:flex;flex-wrap:wrap;gap:10px}
+  .cell{width:176px;text-align:center}
+  .cell svg{display:block;background:#faf8f4;border:1px solid var(--line);border-radius:12px}
+  .cap{font-size:12px;color:#8c867c;margin-top:5px}
+  .pair{display:flex;align-items:flex-end;gap:0;background:#fff;
+        border:1px solid var(--line);border-radius:14px;padding:10px 0 0;width:372px}
+</style></head>
+<body>
+<script>
+const SK   = "#f6d7bd", SK_D = "#eec3a0";          // 피부 / 그늘
+const HAIR_K = "#2b2a24", HAIR_M = "#4a3b2f";      // 아이 / 엄마 머리
+const KID  = "#f08c2e",  KID_D  = "#d9771a", KID_L = "#f9a850";  // 아이 옷 = 브랜드 주황 (뒤팔 어둡게 / 앞팔 밝게)
+const MOM  = "#22304a",  MOM_D  = "#16202f", MOM_L = "#33496e";  // 엄마 옷 = 네이비 (같은 색이면 팔이 사라진다)
+const PANT = "#3f4a5c", SHOE = "#2b2a24";
+
+/* ── 팔: 어깨 안쪽에서 나오는 둥근 막대. 관절은 몸통에 묻힌다 ────
+   각도 규칙 (SVG rotate 는 시계방향, 막대는 +y 로 그린다):
+     손끝 = (어깨x − len·sin d,  어깨y + len·cos d)
+       d=0   아래      d=180  위
+       d=90  왼쪽      d=270  오른쪽
+   머리가 x 104~296 을 차지하므로 **팔을 d=180 근처로 올리면 얼굴을 가린다.**
+   올린 팔은 d=210~220 (위+바깥) 으로 둬야 머리 옆으로 빠진다.            */
+function arm(x, y, len, deg, col, w){
+  return `<g transform="translate(${x} ${y}) rotate(${deg})">
+    <rect x="${-w/2}" y="${-w/2}" width="${w}" height="${len+w/2}" rx="${w/2}" fill="${col}"/>
+    <circle cx="0" cy="${len}" r="${w/2+4}" fill="${SK}"/></g>`;
+}
+/* 굽힌 팔: 어깨 → 팔꿈치 → 손 */
+function arm2(x,y,l1,d1,l2,d2,col,w){
+  const r=d1*Math.PI/180, ex=x-Math.sin(r)*l1, ey=y+Math.cos(r)*l1;  // ← −sin. +sin 이면 팔꿈치가 반대쪽으로 간다
+  return `<g transform="translate(${x} ${y}) rotate(${d1})">
+      <rect x="${-w/2}" y="${-w/2}" width="${w}" height="${l1+w/2}" rx="${w/2}" fill="${col}"/></g>
+    <g transform="translate(${ex} ${ey}) rotate(${d2})">
+      <rect x="${-w/2}" y="${-w/2}" width="${w}" height="${l2+w/2}" rx="${w/2}" fill="${col}"/>
+      <circle cx="0" cy="${l2}" r="${w/2+4}" fill="${SK}"/></g>`;
+}
+/* 어깨가 기울어진 몸통 — 네모에 팔을 꽂으면 붙여 놓은 것처럼 보인다 */
+function torso(cx, top, bot, halfTop, halfBot, col, shade){
+  const d = `M${cx-halfTop} ${top+26} Q${cx-halfTop-2} ${top} ${cx-halfTop+26} ${top-6}
+             L${cx+halfTop-26} ${top-6} Q${cx+halfTop+2} ${top} ${cx+halfTop} ${top+26}
+             L${cx+halfBot} ${bot-34} Q${cx+halfBot} ${bot} ${cx+halfBot-34} ${bot}
+             L${cx-halfBot+34} ${bot} Q${cx-halfBot} ${bot} ${cx-halfBot} ${bot-34} Z`;
+  return `<path d="${d}" fill="${col}"/>` +
+    (shade ? `<path d="${d}" fill="${shade}" opacity=".30" clip-path="inset(${bot-top-64}px 0 0 0)"/>` : "");
+}
+
+/* ── 얼굴: 브랜드 로봇과 같은 큰 원 눈 + 흰 반짝임 ─────────────── */
+function face(cx, cy, s, mood){
+  const er=21*s, sp=7*s, ex=32*s;
+  const eye = dx => `<circle cx="${cx+dx}" cy="${cy}" r="${er}" fill="${HAIR_K}"/>
+      <circle cx="${cx+dx+er*0.30}" cy="${cy-er*0.34}" r="${sp}" fill="#fff"/>`;
+  const my = cy+42*s, mw=40*s;
+  let m;
+  if(mood==="open")       m=`<ellipse cx="${cx}" cy="${my+3*s}" rx="${15*s}" ry="${17*s}" fill="${HAIR_K}"/>
+                             <ellipse cx="${cx}" cy="${my+9*s}" rx="${9*s}" ry="${8*s}" fill="#c4595f"/>`;
+  else if(mood==="wow")   m=`<ellipse cx="${cx}" cy="${my+4*s}" rx="${12*s}" ry="${21*s}" fill="${HAIR_K}"/>`;
+  else if(mood==="flat")  m=`<rect x="${cx-mw/2.6}" y="${my}" width="${mw/1.3}" height="${7*s}" rx="${3.5*s}" fill="${HAIR_K}"/>`;
+  else if(mood==="think") m=`<path d="M${cx-mw/2.8} ${my+4*s} Q${cx} ${my-7*s} ${cx+mw/2.8} ${my+4*s}"
+                               stroke="${HAIR_K}" stroke-width="${7*s}" fill="none" stroke-linecap="round"/>`;
+  else                    m=`<path d="M${cx-mw/2} ${my-3*s} Q${cx} ${my+19*s} ${cx+mw/2} ${my-3*s}"
+                               stroke="${HAIR_K}" stroke-width="${7.5*s}" fill="none" stroke-linecap="round"/>`;
+  return eye(-ex)+eye(ex)+m+
+    `<ellipse cx="${cx-ex-20*s}" cy="${cy+26*s}" rx="${13*s}" ry="${8*s}" fill="${SK_D}" opacity=".9"/>
+     <ellipse cx="${cx+ex+20*s}" cy="${cy+26*s}" rx="${13*s}" ry="${8*s}" fill="${SK_D}" opacity=".9"/>`;
+}
+
+/* ── 아이: 초2 남자. 머리가 크고 몸이 짧다 ─────────────────────── */
+function kid(pose){
+  const P = {
+    neutral:  {L:[14,152], R:[-14,152], mood:"smile"},
+    ask:      {L:[12,148], R:[218,150], mood:"open"},     // 머리 옆으로 번쩍
+    wonder:   {L:[12,150], R:[-50,140], mood:"think", tilt:-13},
+    surprise: {L:[52,132], R:[-52,132], mood:"wow"},      // 양팔 활짝
+    clap:     {L:[-132,102], R:[132,102], mood:"open"},  // 가슴 위에서 모은다(몸통에 안 묻히게)
+    nod:      {L:[14,152], R:[-14,152], mood:"smile", tilt:13},
+  }[pose] || {L:[16,150],R:[-16,150],mood:"smile"};
+  const t = P.tilt||0, W=30;
+  return `<svg viewBox="0 0 400 900" width="400" height="900" xmlns="http://www.w3.org/2000/svg">
+    <rect x="158" y="638" width="40" height="182" rx="20" fill="${PANT}"/>
+    <rect x="202" y="638" width="40" height="182" rx="20" fill="${PANT}"/>
+    <rect x="150" y="806" width="56" height="28" rx="14" fill="${SHOE}"/>
+    <rect x="196" y="806" width="56" height="28" rx="14" fill="${SHOE}"/>
+    ${arm(152, 506, P.L[1], P.L[0], KID_D, W)}
+    ${torso(200, 482, 662, 72, 62, KID, KID_D)}
+    ${arm(248, 506, P.R[1], P.R[0], KID_L, W)}
+    <rect x="184" y="436" width="32" height="56" rx="14" fill="${SK_D}"/>
+    <g transform="rotate(${t} 200 360)">
+      <rect x="104" y="214" width="192" height="202" rx="92" fill="${SK}"/>
+      <rect x="92"  y="300" width="24" height="50" rx="12" fill="${SK}"/>
+      <rect x="284" y="300" width="24" height="50" rx="12" fill="${SK}"/>
+      <path d="M104 306 Q106 202 200 200 Q294 202 296 306 Q268 258 200 262 Q132 258 104 306Z" fill="${HAIR_K}"/>
+      <path d="M196 200 Q228 206 246 226 Q220 214 194 216Z" fill="${HAIR_K}"/>
+      ${face(200, 326, 1, P.mood)}
+    </g></svg>`;
+}
+
+/* ── 엄마: 키가 크고 머리가 작다 ─────────────────────────────── */
+function mom(pose){
+  const P = {
+    neutral: {L:[13,178], R:[-13,178], mood:"smile"},
+    present: {L:[44,166], R:[-44,166], mood:"smile"},
+    pointup: {L:[12,176], R:[214,164], mood:"open"},      // 위 도식을 머리 옆에서 가리킴
+    one:     {L:[12,176], R:[212,158], mood:"open"},
+    think:   {L:[14,174], R:[-29,98,154,156], mood:"think"},   // 팔꿈치 밖 → 손끝이 턱에 닿는다
+    thumbs:  {L:[13,176], R:[-36,107,180,110], mood:"smile"},  // 팔꿈치 밖 → 주먹 위로 (엄지는 아래에서 따로 그린다)
+  }[pose] || {L:[15,176],R:[-15,176],mood:"smile"};
+  const W=29;
+  const R = P.R.length===4 ? arm2(252,474,P.R[1],P.R[0],P.R[3],P.R[2],MOM_L,W)
+                           : arm(252,474,P.R[1],P.R[0],MOM_L,W);
+  return `<svg viewBox="0 0 400 900" width="400" height="900" xmlns="http://www.w3.org/2000/svg">
+    <rect x="157" y="630" width="42" height="190" rx="21" fill="${PANT}"/>
+    <rect x="201" y="630" width="42" height="190" rx="21" fill="${PANT}"/>
+    <rect x="148" y="806" width="58" height="28" rx="14" fill="${SHOE}"/>
+    <rect x="196" y="806" width="58" height="28" rx="14" fill="${SHOE}"/>
+    ${arm(148, 474, P.L[1], P.L[0], MOM_D, W)}
+    ${torso(200, 450, 652, 76, 66, MOM, MOM_D)}
+    ${R}
+    ${(()=>{ if(pose!=="thumbs") return "";
+        const [d1,l1,d2,l2]=P.R, r1=d1*Math.PI/180;
+        const ex=252-Math.sin(r1)*l1, ey=474+Math.cos(r1)*l1, r2=d2*Math.PI/180;
+        const hx=ex-Math.sin(r2)*l2, hy=ey+Math.cos(r2)*l2;
+        return `<rect x="${hx-9}" y="${hy-46}" width="18" height="34" rx="9" fill="${SK}"/>`; })()}
+    <rect x="186" y="406" width="28" height="50" rx="13" fill="${SK_D}"/>
+    <g>
+      <path d="M114 320 Q110 204 200 202 Q290 204 286 320 Q286 404 272 424 Q258 434 254 420 Q266 372 266 306 Q200 276 134 306 Q134 372 146 420 Q142 434 128 424 Q114 404 114 320Z" fill="${HAIR_M}"/>
+      <rect x="126" y="226" width="148" height="176" rx="74" fill="${SK}"/>
+      <rect x="116" y="300" width="20" height="44" rx="10" fill="${SK}"/>
+      <rect x="264" y="300" width="20" height="44" rx="10" fill="${SK}"/>
+      <path d="M126 304 Q126 216 200 214 Q274 216 274 304 Q240 266 200 270 Q160 266 126 304Z" fill="${HAIR_M}"/>
+      ${face(200, 322, 0.86, P.mood)}
+    </g></svg>`;
+}
+
+const KID_POSES = ["neutral","ask","wonder","surprise","clap","nod"];
+const MOM_POSES = ["neutral","present","pointup","one","think","thumbs"];
+const LABEL = {neutral:"기본",ask:"손 들고 질문",wonder:"갸웃",surprise:"놀람",clap:"박수",nod:"끄덕",
+               present:"양손 설명",pointup:"위 가리킴",one:"하나",think:"턱 괴기",thumbs:"엄지척"};
+
+const q = new URLSearchParams(location.search);
+const one = q.get("one");
+if (one){
+  document.body.className = "one";
+  const [who, pose] = one.split("-");
+  document.body.innerHTML = (who === "kid" ? kid(pose) : mom(pose));
+} else {
+  const cell = (svg, name) =>
+    `<div class="cell"><div>${svg.replace('width="400" height="900"','width="176" height="396"')}</div>
+     <div class="cap">${name}</div></div>`;
+  document.body.innerHTML = `<div class="sheet">
+    <h2>아이 — 초등 2학년 남자아이 · 주황 (묻는 쪽)</h2>
+    <div class="row">${KID_POSES.map(p=>cell(kid(p), p+" · "+LABEL[p])).join("")}</div>
+    <h2>엄마 — 네이비 (답하는 쪽)</h2>
+    <div class="row">${MOM_POSES.map(p=>cell(mom(p), p+" · "+LABEL[p])).join("")}</div>
+    <h2>둘이 나란히 — 릴스 하단에 들어가는 모습</h2>
+    <div class="row">
+      <div class="pair">${kid("ask").replace('width="400" height="900"','width="186" height="419"')}
+                        ${mom("present").replace('width="400" height="900"','width="186" height="419"')}</div>
+      <div class="pair">${kid("surprise").replace('width="400" height="900"','width="186" height="419"')}
+                        ${mom("pointup").replace('width="400" height="900"','width="186" height="419"')}</div>
+    </div>
+  </div>`;
+}
+</script>
+</body></html>

@@ -1810,13 +1810,23 @@ textarea{resize:vertical;line-height:1.6}
 /* 보호자 안내 */
 .guide{padding:7mm 8mm;height:100%;display:flex;flex-direction:column;overflow:hidden}
 .guide h2{font-size:18pt;margin:0 0 1.5mm;text-align:center;font-weight:900}
-.guide .lead{text-align:center;font-size:9.8pt;color:#55544c;margin:0 0 4mm;line-height:1.6}
-.guide table{width:100%;border-collapse:collapse;font-size:9.6pt;margin-bottom:4mm}
+.guide .lead{text-align:center;font-size:9.4pt;color:#55544c;margin:0 0 3mm;line-height:1.55}
+.guide table{width:100%;border-collapse:collapse;font-size:9.4pt;margin-bottom:3mm}
 .guide th{background:var(--brand);color:#fff;padding:1.8mm;font-weight:700}
-.guide td{border:1px solid #ddd9cd;padding:1.8mm 2.6mm;vertical-align:middle;line-height:1.5}
+.guide td{border:1px solid #ddd9cd;padding:1.5mm 2.6mm;vertical-align:middle;line-height:1.45}
 .guide td.k{width:30mm;text-align:center;background:#fbf8ef}
-.guide h3{font-size:12pt;margin:2mm 0 2mm;font-weight:800}
-.guide ol{margin:0;padding-left:5.5mm;font-size:10pt;line-height:1.75}
+.guide h3{font-size:11.5pt;margin:1.4mm 0 1.6mm;font-weight:800}
+.guide ol{margin:0;padding-left:5.5mm;font-size:9.4pt;line-height:1.6}
+/* 안내면 맨 아래 — 랜딩 QR 과 카카오톡 채널. 주간·월간 공통이다.
+   이 PDF 는 전달·공유되므로 **받은 사람이 우리를 찾아올 길**이 지면 안에 있어야 한다. */
+.guide .reach{margin-top:auto;display:flex;gap:5mm;border-top:1.6pt solid var(--brand);padding-top:2.6mm}
+.guide .reach .qr{width:20mm;height:20mm;flex:0 0 20mm}
+.guide .reach .qr img{width:100%;height:100%;display:block}
+.guide .reach .rt{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1.6mm}
+.guide .reach .rh{font-size:10.5pt;font-weight:800;color:#2b2a24}
+.guide .reach .rd{font-size:9pt;line-height:1.55;color:#55544c}
+.guide .reach .url{font-weight:800;color:var(--brand)}
+.guide .reach .ch{border-left:1px solid #ddd9cd;padding-left:5mm;flex:1;display:flex;flex-direction:column;justify-content:center;gap:1.6mm}
 
 @page{size:A4;margin:0}
 @media print{
@@ -4532,6 +4542,8 @@ function pageEl(cls){
   const p=document.createElement("div"); p.className="page "+(cls||"");
   wrap.appendChild(p); return {wrap,page:p};
 }
+const QR_LANDING = "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27290%27%20height%3D%27290%27%20class%3D%27segno%27%3E%3Cpath%20transform%3D%27scale%2810%29%27%20class%3D%27qrline%27%20stroke%3D%27%232b2a24%27%20d%3D%27M2%202.5h7m4%200h1m1%200h1m4%200h7m-25%201h1m5%200h1m3%200h2m1%200h4m1%200h1m5%200h1m-25%201h1m1%200h3m1%200h1m1%200h2m8%200h1m1%200h3m1%200h1m-25%201h1m1%200h3m1%200h1m1%200h1m2%200h1m1%200h4m1%200h1m1%200h3m1%200h1m-25%201h1m1%200h3m1%200h1m1%200h4m4%200h1m1%200h1m1%200h3m1%200h1m-25%201h1m5%200h1m1%200h3m2%200h1m1%200h1m2%200h1m5%200h1m-25%201h7m1%200h1m1%200h1m1%200h1m1%200h1m1%200h1m1%200h7m-17%201h5m1%200h3m-17%201h1m1%200h5m3%200h2m1%200h3m2%200h5m-23%201h3m1%200h2m2%200h2m1%200h3m2%200h2m5%200h1m-22%201h2m1%200h4m1%200h2m1%200h4m1%200h2m1%200h1m1%200h2m-24%201h2m1%200h2m1%200h2m2%200h1m2%200h2m2%200h1m5%200h1m-25%201h2m1%200h2m1%200h1m2%200h1m1%200h1m1%200h2m2%200h4m1%200h3m-25%201h1m1%200h1m2%200h1m1%200h1m1%200h2m1%200h2m2%200h1m4%200h1m1%200h1m-24%201h1m1%200h2m2%200h1m1%200h1m1%200h1m3%200h4m1%200h3m1%200h2m-25%201h1m4%200h1m6%200h1m1%200h1m2%200h4m3%200h1m-25%201h1m1%200h1m3%200h1m2%200h1m2%200h1m3%200h5m1%200h1m-15%201h3m4%200h2m3%200h2m-22%201h7m4%200h2m3%200h1m1%200h1m1%200h1m1%200h3m-25%201h1m5%200h1m1%200h2m1%200h1m4%200h1m3%200h2m1%200h2m-25%201h1m1%200h3m1%200h1m1%200h2m1%200h1m3%200h6m1%200h3m-25%201h1m1%200h3m1%200h1m1%200h2m2%200h2m1%200h4m1%200h5m-25%201h1m1%200h3m1%200h1m1%200h1m4%200h2m1%200h1m4%200h2m1%200h1m-25%201h1m5%200h1m5%200h2m1%200h2m2%200h3m2%200h1m-25%201h7m1%200h2m2%200h1m1%200h1m2%200h8%27%2F%3E%3C%2Fsvg%3E";
+
 function coverHTML(){
   const list = S.days.map((d,i)=>{
     const dt = addDays(S.week,i);
@@ -4564,7 +4576,7 @@ function guideHTML(){
    +   '<tr><td class="k"><b>10분</b> 활동지</td><td>퀴즈와 활동을 풉니다. 정답은 지면 맨 아래에 거꾸로 적혀 있어요</td></tr>'
    + '</table>'
    + '<h3>토·일에는</h3>'
-   + '<p style="font-size:9.5pt;line-height:1.75;margin:0 0 4mm;color:#3f3e36">'
+   + '<p style="font-size:9pt;line-height:1.6;margin:0 0 3mm;color:#3f3e36">'
    +   '맨 뒤 <b>주말에 한 번 더</b> 한 장으로 다섯 편을 되짚습니다. 기억나는 줄거리를 한 줄씩 적고, '
    +   '낱말·한자·영단어를 다시 써 보는 구성이라 시간 여유가 있는 주말에 쓰기 좋습니다. '
    +   '다 못 해도 괜찮습니다. 한 칸만 채워도 그 주가 남습니다.</p>'
@@ -4572,7 +4584,22 @@ function guideHTML(){
    + '<li>기사에서 가장 놀란 부분이 어디였는지 묻기</li>'
    + '<li>오늘의 낱말을 넣어 문장을 하나씩 만들어 보기</li>'
    + '<li>활동지의 두 번째 질문은 정답이 없다는 것을 먼저 알려 주기</li>'
-   + '<li>아이의 답을 고쳐 주기보다 한 가지를 더 물어보기</li></ol></div>';
+   + '<li>아이의 답을 고쳐 주기보다 한 가지를 더 물어보기</li></ol>'
+   + reachHTML()
+   + '</div>';
+}
+// 받은 사람이 우리를 찾아오는 길. 주간(미끼)·월간(판매) 양쪽 안내면에 같이 들어간다.
+// 한달치에서는 make-month.py 가 체험본 문장만 다른 말로 바꾼다.
+function reachHTML(){
+  return '<div class="reach">'
+   + '<div class="qr"><img src="' + QR_LANDING + '" alt="10minkids.com"></div>'
+   + '<div class="rt"><div class="rh">매일 아침 기사 한 장</div>'
+   +   '<div class="rd js-trial">왼쪽 QR 을 찍거나 <span class="url">10minkids.com</span> 으로 오시면<br>'
+   +   '<b>체험본 1주일치 14쪽</b>을 무료로 받아보실 수 있어요.</div></div>'
+   + '<div class="ch"><div class="rh">카카오톡 채널 · 10분 키즈뉴스</div>'
+   +   '<div class="rd">카카오톡에서 <b>10minkids</b> 를 검색해 친구 추가하시면<br>'
+   +   '문의와 새 소식을 받아보실 수 있어요.</div></div>'
+   + '</div>';
 }
 function artHTML(d,i){
   const paras = String(d.body||"").split(/\n{2,}/).map(p=>'<p style="margin:0 0 2.6mm">'+emph(p)+'</p>').join("");
