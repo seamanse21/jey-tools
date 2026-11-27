@@ -11,6 +11,7 @@ window.SG = (function () {
   var mode = 'local';
   var auth = 'none';          // 'none' 안 잠금 · 'required' 로그인 필요 · 'ok' 로그인됨
   var role = 'admin';         // 'admin' 운영진(다 고칠 수 있음) · 'member' 회원(사진·정산 신청만)
+  var maxUpload = 0;          // 나스가 한 번에 받을 수 있는 파일 크기 (바이트, 0이면 모름)
   var db = {};
   var dirty = {};
   var timer = null;
@@ -56,6 +57,7 @@ window.SG = (function () {
       if (!j) return false;
       if (j.auth) auth = j.auth;
       if (j.role) role = j.role;
+      if (j.maxUpload) maxUpload = +j.maxUpload;
       return !!j.ok;
     } catch (e) { return false; }
   }
@@ -201,8 +203,22 @@ window.SG = (function () {
     });
   }
 
+  function isVideo(file) {
+    return /^video\//.test(file.type || '') || /\.(mp4|mov|m4v|webm|3gp)$/i.test(file.name || '');
+  }
+  function sizeText(n) {
+    return n >= 1048576 ? (Math.round(n / 1048576 * 10) / 10) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
+  }
+
   /* kind: 'photos' | 'receipts'  →  {name, url} */
   async function upload(file, kind, folder) {
+    if (isVideo(file)) {
+      if (mode !== 'server')
+        throw new Error('영상은 나스 저장일 때만 올릴 수 있습니다.');
+      if (maxUpload && file.size > maxUpload)
+        throw new Error(file.name + ' 은 ' + sizeText(file.size) + ' 라 너무 큽니다 (이 나스는 '
+          + sizeText(maxUpload) + '까지). Web Station 의 PHP 설정에서 올릴 수 있습니다.');
+    }
     var small = await shrink(file, 1600, 0.82);
     if (mode === 'server') {
       var fd = new FormData();
@@ -232,12 +248,13 @@ window.SG = (function () {
   return {
     STORES: STORES, DEFAULTS: DEFAULTS,
     init: init, save: save, flush: flush, upload: upload,
-    login: login, logout: logout, src: src,
+    login: login, logout: logout, src: src, isVideo: isVideo, sizeText: sizeText,
     exportAll: exportAll, importAll: importAll,
     uid: uid, clone: clone,
     get mode() { return mode; },
     get auth() { return auth; },
     get role() { return role; },
+    get maxUpload() { return maxUpload; },
     isAdmin: function () { return role === 'admin'; },
     get db() { return db; },
     onsaved: null

@@ -12,7 +12,10 @@ if (function_exists('posix_geteuid') && function_exists('posix_getpwuid')) {
     $user = get_current_user();
 }
 echo "웹서버 실행 계정: " . $user . "\n";
-echo "폴더 위치      : " . dirname(__FILE__) . "\n\n";
+echo "폴더 위치      : " . dirname(__FILE__) . "\n";
+echo "한 번에 올릴 수 있는 크기: upload_max_filesize=" . ini_get('upload_max_filesize')
+   . ", post_max_size=" . ini_get('post_max_size') . "\n";
+echo "  (영상이 이보다 크면 Web Station → 스크립트 언어 설정 → PHP 프로필에서 올려야 합니다)\n\n";
 
 $base = dirname(__FILE__);
 $targets = array('.', 'data', 'photos', 'receipts', 'seed');

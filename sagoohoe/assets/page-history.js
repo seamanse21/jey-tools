@@ -61,7 +61,7 @@
       UI.stat('기록된 모임', total + '회'),
       UI.stat('평균 참석', avg + '명', '전체 ' + members.length + '명 중'),
       UI.stat('안건', agCount + '건', '가결 ' + passed + '건'),
-      UI.stat('사진', photoCount + '장', total ? '최근 ' + whenText(sorted()[0]) : '')
+      UI.stat('사진 · 영상', photoCount + '개', total ? '최근 ' + whenText(sorted()[0]) : '')
     ));
 
     view.appendChild(h('div.card', h('div.spread',
@@ -154,7 +154,7 @@
         photoWrap.textContent = '';
         var who = meName();
         photoWrap.appendChild(h('div.spread',
-          h('h4', { text: '사진' }),
+          h('h4', { text: '사진 · 영상' }),
           who ? h('span.tiny.muted', { text: who + ' 이름으로 올라갑니다' }) : null));
 
         if (!who) {
@@ -170,14 +170,14 @@
               drawPhotos();
             });
           photoWrap.appendChild(h('div.card', { style: 'margin-top:8px;border-color:var(--warn)' },
-            h('p.small', { style: 'margin:0 0 8px' }, h('b', { text: '사진을 올리기 전에 누구신지 알려 주세요.' }),
+            h('p.small', { style: 'margin:0 0 8px' }, h('b', { text: '사진·영상을 올리기 전에 누구신지 알려 주세요.' }),
               ' 올린 사람 이름이 사진 아래 남습니다.'),
             pickMe));
           if (m.photos.length) photoWrap.appendChild(h('div', { style: 'margin-top:12px' }, UI.attachView(m.photos)));
           return;
         }
 
-        photoWrap.appendChild(UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '내가 찍은 사진',
+        photoWrap.appendChild(UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '내가 찍은 사진 · 영상',
           { by: who, canDelete: function (f) { return !f.by || f.by === who; } }));
       }
 
@@ -257,7 +257,7 @@
 
       /* 사진 */
       body.appendChild(h('div', { style: 'margin-top:14px' },
-        UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '모임 사진', { by: meName() })));
+        UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '모임 사진 · 영상', { by: meName() })));
 
       /* 메모 */
       var memoT = h('textarea', { placeholder: '그날 있었던 일, 결정 사항, 다음 모임 약속 등', value: m.memo || '', oninput: function () { m.memo = memoT.value; saveSoon(); } });
@@ -352,7 +352,7 @@
       L.push('장소: ' + (m.place || '-'));
       L.push('참석(' + (m.attendees || []).length + '명): ' + (m.attendees || []).map(name).join(', '));
       if (m.spend) L.push('총 지출: ' + UI.money(m.spend));
-      if ((m.photos || []).length) L.push('사진: ' + m.photos.length + '장');
+      if ((m.photos || []).length) L.push('사진·영상: ' + m.photos.length + '개');
       if (m.memo) L.push('', m.memo);
       if ((m.agendas || []).length) {
         L.push('', '◆ 안건');

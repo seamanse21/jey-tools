@@ -40,14 +40,37 @@ $method  = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET
 
 $STORES   = array('settings', 'members', 'rules', 'history', 'dues', 'expenses');
 $KINDS    = array('photos', 'receipts');
-$EXT_OK   = array('jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif', 'pdf');
-$MAX_FILE = 25 * 1024 * 1024;
+$EXT_OK   = array('jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif', 'pdf',
+                  'mp4', 'mov', 'm4v', 'webm', '3gp');          // 영상도 받는다
+$MAX_FILE = 500 * 1024 * 1024;                                   // 실제 상한은 PHP 설정이 결정한다
 $MAX_BODY = 20 * 1024 * 1024;
 $MIME = array(
     'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png',
     'webp' => 'image/webp', 'gif' => 'image/gif', 'heic' => 'image/heic',
-    'heif' => 'image/heif', 'pdf' => 'application/pdf'
+    'heif' => 'image/heif', 'pdf' => 'application/pdf',
+    'mp4' => 'video/mp4', 'mov' => 'video/quicktime', 'm4v' => 'video/x-m4v',
+    'webm' => 'video/webm', '3gp' => 'video/3gpp'
 );
+
+/* PHP 설정의 '8M' 같은 표기를 바이트로 */
+function sg_bytes($v) {
+    $v = trim((string)$v);
+    if ($v === '') return 0;
+    $unit = strtolower(substr($v, -1));
+    $n = (float)$v;
+    if ($unit === 'g') $n *= 1024 * 1024 * 1024;
+    elseif ($unit === 'm') $n *= 1024 * 1024;
+    elseif ($unit === 'k') $n *= 1024;
+    return (int)$n;
+}
+/* 실제로 받을 수 있는 한 파일 크기 */
+function sg_upload_limit() {
+    $a = sg_bytes(ini_get('upload_max_filesize'));
+    $b = sg_bytes(ini_get('post_max_size'));
+    $lim = $a;
+    if ($b > 0 && ($lim === 0 || $b < $lim)) $lim = $b;
+    return $lim;
+}
 
 /* ── 로그인 상태 유지 (60일) ── */
 $cookiePath = preg_replace('#[^/]*$#', '', strtok(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', '?'));
@@ -224,7 +247,9 @@ if (isset($_GET['ping'])) {
         'php'   => phpversion(),
         'write' => is_writable($dataDir) ? 'ok' : 'no',
         'auth'  => ($conf === null ? 'none' : (sg_ok($conf) ? 'ok' : 'required')),
-        'role'  => sg_role($conf)
+        'role'  => sg_role($conf),
+        'maxUpload'     => sg_upload_limit(),
+        'maxUploadText' => ini_get('upload_max_filesize') . ' / ' . ini_get('post_max_size')
     ));
 }
 
@@ -276,10 +301,42 @@ if (isset($_GET['file'])) {
 
     $ext = strtolower(pathinfo($full, PATHINFO_EXTENSION));
     if (!isset($MIME[$ext])) fail('내려줄 수 없는 파일입니다.');
+    $size = filesize($full);
     header('Content-Type: ' . $MIME[$ext]);
-    header('Content-Length: ' . filesize($full));
     header('Cache-Control: private, max-age=604800');
     header('Content-Disposition: inline; filename="' . basename($full) . '"');
+    header('Accept-Ranges: bytes');
+
+    /* 영상은 브라우저가 구간을 끊어 달라고 한다. 이걸 받아주지 않으면 재생이 안 된다. */
+    $range = isset($_SERVER['HTTP_RANGE']) ? $_SERVER['HTTP_RANGE'] : '';
+    if ($range !== '' && preg_match('/bytes=(\d*)-(\d*)/', $range, $mm)) {
+        $start = ($mm[1] === '') ? 0 : (int)$mm[1];
+        $end   = ($mm[2] === '') ? $size - 1 : (int)$mm[2];
+        if ($end >= $size) $end = $size - 1;
+        if ($start > $end || $start >= $size) {
+            http_response_code(416);
+            header('Content-Range: bytes */' . $size);
+            exit;
+        }
+        http_response_code(206);
+        header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
+        header('Content-Length: ' . ($end - $start + 1));
+        $fp = fopen($full, 'rb');
+        if ($fp === false) exit;
+        fseek($fp, $start);
+        $left = $end - $start + 1;
+        while ($left > 0 && !feof($fp)) {
+            $chunk = fread($fp, min(262144, $left));
+            if ($chunk === false) break;
+            echo $chunk;
+            $left -= strlen($chunk);
+            flush();
+        }
+        fclose($fp);
+        exit;
+    }
+
+    header('Content-Length: ' . $size);
     readfile($full);
     exit;
 }
@@ -355,16 +412,30 @@ if (isset($_GET['upload'])) {
     if ($method !== 'POST') fail('POST 만 받습니다.', 405);
     $kind = (string)$_GET['upload'];
     if (!in_array($kind, $KINDS, true)) fail('알 수 없는 올리기 종류입니다.');
-    if (!isset($_FILES['file'])) fail('파일이 없습니다.');
+    $limit = sg_upload_limit();
+    $limitMB = $limit ? round($limit / 1048576, 1) : 0;
+    $tooBig = '이 나스가 한 번에 받을 수 있는 크기는 ' . $limitMB . 'MB 입니다. '
+            . 'Web Station → 스크립트 언어 설정 → PHP 프로필 편집에서 '
+            . 'upload_max_filesize 와 post_max_size 를 올리면 더 큰 영상도 올라갑니다.';
+
+    if (!isset($_FILES['file']) || !count($_FILES)) {
+        /* 본문 자체가 한도를 넘으면 PHP 가 $_FILES 를 비워서 넘긴다 */
+        $sent = isset($_SERVER['CONTENT_LENGTH']) ? (int)$_SERVER['CONTENT_LENGTH'] : 0;
+        if ($limit && $sent > $limit) fail('파일이 너무 큽니다. ' . $tooBig, 413);
+        fail('파일이 없습니다.');
+    }
 
     $f = $_FILES['file'];
     $err = isset($f['error']) ? $f['error'] : UPLOAD_ERR_NO_FILE;
+    if ($err === UPLOAD_ERR_INI_SIZE || $err === UPLOAD_ERR_FORM_SIZE)
+        fail('파일이 너무 큽니다. ' . $tooBig, 413);
+    if ($err === UPLOAD_ERR_PARTIAL) fail('올리는 도중 끊겼습니다. 다시 시도해 주세요.');
     if ($err !== UPLOAD_ERR_OK) fail('올리기 중 오류 (코드 ' . $err . ')');
     $size = isset($f['size']) ? $f['size'] : 0;
-    if ($size > $MAX_FILE) fail('파일이 너무 큽니다. 25MB 이하로 올려 주세요.', 413);
+    if ($size > $MAX_FILE) fail('파일이 너무 큽니다. ' . $tooBig, 413);
 
     $ext = strtolower(pathinfo((string)$f['name'], PATHINFO_EXTENSION));
-    if (!in_array($ext, $EXT_OK, true)) fail('사진 또는 PDF 만 올릴 수 있습니다.');
+    if (!in_array($ext, $EXT_OK, true)) fail('사진 · 영상 · PDF 만 올릴 수 있습니다.');
 
     $rawFolder = isset($_POST['folder']) ? (string)$_POST['folder'] : '';
     $folder = preg_replace('/[^0-9A-Za-z가-힣ㄱ-ㅎㅏ-ㅣ_-]/u', '', $rawFolder);

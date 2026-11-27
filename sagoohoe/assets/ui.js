@@ -106,62 +106,89 @@ window.UI = (function () {
     var status = h('div.picked');
     var input = h('input', {
       type: 'file', multiple: true,
-      accept: isPhoto ? 'image/*' : 'image/*,.pdf',
+      accept: isPhoto ? 'image/*,video/*' : 'image/*,.pdf',
       style: 'position:absolute;width:1px;height:1px;opacity:0',
-      onchange: async function () {
-        var files = Array.prototype.slice.call(input.files);
-        if (!files.length) return;
-        btn.disabled = true;
-        var done = 0;
-        for (var i = 0; i < files.length; i++) {
-          status.className = 'picked go';
-          status.textContent = '올리는 중… ' + (i + 1) + ' / ' + files.length + (isPhoto ? '장' : '개');
-          try {
-            var up = await SG.upload(files[i], kind, folder);
-            if (opts.by) { up.by = opts.by; up.at = today(); }
-            list.push(up);
-            done++;
-            render(); if (onchange) onchange();
-          } catch (e) {
-            status.className = 'picked err';
-            status.textContent = '올리지 못했습니다 — ' + e.message;
-            btn.disabled = false; input.value = '';
-            return;
-          }
-        }
-        status.className = 'picked go';
-        status.textContent = done + (isPhoto ? '장' : '개') + ' 올렸습니다';
-        setTimeout(function () {
-          if (status.textContent.indexOf('올렸습니다') >= 0) { status.textContent = ''; status.className = 'picked'; }
-        }, 4000);
-        btn.disabled = false; input.value = '';
-      }
+      onchange: function () { take(input.files); }
     });
     var btn = h('button.btn', {
       type: 'button',
-      text: isPhoto ? '📷 사진 올리기' : '🧾 파일 올리기',
+      text: isPhoto ? '📷 사진 · 영상 올리기' : '🧾 파일 올리기',
       onclick: function () { input.click(); }
     });
+    var unit = isPhoto ? '개' : '개';
+
+    /* 고르든 끌어다 놓든 같은 길로 들어온다 */
+    async function take(fileList) {
+      var files = Array.prototype.slice.call(fileList || []);
+      if (!files.length) return;
+      btn.disabled = true;
+      var done = 0;
+      for (var i = 0; i < files.length; i++) {
+        status.className = 'picked go';
+        status.textContent = '올리는 중… ' + (i + 1) + ' / ' + files.length + unit +
+          (SG.isVideo(files[i]) ? ' (영상은 오래 걸립니다)' : '');
+        try {
+          var up = await SG.upload(files[i], kind, folder);
+          if (opts.by) { up.by = opts.by; up.at = today(); }
+          list.push(up);
+          done++;
+          render(); if (onchange) onchange();
+        } catch (e) {
+          status.className = 'picked err';
+          status.textContent = '올리지 못했습니다 — ' + e.message;
+          btn.disabled = false; input.value = '';
+          return;
+        }
+      }
+      status.className = 'picked go';
+      status.textContent = done + unit + ' 올렸습니다';
+      setTimeout(function () {
+        if (status.textContent.indexOf('올렸습니다') >= 0) { status.textContent = ''; status.className = 'picked'; }
+      }, 4000);
+      btn.disabled = false; input.value = '';
+    }
+
+    var zone = h('div.drop',
+      h('div.pickrow', btn, status),
+      h('div.tiny.muted', { text: isPhoto
+        ? '버튼을 누르거나, 여기로 사진·영상을 끌어다 놓으세요'
+        : '버튼을 누르거나, 여기로 파일을 끌어다 놓으세요 · 사진 · PDF' }));
+
+    var depth = 0;
+    zone.addEventListener('dragenter', function (e) { e.preventDefault(); depth++; zone.classList.add('over'); });
+    zone.addEventListener('dragover', function (e) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+    zone.addEventListener('dragleave', function () { depth = Math.max(0, depth - 1); if (!depth) zone.classList.remove('over'); });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault(); depth = 0; zone.classList.remove('over');
+      if (e.dataTransfer && e.dataTransfer.files) take(e.dataTransfer.files);
+    });
+
     var shelf = h('div');
     box.appendChild(h('label.f', { text: label || '파일 첨부' }));
-    box.appendChild(h('div.pickrow', btn, status,
-      h('span.tiny.muted', { text: isPhoto
-        ? '버튼을 누르고 사진을 고르면 바로 올라갑니다 (여러 장 한 번에)'
-        : '버튼을 누르고 고르면 바로 올라갑니다 · 사진 또는 PDF' })));
+    box.appendChild(zone);
     box.appendChild(input);
     box.appendChild(shelf);
     function render() {
       shelf.textContent = '';
       if (!list.length) return;
       var isImg = function (u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u); };
+      var isVid = function (u) { return /^data:video|\.(mp4|mov|m4v|webm|3gp)$/i.test(u); };
       var g = h('div.thumbs');
       list.forEach(function (f, i) {
         var who = f.by ? (f.by + ' 올림' + (f.at ? ' · ' + dateKo(f.at) : '')) : '';
-        var cell = isImg(f.url)
-          ? h('figure', h('a', { href: SG.src(f.url), target: '_blank', title: who || f.name },
-              h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })))
-          : h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', title: who,
-              text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
+        var cell;
+        if (isImg(f.url)) {
+          cell = h('figure', h('a', { href: SG.src(f.url), target: '_blank', title: who || f.name },
+            h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })));
+        } else if (isVid(f.url)) {
+          cell = h('figure', h('video', {
+            src: SG.src(f.url), controls: true, preload: 'metadata', playsinline: true,
+            title: who || f.name, class: 'vid'
+          }));
+        } else {
+          cell = h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', title: who,
+            text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
+        }
         if (who) cell.appendChild(h('figcaption.tiny.muted', { text: f.by, style: 'text-align:center;margin-top:2px' }));
         if (!opts.canDelete || opts.canDelete(f)) {
           cell.appendChild(h('button.x', {
@@ -181,11 +208,20 @@ window.UI = (function () {
   function attachView(list) {
     if (!list || !list.length) return null;
     var isImg = function (u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u); };
+    var isVid = function (u) { return /^data:video|\.(mp4|mov|m4v|webm|3gp)$/i.test(u); };
     var g = h('div.thumbs');
     list.forEach(function (f) {
-      g.appendChild(isImg(f.url)
-        ? h('figure', h('a', { href: SG.src(f.url), target: '_blank' }, h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })))
-        : h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' })));
+      var cell;
+      if (isImg(f.url)) {
+        cell = h('figure', h('a', { href: SG.src(f.url), target: '_blank' },
+          h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })));
+      } else if (isVid(f.url)) {
+        cell = h('figure', h('video', { src: SG.src(f.url), controls: true, preload: 'metadata', playsinline: true, class: 'vid' }));
+      } else {
+        cell = h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
+      }
+      if (f.by) cell.appendChild(h('figcaption.tiny.muted', { text: f.by, style: 'text-align:center;margin-top:2px' }));
+      g.appendChild(cell);
     });
     return g;
   }

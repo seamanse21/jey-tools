@@ -213,6 +213,32 @@ Apache + Playwright 로 검증: 카카오톡 UA 환경에서 로그인 화면 �
 회원 화면에서는 "나" 를 고르지 않았으면 올리기 칸 대신 **이름 고르기**를 먼저 띄운다.
 사진에 올린 사람이 비는 걸 막으려는 것이다.
 
+## 영상과 끌어다 놓기
+
+**끌어다 놓기** — 파일 입력을 감싼 `.drop` 영역에 dragenter/over/leave/drop 을 달았다.
+고르기와 끌어다 놓기가 같은 `take(fileList)` 로 들어간다. dragleave 가 자식 요소에서도
+튀어서 테두리가 깜빡이므로 depth 카운터로 센다.
+
+**영상** — 확장자 mp4/mov/m4v/webm/3gp 를 받는다. 사진과 달리 줄이지 않고 원본을 올린다.
+썸네일 자리에는 `<video controls preload="metadata" playsinline>` 을 둬서 그 자리에서 재생된다.
+
+`api.php?file=` 에 **Range 응답(206)** 을 넣은 게 핵심이다. 이게 없으면 Safari·iOS 에서
+영상이 아예 재생되지 않는다. 206 과 `Content-Range`, `Accept-Ranges` 를 돌려주고
+256KB 씩 끊어 보낸다.
+
+**용량 한도** — 진짜 벽은 나스 PHP 의 `upload_max_filesize` / `post_max_size` 다.
+Synology 기본값이 2M 인 경우가 흔한데 폰 영상은 수십~수백 MB다. 그래서
+`ping` 이 `maxUpload` 를 함께 돌려주고, 클라이언트가 **고르는 즉시** 크기를 재서
+"이 나스는 2MB까지" 라고 알려 준다. 서버에서도 `UPLOAD_ERR_INI_SIZE` 와
+`$_FILES` 가 통째로 비는 경우(post_max_size 초과)를 잡아 같은 안내를 준다.
+`phpcheck.php` 맨 위에도 현재 한도를 찍는다.
+
+로컬(브라우저 저장) 모드에서는 영상을 막는다. data URL 로 넣으면 localStorage 가 터진다.
+
+검증: 끌어다 놓기로 사진 첨부·테두리 강조, mp4 업로드 후 실제 재생(320px·2초 메타데이터
+읽힘), Range 요청에 206 과 올바른 Content-Range, 한도를 넘는 5MB 파일에 대해
+화면·서버 양쪽에서 한글 안내.
+
 ## 남은 것 / 다음에 할 만한 것
 
 - 회칙 초안의 경조사 금액이 `○○○,○○○원` placeholder 다. 실제 금액 확인 후 채워야 한다
@@ -223,4 +249,6 @@ Apache + Playwright 로 검증: 카카오톡 UA 환경에서 로그인 화면 �
   로그인한 사람의 이름을 세션에 넣어 "자기 신청만 수정" 까지 갈 수 있다
 - 안건 투표도 지금은 운영진만 누를 수 있다. 각자 폰에서 누르게 하려면
   `history` 쓰기 규칙에 `agendas[].votes` 도 열어주면 된다
+- 영상은 원본 그대로 올라간다. 용량이 부담되면 올리기 전에 해상도를 줄이는 처리를
+  붙일 수 있다 (브라우저에서 영상 재인코딩은 느려서 지금은 하지 않는다)
 - DDNS 로 열려 있어 HTTP 다. Synology 인증서(Let's Encrypt)를 붙이면 HTTPS 로 올릴 수 있다

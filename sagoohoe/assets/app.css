@@ -134,7 +134,8 @@ tfoot td{font-weight:700; background:var(--bg); border-top:2px solid var(--line)
 
 .thumbs{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; margin-top:8px}
 .thumbs figure{margin:0; position:relative}
-.thumbs img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:9px; border:1px solid var(--line); display:block}
+.thumbs img,.thumbs video{width:100%; aspect-ratio:1; object-fit:cover; border-radius:9px; border:1px solid var(--line); display:block}
+.thumbs video{background:#000}
 .thumbs .x{position:absolute; top:3px; right:3px; width:22px; height:22px; border-radius:50%;
   border:0; background:rgba(0,0,0,.6); color:#fff; cursor:pointer; font-size:13px; line-height:1}
 .files{font-size:12.5px}
@@ -193,3 +194,8 @@ select{appearance:auto; -webkit-appearance:auto}
 .picked{font-size:12.5px; color:var(--dim)}
 .picked.err{color:var(--no)}
 .picked.go{color:var(--accent); font-weight:700}
+
+/* 끌어다 놓는 자리 */
+.drop{border:1.5px dashed var(--line); border-radius:10px; padding:12px; transition:border-color .12s, background .12s}
+.drop.over{border-color:var(--accent); background:var(--accent-soft)}
+.drop .pickrow{margin-bottom:6px}
