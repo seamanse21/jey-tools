@@ -30,6 +30,7 @@
   window.PAGES = window.PAGES || {};
   window.PAGES.expense = function (view) {
     var E = SG.db.expenses;
+    var admin = SG.isAdmin();     // 승인·반려·지급 처리는 운영진만
     E.requests = E.requests || [];
     var members = SG.db.members;
     var meetings = (SG.db.history.meetings || []).slice()
@@ -272,18 +273,19 @@
       function drawCtl() {
         ctl.textContent = '';
         if (r.status === '작성중' || r.status === '반려') ctl.appendChild(h('button.btn.pri', { text: '신청 제출', onclick: submit }));
-        if (r.status === '접수') {
+        if (admin && r.status === '접수') {
           ctl.appendChild(h('button.btn.pri', { text: '승인', onclick: function () { setStatus('승인'); } }));
           ctl.appendChild(h('button.btn.danger', { text: '반려', onclick: function () { askNote('반려'); } }));
         }
-        if (r.status === '승인') {
+        if (admin && r.status === '승인') {
           ctl.appendChild(h('button.btn.pri', { text: '지급완료 처리', onclick: function () { setStatus('지급완료'); } }));
           ctl.appendChild(h('button.btn', { text: '접수로 되돌리기', onclick: function () { setStatus('접수'); } }));
         }
-        if (r.status === '지급완료') ctl.appendChild(h('button.btn', { text: '승인으로 되돌리기', onclick: function () { setStatus('승인'); } }));
+        if (admin && r.status === '지급완료') ctl.appendChild(h('button.btn', { text: '승인으로 되돌리기', onclick: function () { setStatus('승인'); } }));
+        if (!admin && r.status === '접수') ctl.appendChild(h('span.tiny.muted', { text: '운영진이 확인하면 승인·지급 처리됩니다.' }));
         ctl.appendChild(h('button.btn.sm', { text: '신청서 복사', onclick: function () { UI.copy(reqText(r)); } }));
         ctl.appendChild(h('button.btn.sm', { text: '인쇄', onclick: function () { window.print(); } }));
-        ctl.appendChild(h('button.btn.sm.danger', {
+        if (admin || r.status === '작성중') ctl.appendChild(h('button.btn.sm.danger', {
           text: '신청 삭제', onclick: function () {
             UI.confirm('#' + r.no + ' ' + name(r.applicantId) + ' 신청을 삭제합니다.', function () {
               SG.db.expenses.requests = E.requests = E.requests.filter(function (x) { return x !== r; });

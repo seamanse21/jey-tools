@@ -24,6 +24,12 @@
 
   function route() {
     var r = parseHash();
+    if (r.name === 'settings' && !SG.isAdmin()) {
+      view.textContent = '';
+      view.appendChild(h('div.card', h('div.empty', '설정은 운영진만 볼 수 있습니다.')));
+      Array.prototype.forEach.call(tabs.children, function (a) { a.classList.remove('on'); });
+      return;
+    }
     var fn = PAGES[r.name] || PAGES.dues;
     Array.prototype.forEach.call(tabs.children, function (a) {
       a.classList.toggle('on', a.getAttribute('href').indexOf('#/' + r.name) === 0);
@@ -51,6 +57,22 @@
       try { localStorage.setItem('sg.me', meSel.value); } catch (e) { }
     };
     if (cur) sessionStorage.setItem('sg.me', cur);
+  }
+
+  function paintRole() {
+    document.body.classList.toggle('member', SG.auth === 'ok' && !SG.isAdmin());
+    var el = document.getElementById('role');
+    if (!el) {
+      el = h('span', { id: 'role', class: 'mode', style: 'margin-left:4px' });
+      modeEl.parentNode.insertBefore(el, modeEl.nextSibling);
+    }
+    if (SG.auth !== 'ok') { el.hidden = true; return; }
+    el.hidden = false;
+    el.textContent = SG.isAdmin() ? '운영진' : '회원';
+    el.className = 'mode' + (SG.isAdmin() ? '' : ' local');
+    el.title = SG.isAdmin()
+      ? '모든 항목을 고칠 수 있습니다.'
+      : '사진 올리기와 정산금 신청만 할 수 있습니다. 나머지는 보기 전용입니다.';
   }
 
   function paintMode() {
@@ -121,7 +143,7 @@
         await SG.login(id, pw);
         document.body.classList.remove('locked');
         try { localStorage.setItem('sg.lastid', id); } catch (e) { }
-        paintMode(); fillMe(); paintLogout();
+        paintMode(); paintRole(); fillMe(); paintLogout();
         if (!location.hash) location.hash = '#/dues';
         route();
       } catch (e) {
@@ -167,6 +189,7 @@
   SG.init().then(function () {
     paintMode();
     if (SG.auth === 'required') { showLogin(); return; }
+    paintRole();
     fillMe();
     paintLogout();
     if (!location.hash) location.hash = '#/dues';

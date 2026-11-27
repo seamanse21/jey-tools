@@ -7,6 +7,7 @@
     var R = SG.db.rules;
     R.articles = R.articles || [];
     R.history = R.history || [];
+    var admin = SG.isAdmin();
     var tab = params.t || 'now';
     var S = function () { SG.save('rules'); };
 
@@ -28,7 +29,7 @@
 
     /* ── 현행 회칙 ── */
     function drawNow() {
-      var edit = sessionStorage.getItem('sg.rulesEdit') === '1';
+      var edit = admin && sessionStorage.getItem('sg.rulesEdit') === '1';
       var wrap = h('div.card');
       wrap.appendChild(h('div.spread',
         h('div',
@@ -37,11 +38,11 @@
             ? '최종 개정 ' + UI.dateKo(R.history[R.history.length - 1].at) + ' · ' + (R.history[R.history.length - 1].reason || '')
             : '아직 개정 이력이 없습니다.' })),
         h('div.row',
-          h('button', {
+          admin ? h('button', {
             class: 'btn sm' + (edit ? ' pri' : ''), text: edit ? '편집 끝내기' : '편집',
             onclick: function () { sessionStorage.setItem('sg.rulesEdit', edit ? '0' : '1'); PAGES._reload(); }
-          }),
-          edit ? h('button.btn.sm.pri', { text: '개정 확정', onclick: commit }) : null
+          }) : null,
+          (admin && edit) ? h('button.btn.sm.pri', { text: '개정 확정', onclick: commit }) : null
         )
       ));
       wrap.appendChild(h('div.sep'));
@@ -145,7 +146,7 @@
           });
           body.appendChild(h('div.row', { style: 'margin-top:14px' },
             h('button.btn.sm', { text: '이 버전 전문 복사', onclick: function () { UI.copy(fullText(v.snapshot || [])); } }),
-            h('button.btn.sm.danger', {
+            !admin ? null : h('button.btn.sm.danger', {
               text: '이 버전으로 되돌리기', onclick: function () {
                 UI.confirm('현행 회칙을 ' + UI.dateKo(v.at) + ' 버전으로 되돌립니다. 지금 내용은 먼저 이력에 자동 보관됩니다.', function () {
                   R.history.push({ id: SG.uid('rv'), at: UI.today(), reason: '되돌리기 직전 자동 보관', by: '', snapshot: SG.clone(R.articles) });

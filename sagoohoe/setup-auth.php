@@ -32,15 +32,21 @@ function guard($dir) {
     return $made;
 }
 
-function writeAuth($dataDir, $authFile, $id, $pass) {
+function writeAuth($dataDir, $authFile, $accounts) {
     if (!is_dir($dataDir) && !@mkdir($dataDir, 0775, true)) return 'data 폴더를 만들 수 없습니다.';
-    $hash = password_hash($pass, PASSWORD_BCRYPT);
-    if ($hash === false) return '비밀번호를 암호화하지 못했습니다.';
-    $php = "<?php\n/* 사구회 접속 정보. 비밀번호는 암호화되어 있어 되돌려 볼 수 없습니다. */\n"
-         . "\$SG_AUTH = array(\n"
-         . "    'id'   => " . var_export($id, true) . ",\n"
-         . "    'hash' => " . var_export($hash, true) . "\n"
-         . ");\n";
+    $php = "<?php\n/* 사구회 접속 정보. 비밀번호는 암호화되어 있어 되돌려 볼 수 없습니다.\n"
+         . "   admin  = 운영진 (모든 항목을 고칠 수 있음)\n"
+         . "   member = 회원 9명 공용 (사진 올리기와 정산금 신청만) */\n"
+         . "\$SG_AUTH = array(\n";
+    foreach ($accounts as $role => $a) {
+        $hash = password_hash($a['pw'], PASSWORD_BCRYPT);
+        if ($hash === false) return '비밀번호를 암호화하지 못했습니다.';
+        $php .= "    " . var_export($role, true) . " => array(\n"
+              . "        'id'   => " . var_export($a['id'], true) . ",\n"
+              . "        'hash' => " . var_export($hash, true) . "\n"
+              . "    ),\n";
+    }
+    $php .= ");\n";
     if (@file_put_contents($authFile, $php) === false)
         return 'data/auth.php 를 쓰지 못했습니다. 폴더 쓰기 권한을 확인해 주세요.';
     @chmod($authFile, 0640);
@@ -71,17 +77,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $msg = '잠금을 풀었습니다. 이제 주소만 알면 누구나 들어올 수 있습니다.';
         $msgType = 'warn';
     } else {
-        $id = trim(isset($_POST['id']) ? $_POST['id'] : '');
-        $p1 = isset($_POST['p1']) ? $_POST['p1'] : '';
-        $p2 = isset($_POST['p2']) ? $_POST['p2'] : '';
-        if ($id === '' || !preg_match('/^[A-Za-z0-9._-]{2,20}$/', $id)) {
+        $aId = trim(isset($_POST['aid']) ? $_POST['aid'] : '');
+        $aPw = isset($_POST['apw']) ? $_POST['apw'] : '';
+        $mId = trim(isset($_POST['mid']) ? $_POST['mid'] : '');
+        $mPw = isset($_POST['mpw']) ? $_POST['mpw'] : '';
+        $okId = '/^[A-Za-z0-9._-]{2,20}$/';
+        if (!preg_match($okId, $aId) || !preg_match($okId, $mId)) {
             $msg = '아이디는 숫자나 영문으로 2자 이상 적어 주세요.'; $msgType = 'no';
-        } elseif (strlen($p1) < 4) {
+        } elseif (strlen($aPw) < 4 || strlen($mPw) < 4) {
             $msg = '비밀번호는 4자 이상으로 해주세요.'; $msgType = 'no';
-        } elseif ($p1 !== $p2) {
-            $msg = '비밀번호 두 칸이 서로 다릅니다.'; $msgType = 'no';
+        } elseif ($aId === $mId) {
+            $msg = '운영진 아이디와 회원 아이디는 서로 달라야 합니다.'; $msgType = 'no';
         } else {
-            $err = writeAuth($dataDir, $authFile, $id, $p1);
+            $err = writeAuth($dataDir, $authFile, array(
+                'admin'  => array('id' => $aId, 'pw' => $aPw),
+                'member' => array('id' => $mId, 'pw' => $mPw)
+            ));
             if ($err !== '') { $msg = $err; $msgType = 'no'; }
             else {
                 guard($dir);
@@ -99,11 +110,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 guard($dir);
 $on = is_file($authFile);
-$curId = '';
+$curAdmin = ''; $curMember = '';
 if ($on) {
     $SG_AUTH = null;
     include $authFile;
-    if (is_array($SG_AUTH) && isset($SG_AUTH['id'])) $curId = $SG_AUTH['id'];
+    if (is_array($SG_AUTH)) {
+        if (isset($SG_AUTH['admin']['id']))  $curAdmin  = $SG_AUTH['admin']['id'];
+        if (isset($SG_AUTH['member']['id'])) $curMember = $SG_AUTH['member']['id'];
+        if ($curAdmin === '' && isset($SG_AUTH['id'])) $curAdmin = $SG_AUTH['id'];   // 예전 방식
+    }
 }
 ?><!doctype html>
 <html lang="ko">
@@ -111,13 +126,14 @@ if ($on) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>사구회 접속 잠금</title>
-<link rel="stylesheet" href="assets/app.css?v=2">
+<link rel="stylesheet" href="assets/app.css?v=3">
 </head>
 <body>
 <main class="view" style="max-width:620px">
   <h1 style="font-size:20px">사구회 접속 잠금</h1>
-  <p class="small muted">아이디와 비밀번호를 하나 정해 9명에게 알려주면, 그 둘을 아는 사람만 들어올 수 있습니다.
-     회비 기록·사진·영수증까지 전부 같이 잠깁니다. <b>둘 다 숫자로만 정해도 됩니다.</b></p>
+  <p class="small muted">비밀번호를 <b>두 벌</b> 정합니다. <b>운영진용</b>은 모든 항목을 고칠 수 있고,
+     <b>회원용</b>은 사진 올리기와 정산금 신청만 할 수 있습니다. 회원용만 9명에게 알려주세요.
+     아이디·비밀번호 모두 숫자로만 정해도 됩니다.</p>
 
   <?php if ($msg !== ''): ?>
     <div class="card" style="border-color:var(--<?php echo $msgType === 'ok' ? 'ok' : ($msgType === 'no' ? 'no' : 'warn'); ?>)">
@@ -131,8 +147,12 @@ if ($on) {
       <span class="tag <?php echo $on ? 'ok' : 'no'; ?>"><?php echo $on ? '잠김' : '누구나 접속 가능'; ?></span>
     </div>
     <?php if ($on): ?>
-      <p class="small">아이디: <b><?php echo h($curId); ?></b> · 비밀번호는 암호화되어 있어 다시 볼 수 없습니다.
-         잊었으면 아래에서 새로 정하면 됩니다.</p>
+      <p class="small">운영진 아이디: <b><?php echo h($curAdmin !== '' ? $curAdmin : '(없음)'); ?></b> ·
+         회원 아이디: <b><?php echo h($curMember !== '' ? $curMember : '(없음)'); ?></b><br>
+         비밀번호는 암호화되어 있어 다시 볼 수 없습니다. 잊었으면 아래에서 새로 정하면 됩니다.</p>
+      <?php if ($curMember === ''): ?>
+        <p class="small" style="color:var(--warn)"><b>회원용 계정이 아직 없습니다.</b> 아래에서 두 벌을 같이 정해 주세요.</p>
+      <?php endif; ?>
     <?php else: ?>
       <p class="small">아직 잠겨 있지 않습니다. 지금 바로 설정하세요.</p>
     <?php endif; ?>
@@ -140,20 +160,26 @@ if ($on) {
 
   <form method="post" class="card">
     <h2 style="font-size:16px"><?php echo $on ? '비밀번호 바꾸기' : '비밀번호 걸기'; ?></h2>
-    <div class="grid" style="margin-top:10px">
-      <div><label class="f">아이디 — 숫자만 써도 됩니다 (2자 이상)</label>
-        <input name="id" value="<?php echo h($curId !== '' ? $curId : '49'); ?>" autocomplete="username"></div>
-      <div><label class="f">비밀번호 — 숫자만 써도 됩니다 (4자 이상)</label>
-        <input type="password" name="p1" autocomplete="new-password"></div>
-      <div><label class="f">비밀번호 다시 입력</label>
-        <input type="password" name="p2" autocomplete="new-password"></div>
+    <h3 style="font-size:14px;margin-top:14px">운영진용 (나만 씁니다 — 모든 항목 수정 가능)</h3>
+    <div class="grid g2" style="margin-top:6px">
+      <div><label class="f">아이디 (2자 이상)</label>
+        <input name="aid" value="<?php echo h($curAdmin !== '' ? $curAdmin : '10'); ?>" autocomplete="off"></div>
+      <div><label class="f">비밀번호 (4자 이상)</label>
+        <input type="password" name="apw" autocomplete="new-password"></div>
+    </div>
+    <h3 style="font-size:14px;margin-top:18px">회원용 (9명에게 알려줄 것 — 사진·정산 신청만)</h3>
+    <div class="grid g2" style="margin-top:6px">
+      <div><label class="f">아이디 (2자 이상)</label>
+        <input name="mid" value="<?php echo h($curMember !== '' ? $curMember : '49'); ?>" autocomplete="off"></div>
+      <div><label class="f">비밀번호 (4자 이상)</label>
+        <input type="password" name="mpw" autocomplete="new-password"></div>
     </div>
     <div class="row end" style="margin-top:14px">
       <button class="btn pri" type="submit">저장</button>
     </div>
-    <p class="tiny muted" style="margin-top:10px">비밀번호는 암호화(bcrypt)해서 보관합니다. 이 화면에도, 파일에도 원문은 남지 않습니다.<br>
-       아이디 숫자 2자리 + 비밀번호 숫자 4자리면 충분히 간단합니다 (예: 아이디 <code>49</code>, 비밀번호 <code>1234</code>).
-       더 단단히 하고 싶으면 자릿수를 늘리면 됩니다.</p>
+    <p class="tiny muted" style="margin-top:14px">두 벌을 한 번에 저장합니다. 비밀번호는 암호화(bcrypt)해서 보관하므로
+       이 화면에도, 파일에도 원문은 남지 않습니다. 운영진 아이디와 회원 아이디는 서로 달라야 합니다.<br>
+       숫자 2자리 아이디 + 4자리 비밀번호면 충분히 간단합니다. 더 단단히 하고 싶으면 자릿수를 늘리면 됩니다.</p>
   </form>
 
   <?php if ($on): ?>
@@ -169,6 +195,22 @@ if ($on) {
     </form>
   </div>
   <?php endif; ?>
+
+  <div class="card">
+    <h2 style="font-size:16px">누가 무엇을 할 수 있나</h2>
+    <table style="font-size:13px">
+      <thead><tr><th class="name">항목</th><th>운영진</th><th>회원</th></tr></thead>
+      <tbody>
+        <tr><td class="name">회비 입력·수정</td><td>O</td><td class="muted">보기만</td></tr>
+        <tr><td class="name">모임 기록·안건·투표</td><td>O</td><td class="muted">보기만</td></tr>
+        <tr><td class="name">모임 사진 올리기</td><td>O</td><td>O</td></tr>
+        <tr><td class="name">정산금 신청·영수증 첨부</td><td>O</td><td>O</td></tr>
+        <tr><td class="name">정산 승인·반려·지급</td><td>O</td><td class="muted">불가</td></tr>
+        <tr><td class="name">회칙 수정</td><td>O</td><td class="muted">보기만</td></tr>
+        <tr><td class="name">설정 · 백업</td><td>O</td><td class="muted">불가</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <p class="tiny muted">카카오톡 등 앱 안에서 열어도 로그인 화면이 그대로 뜹니다.
      한 번 로그인하면 그 기기에서는 한동안 다시 묻지 않습니다.</p>

@@ -50,6 +50,7 @@
       return;
     }
 
+    var admin = SG.isAdmin();
     var due = dueOf(year);
     // '미납'은 이미 지난 달까지만 센다. 올해라면 이번 달까지, 지난해면 12개월, 내년이면 0.
     var elapsed = year < now.getFullYear() ? 12 : (year === now.getFullYear() ? now.getMonth() + 1 : 0);
@@ -94,11 +95,11 @@
     var tbl = h('table');
     var thr = h('tr', h('th.name', { text: '회원' }));
     MONTHS.forEach(function (m) {
-      thr.appendChild(h('th', {
+      thr.appendChild(h('th', admin ? {
         text: m + '월', title: '클릭하면 ' + m + '월 전원 납입/해제',
         style: 'cursor:pointer',
         onclick: function () { toggleMonth(m); }
-      }));
+      } : { text: m + '월' }));
     });
     thr.appendChild(h('th', { text: '합계' }));
     thr.appendChild(h('th', { text: '미납', title: elapsed + '개월분(' + UI.money(duty) + ') 기준으로 모자란 금액' }));
@@ -107,10 +108,10 @@
     var tbody = h('tbody');
     members.forEach(function (mb) {
       var tr = h('tr', { 'data-mid': mb.id });
-      tr.appendChild(h('td.name', {
+      tr.appendChild(h('td.name', admin ? {
         text: mb.name, title: '클릭하면 ' + mb.name + ' 12개월 전체 납입/해제',
         style: 'cursor:pointer', onclick: function () { toggleRow(mb.id); }
-      }));
+      } : { text: mb.name }));
       MONTHS.forEach(function (m) { tr.appendChild(h('td', cellBtn(mb, m))); });
       tr.appendChild(h('td', { class: 'sum', text: UI.num(memberTotal(year, mb.id)) }));
       tr.appendChild(h('td', { class: 'rest', text: UI.num(Math.max(0, duty - memberTotal(year, mb.id))) }));
@@ -126,7 +127,9 @@
 
     view.appendChild(h('div.card',
       h('div.spread', h('h2', { text: year + '년 회비 납입 현황' }),
-        h('span.tiny.muted', { text: '칸을 누르면 납입 처리 · 꾹 누르거나 더블클릭하면 금액 직접 입력' })),
+        h('span.tiny.muted', { text: admin
+          ? '칸을 누르면 납입 처리 · 꾹 누르거나 더블클릭하면 금액 직접 입력'
+          : '보기 전용입니다. 회비 입력은 운영진이 합니다.' })),
       h('div.scroll', { style: 'max-height:62vh' }, tbl)
     ));
 
@@ -134,17 +137,19 @@
       var amt = cellAmt(year, mb.id, m);
       var future = (year > now.getFullYear()) || (year === now.getFullYear() && m > now.getMonth() + 1);
       var cls = 'cell' + (amt >= due && amt > 0 ? ' paid' : amt > 0 ? ' part' : future ? ' future' : '');
-      var b = h('button', {
+      var attrs = {
         class: cls, 'data-m': m, 'data-mid': mb.id,
         text: amt > 0 ? (amt === due ? '✓' : UI.num(amt / 10000) + '만') : '·',
-        title: mb.name + ' ' + year + '년 ' + m + '월' + (amt ? ' — ' + UI.money(amt) : ' — 미납'),
-        onclick: function () {
-          var cur = cellAmt(year, mb.id, m);
-          setCell(year, mb.id, m, cur > 0 ? 0 : due); refresh();
-        },
-        ondblclick: function (e) { e.preventDefault(); askAmount(mb, m); },
-        oncontextmenu: function (e) { e.preventDefault(); askAmount(mb, m); }
-      });
+        title: mb.name + ' ' + year + '년 ' + m + '월' + (amt ? ' — ' + UI.money(amt) : ' — 미납')
+      };
+      if (!admin) { attrs.disabled = true; attrs.style = 'cursor:default'; return h('button', attrs); }
+      attrs.onclick = function () {
+        var cur = cellAmt(year, mb.id, m);
+        setCell(year, mb.id, m, cur > 0 ? 0 : due); refresh();
+      };
+      attrs.ondblclick = function (e) { e.preventDefault(); askAmount(mb, m); };
+      attrs.oncontextmenu = function (e) { e.preventDefault(); askAmount(mb, m); };
+      var b = h('button', attrs);
       var t;
       b.addEventListener('touchstart', function () { t = setTimeout(function () { askAmount(mb, m); }, 600); }, { passive: true });
       ['touchend', 'touchmove', 'touchcancel'].forEach(function (ev) { b.addEventListener(ev, function () { clearTimeout(t); }); });

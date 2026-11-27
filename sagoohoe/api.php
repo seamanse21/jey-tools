@@ -97,20 +97,90 @@ function sg_guard($base) {
 }
 
 /* ── 비밀번호 설정 읽기 ── */
+/* data/auth.php 는 이런 모양이다
+ *   $SG_AUTH = array(
+ *     'admin'  => array('id' => '...', 'hash' => '...'),   // 운영진(나)
+ *     'member' => array('id' => '...', 'hash' => '...')    // 회원 9명 공용
+ *   );
+ * 예전 방식(맨 위에 id/hash 하나)도 읽어서 관리자 계정으로 본다. */
 function sg_conf($dataDir) {
     $f = $dataDir . '/auth.php';
     if (!is_file($f)) return null;
     $SG_AUTH = null;
     include $f;
-    if (is_array($SG_AUTH) && isset($SG_AUTH['id']) && isset($SG_AUTH['hash'])) return $SG_AUTH;
-    return null;
+    if (!is_array($SG_AUTH)) return null;
+    if (isset($SG_AUTH['id']) && isset($SG_AUTH['hash']))
+        return array('admin' => array('id' => $SG_AUTH['id'], 'hash' => $SG_AUTH['hash']));
+    $out = array();
+    foreach (array('admin', 'member') as $r) {
+        if (isset($SG_AUTH[$r]['id']) && isset($SG_AUTH[$r]['hash'])) $out[$r] = $SG_AUTH[$r];
+    }
+    return count($out) ? $out : null;
 }
 function sg_ok($conf) {
     if ($conf === null) return true;                       // 아직 잠그지 않았으면 통과
     return !empty($_SESSION['sg_ok']);
 }
+/* 'admin' = 다 고칠 수 있음 · 'member' = 사진 올리기와 정산 신청만 */
+function sg_role($conf) {
+    if ($conf === null) return 'admin';
+    if (empty($_SESSION['sg_ok'])) return '';
+    return isset($_SESSION['sg_role']) ? $_SESSION['sg_role'] : 'member';
+}
 function sg_need($conf) {
     if (!sg_ok($conf)) out(array('ok' => false, 'error' => '로그인이 필요합니다.', 'auth' => 'required'), 401);
+}
+function sg_need_admin($conf, $what) {
+    if (sg_role($conf) !== 'admin')
+        out(array('ok' => false, 'error' => $what . '은(는) 운영진만 할 수 있습니다.', 'role' => 'member'), 403);
+}
+
+/* 회원이 보낸 히스토리는 사진만 바뀐 것이어야 한다 */
+function sg_history_ok($old, $new) {
+    $strip = function ($m) {
+        unset($m['photos']);
+        return $m;
+    };
+    $oldM = array(); $newM = array();
+    foreach ((isset($old['meetings']) && is_array($old['meetings'])) ? $old['meetings'] : array() as $m)
+        if (isset($m['id'])) $oldM[$m['id']] = $strip($m);
+    foreach ((isset($new['meetings']) && is_array($new['meetings'])) ? $new['meetings'] : array() as $m) {
+        if (!isset($m['id'])) return false;
+        $newM[$m['id']] = $strip($m);
+    }
+    if (count($oldM) !== count($newM)) return false;        // 모임 추가·삭제 불가
+    foreach ($newM as $id => $m) {
+        if (!isset($oldM[$id])) return false;
+        if (json_encode($m) !== json_encode($oldM[$id])) return false;
+    }
+    return true;
+}
+
+/* 회원이 보낸 정산 신청은 자기 신청을 쓰고 제출하는 것까지만 */
+function sg_expenses_ok($old, $new) {
+    $locked = array('승인', '지급완료');                     // 처리된 건은 손 못 댐
+    $allowed = array('작성중', '접수');                      // 회원이 만들 수 있는 상태
+    $oldR = array(); $newR = array();
+    foreach ((isset($old['requests']) && is_array($old['requests'])) ? $old['requests'] : array() as $r)
+        if (isset($r['id'])) $oldR[$r['id']] = $r;
+    foreach ((isset($new['requests']) && is_array($new['requests'])) ? $new['requests'] : array() as $r) {
+        if (!isset($r['id'])) return false;
+        $newR[$r['id']] = $r;
+    }
+    foreach ($oldR as $id => $r) {
+        $st = isset($r['status']) ? $r['status'] : '작성중';
+        if (!isset($newR[$id])) {                            // 지우기
+            if ($st !== '작성중') return false;
+            continue;
+        }
+        if (in_array($st, $locked, true) && json_encode($newR[$id]) !== json_encode($r)) return false;
+    }
+    foreach ($newR as $id => $r) {
+        $st = isset($r['status']) ? $r['status'] : '작성중';
+        $oldSt = isset($oldR[$id]['status']) ? $oldR[$id]['status'] : null;
+        if ($st !== $oldSt && !in_array($st, $allowed, true)) return false;   // 승인·반려·지급완료는 운영진만
+    }
+    return true;
 }
 
 /* ── 로그인 실패 제한 (같은 주소에서 10번 틀리면 10분 쉼) ── */
@@ -153,7 +223,8 @@ if (isset($_GET['ping'])) {
         'ok'    => is_dir($dataDir) && is_writable($dataDir),
         'php'   => phpversion(),
         'write' => is_writable($dataDir) ? 'ok' : 'no',
-        'auth'  => ($conf === null ? 'none' : (sg_ok($conf) ? 'ok' : 'required'))
+        'auth'  => ($conf === null ? 'none' : (sg_ok($conf) ? 'ok' : 'required')),
+        'role'  => sg_role($conf)
     ));
 }
 
@@ -170,15 +241,19 @@ if (isset($_GET['login'])) {
     $id = isset($in['id']) ? trim((string)$in['id']) : '';
     $pw = isset($in['pw']) ? (string)$in['pw'] : '';
 
-    $good = ($id === $conf['id']) && password_verify($pw, $conf['hash']);
-    if (!$good) {
+    $role = '';
+    foreach (array('admin', 'member') as $r) {
+        if (isset($conf[$r]) && $id === $conf[$r]['id'] && password_verify($pw, $conf[$r]['hash'])) { $role = $r; break; }
+    }
+    if ($role === '') {
         sleep(1);
         sg_fail_add($dataDir);
         out(array('ok' => false, 'error' => '아이디나 비밀번호가 맞지 않습니다.'), 401);
     }
     sg_fail_clear($dataDir);
     $_SESSION['sg_ok'] = true;
-    out(array('ok' => true, 'auth' => 'ok'));
+    $_SESSION['sg_role'] = $role;
+    out(array('ok' => true, 'auth' => 'ok', 'role' => $role));
 }
 
 /* ── 로그아웃 ── */
@@ -242,6 +317,19 @@ if (isset($_GET['store'])) {
     if (strlen($raw) > $MAX_BODY) fail('자료가 너무 큽니다.', 413);
     $parsed = json_decode($raw, true);
     if ($parsed === null && trim($raw) !== 'null') fail('JSON 형식이 아닙니다.');
+
+    /* 여기서부터 쓰기 — 운영진만 고칠 수 있는 것들을 가린다 */
+    $label = array('settings' => '설정 변경', 'members' => '회원 명단 변경',
+                   'rules' => '회칙 수정', 'dues' => '회비 입력');
+    if (isset($label[$name])) sg_need_admin($conf, $label[$name]);
+    if (sg_role($conf) !== 'admin') {
+        $cur = is_file($file) ? json_decode((string)@file_get_contents($file), true) : array();
+        if (!is_array($cur)) $cur = array();
+        if ($name === 'history' && !sg_history_ok($cur, $parsed))
+            out(array('ok' => false, 'error' => '모임 기록은 운영진만 고칠 수 있습니다. 회원은 사진만 올릴 수 있습니다.', 'role' => 'member'), 403);
+        if ($name === 'expenses' && !sg_expenses_ok($cur, $parsed))
+            out(array('ok' => false, 'error' => '정산 신청의 승인·반려·지급 처리는 운영진만 할 수 있습니다.', 'role' => 'member'), 403);
+    }
 
     if (!is_dir($dataDir) && !@mkdir($dataDir, 0775, true)) fail('data 폴더를 만들 수 없습니다.', 500);
 

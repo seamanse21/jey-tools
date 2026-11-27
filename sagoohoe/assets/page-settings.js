@@ -4,6 +4,10 @@
 
   window.PAGES = window.PAGES || {};
   window.PAGES.settings = function (view) {
+    if (!SG.isAdmin()) {
+      view.appendChild(h('div.card', h('div.empty', '설정은 운영진만 볼 수 있습니다.')));
+      return;
+    }
     var s = SG.db.settings;
     var members = SG.db.members;
     var S = function (k) { SG.save(k || 'settings'); };

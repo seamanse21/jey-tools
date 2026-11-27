@@ -167,3 +167,9 @@ tfoot td{font-weight:700; background:var(--bg); border-top:2px solid var(--line)
 body.locked .tabs,
 body.locked .who,
 body.locked .foot{display:none}
+
+/* ── 회원(운영진 아님) 화면에서 감추는 것들 ── */
+body.member .tabs a[href="#/settings"],
+body.member #btn-export,
+body.member #btn-import,
+body.member .admin-only{display:none!important}

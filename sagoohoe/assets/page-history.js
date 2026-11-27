@@ -29,6 +29,7 @@
   window.PAGES.history = function (view) {
     var H = SG.db.history;
     var members = SG.db.members;
+    var admin = SG.isAdmin();     // 회원은 사진만 올릴 수 있다
 
     var total = H.meetings.length;
     var avg = total ? Math.round(H.meetings.reduce(function (s, m) { return s + (m.attendees || []).length; }, 0) / total * 10) / 10 : 0;
@@ -45,8 +46,9 @@
     ));
 
     view.appendChild(h('div.card', h('div.spread',
-      h('h2', { text: '모임 히스토리' }),
-      h('button.btn.pri', { text: '+ 모임 기록 추가', onclick: addMeeting })
+      h('div', h('h2', { text: '모임 히스토리' }),
+        admin ? null : h('p.small.muted', { style: 'margin:0', text: '사진만 올릴 수 있습니다. 나머지 내용은 운영진이 적습니다.' })),
+      admin ? h('button.btn.pri', { text: '+ 모임 기록 추가', onclick: addMeeting }) : null
     )));
 
     function sorted() {
@@ -99,10 +101,10 @@
       var saveSoon = function () { SG.save('history'); };
 
       /* 기본 정보 */
-      var dateI = h('input', { type: 'date', value: m.date || '', oninput: function () { m.date = dateI.value; saveSoon(); } });
-      var seasonS = UI.select(SEASONS, m.season, function (v) { m.season = v; saveSoon(); });
-      var placeI = h('input', { value: m.place || '', placeholder: '예: 강릉 안목해변 펜션', oninput: function () { m.place = placeI.value; saveSoon(); } });
-      var spendI = h('input', { type: 'number', value: m.spend || '', placeholder: '0', oninput: function () { m.spend = UI.parseNum(spendI.value); saveSoon(); } });
+      var dateI = h('input', { type: 'date', value: m.date || '', disabled: !admin, oninput: function () { m.date = dateI.value; saveSoon(); } });
+      var seasonS = UI.select(SEASONS, m.season, function (v) { m.season = v; saveSoon(); }, { disabled: !admin });
+      var placeI = h('input', { value: m.place || '', placeholder: '예: 강릉 안목해변 펜션', disabled: !admin, oninput: function () { m.place = placeI.value; saveSoon(); } });
+      var spendI = h('input', { type: 'number', value: m.spend || '', placeholder: '0', disabled: !admin, oninput: function () { m.spend = UI.parseNum(spendI.value); saveSoon(); } });
       body.appendChild(h('div.grid.g2', { style: 'margin-top:14px' },
         UI.field('날짜', dateI), UI.field('구분', seasonS),
         UI.field('장소', placeI), UI.field('모임 총 지출 (원)', spendI)
@@ -115,8 +117,9 @@
         members.forEach(function (mb) {
           var on = (m.attendees || []).indexOf(mb.id) >= 0;
           chips.appendChild(h('button', {
-            class: 'chip' + (on ? ' on' : ' out'), text: mb.name,
+            class: 'chip' + (on ? ' on' : ' out'), text: mb.name, disabled: !admin,
             onclick: function () {
+              if (!admin) return;
               m.attendees = m.attendees || [];
               var i = m.attendees.indexOf(mb.id);
               if (i >= 0) m.attendees.splice(i, 1); else m.attendees.push(mb.id);
@@ -131,7 +134,8 @@
         }));
       }
       drawChips();
-      body.appendChild(h('div', { style: 'margin-top:12px' }, h('label.f', { text: '참석자 (이름을 눌러 켜고 끔)' }), chips));
+      body.appendChild(h('div', { style: 'margin-top:12px' },
+        h('label.f', { text: admin ? '참석자 (이름을 눌러 켜고 끔)' : '참석자' }), chips));
 
       /* 사진 */
       m.photos = m.photos || [];
@@ -139,14 +143,14 @@
         UI.attach(m.photos, 'photos', (m.date || 'etc').slice(0, 7) + '-' + (m.season || '').slice(0, 2), saveSoon, '모임 사진')));
 
       /* 메모 */
-      var memoT = h('textarea', { placeholder: '그날 있었던 일, 결정 사항, 다음 모임 약속 등', value: m.memo || '', oninput: function () { m.memo = memoT.value; saveSoon(); } });
+      var memoT = h('textarea', { placeholder: '그날 있었던 일, 결정 사항, 다음 모임 약속 등', value: m.memo || '', disabled: !admin, oninput: function () { m.memo = memoT.value; saveSoon(); } });
       body.appendChild(h('div', { style: 'margin-top:14px' }, UI.field('메모', memoT)));
 
       /* 안건 */
       var agWrap = h('div');
       body.appendChild(h('div', { style: 'margin-top:16px' },
         h('div.spread', h('h4', { text: '안건 · 투표' }),
-          h('button.btn.sm', {
+          !admin ? null : h('button.btn.sm', {
             text: '+ 안건 추가', onclick: function () {
               m.agendas = m.agendas || [];
               m.agendas.push({ id: SG.uid('ag'), title: '', body: '', proposer: '', votes: {}, status: 'auto' });
@@ -164,12 +168,12 @@
           var voters = (m.attendees || []).length ? m.attendees : members.map(function (x) { return x.id; });
           var t = tally(ag), st = decide(ag, voters.length);
 
-          var titleI = h('input', { value: ag.title || '', placeholder: '안건 제목 (예: 회비 7만원 인상)', oninput: function () { ag.title = titleI.value; saveSoon(); redrawHead(); } });
-          var bodyT = h('textarea', { style: 'min-height:64px', value: ag.body || '', placeholder: '안건 내용 · 배경 · 제안 이유', oninput: function () { ag.body = bodyT.value; saveSoon(); } });
+          var titleI = h('input', { value: ag.title || '', placeholder: '안건 제목 (예: 회비 7만원 인상)', disabled: !admin, oninput: function () { ag.title = titleI.value; saveSoon(); redrawHead(); } });
+          var bodyT = h('textarea', { style: 'min-height:64px', value: ag.body || '', placeholder: '안건 내용 · 배경 · 제안 이유', disabled: !admin, oninput: function () { ag.body = bodyT.value; saveSoon(); } });
           var propS = UI.select([{ value: '', label: '발의자 선택' }].concat(members.map(function (x) { return { value: x.id, label: x.name }; })),
-            ag.proposer, function (v) { ag.proposer = v; saveSoon(); });
+            ag.proposer, function (v) { ag.proposer = v; saveSoon(); }, { disabled: !admin });
           var statS = UI.select([{ value: 'auto', label: '자동 판정 (' + st + ')' }, '가결', '부결', '보류', '투표 전'],
-            ag.status || 'auto', function (v) { ag.status = v; saveSoon(); drawAgendas(); });
+            ag.status || 'auto', function (v) { ag.status = v; saveSoon(); drawAgendas(); }, { disabled: !admin });
 
           var head = h('div.spread');
           function redrawHead() {
@@ -184,9 +188,10 @@
             var opts = h('div.opts');
             VOTES.forEach(function (v) {
               opts.appendChild(h('button', {
-                'data-v': v, text: v,
+                'data-v': v, text: v, disabled: !admin,
                 class: (ag.votes || {})[mid] === v ? 'on' : '',
                 onclick: function () {
+                  if (!admin) return;
                   ag.votes = ag.votes || {};
                   if (ag.votes[mid] === v) delete ag.votes[mid]; else ag.votes[mid] = v;
                   saveSoon(); drawAgendas();
@@ -202,7 +207,7 @@
             h('div', { style: 'margin-top:8px' }, UI.field('내용', bodyT)),
             h('div', { style: 'margin-top:10px' }, h('label.f', { text: '참석자 투표' }), votesBox),
             h('div.grid.g2', { style: 'margin-top:10px' }, UI.field('선정 결과', statS),
-              h('div', h('label.f', { text: ' ' }), h('button.btn.sm.danger', {
+              !admin ? null : h('div', h('label.f', { text: ' ' }), h('button.btn.sm.danger', {
                 text: '이 안건 삭제', onclick: function () {
                   UI.confirm('안건 “' + (ag.title || '제목 없음') + '” 을 삭제합니다.', function () {
                     m.agendas.splice(idx, 1); saveSoon(); drawAgendas(); UI.toast('삭제했습니다');
@@ -216,7 +221,7 @@
       /* 하단 도구 */
       body.appendChild(h('div.row', { style: 'margin-top:16px' },
         h('button.btn.sm', { text: '요약 복사', onclick: function () { UI.copy(summaryText(m)); } }),
-        h('button.btn.sm.danger', {
+        !admin ? null : h('button.btn.sm.danger', {
           text: '모임 기록 삭제', onclick: function () {
             UI.confirm((UI.dateKo(m.date) || '이 모임') + ' 기록 전체를 삭제합니다.', function () {
               H.meetings = H.meetings.filter(function (x) { return x !== m; });

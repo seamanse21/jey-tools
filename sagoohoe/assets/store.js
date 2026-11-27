@@ -10,6 +10,7 @@ window.SG = (function () {
   var LSK = 'sagoohoe:';
   var mode = 'local';
   var auth = 'none';          // 'none' 안 잠금 · 'required' 로그인 필요 · 'ok' 로그인됨
+  var role = 'admin';         // 'admin' 운영진(다 고칠 수 있음) · 'member' 회원(사진·정산 신청만)
   var db = {};
   var dirty = {};
   var timer = null;
@@ -54,6 +55,7 @@ window.SG = (function () {
       var j = await r.json();
       if (!j) return false;
       if (j.auth) auth = j.auth;
+      if (j.role) role = j.role;
       return !!j.ok;
     } catch (e) { return false; }
   }
@@ -68,6 +70,7 @@ window.SG = (function () {
     var j = await r.json().catch(function () { return null; });
     if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || '로그인하지 못했습니다.');
     auth = 'ok';
+    role = j.role || 'member';
     await loadAll();
     return true;
   }
@@ -122,7 +125,7 @@ window.SG = (function () {
 
   async function init() {
     mode = (await ping()) ? 'server' : 'local';
-    if (mode === 'local') auth = 'none';
+    if (mode === 'local') { auth = 'none'; role = 'admin'; }
     if (auth === 'required') {           // 로그인 전에는 자료를 읽지 않는다
       STORES.forEach(function (n) { db[n] = merged(n, null); });
       return mode;
@@ -234,6 +237,8 @@ window.SG = (function () {
     uid: uid, clone: clone,
     get mode() { return mode; },
     get auth() { return auth; },
+    get role() { return role; },
+    isAdmin: function () { return role === 'admin'; },
     get db() { return db; },
     onsaved: null
   };
