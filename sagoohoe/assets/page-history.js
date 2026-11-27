@@ -14,6 +14,11 @@
     var m = SG.db.members.filter(function (x) { return x.id === id; })[0];
     return m ? m.name : '';
   }
+  function idByName(nm) {
+    var m = SG.db.members.filter(function (x) { return x.name === nm; })[0];
+    return m ? m.id : '';
+  }
+  function officerName(mid) { return mid ? name(mid) : '-'; }
   function yearOf(m) { return +m.year || +String(m.date || '').slice(0, 4) || 0; }
   function sortKey(m) {
     return String(yearOf(m) || 0) + '-' + (m.date || '0000-00-00') + '-' + (m.season || '');
@@ -103,40 +108,48 @@
 
     function card(m) {
       var body = h('div.acc-body', { hidden: true });
-      var att = (m.attendees || []).length;
+      var titleEl = h('h4');
+      var metaEl = h('div.meta');
+      var badges = h('div.row');
+      /* 안에서 고친 내용이 카드 제목줄에도 바로 반영되게 */
+      function syncHead() {
+        titleEl.textContent = (m.season || '모임') + ' · ' + (m.place || '장소 미입력');
+        metaEl.textContent = whenText(m) + ' · 참석 ' + (m.attendees || []).length + '명'
+          + (m.chairmanId ? ' · 회장 ' + officerName(m.chairmanId) : '')
+          + (m.treasurerId ? ' · 총무 ' + officerName(m.treasurerId) : '')
+          + (m.spend ? ' · 지출 ' + UI.money(m.spend) : '');
+        badges.textContent = '';
+        if ((m.agendas || []).length) badges.appendChild(h('span.tag.flat', { text: '안건 ' + m.agendas.length }));
+        if ((m.photos || []).length) badges.appendChild(h('span.tiny.muted', { text: '📷 ' + m.photos.length }));
+        badges.appendChild(h('span.muted', { text: '▾' }));
+      }
+      syncHead();
       var btn = h('button.acc', {
         onclick: function () {
           body.hidden = !body.hidden;
-          if (!body.hidden && !body.dataset.built) { buildBody(m, body); body.dataset.built = '1'; }
+          if (!body.hidden && !body.dataset.built) { buildBody(m, body, syncHead); body.dataset.built = '1'; }
         }
-      },
-        h('div',
-          h('h4', { text: (m.season || '모임') + ' · ' + (m.place || '장소 미입력') }),
-          h('div.meta', { text: whenText(m) + ' · 참석 ' + att + '명' + (m.spend ? ' · 지출 ' + UI.money(m.spend) : '') })
-        ),
-        h('div.row',
-          (m.agendas || []).length ? h('span.tag.flat', { text: '안건 ' + m.agendas.length }) : null,
-          (m.photos || []).length ? h('span.tiny.muted', { text: '📷 ' + m.photos.length }) : null,
-          h('span.muted', { text: '▾' })
-        )
-      );
+      }, h('div', titleEl, metaEl), badges);
       return h('div.item.pad0', btn, body);
     }
 
     /* ── 모임 펼쳤을 때 ── */
-    function buildBody(m, body) {
+    function buildBody(m, body, syncHead) {
       m.photos = m.photos || [];
-      if (admin) buildAdminBody(m, body);
-      else buildMemberBody(m, body);
+      if (admin) buildAdminBody(m, body, syncHead);
+      else buildMemberBody(m, body, syncHead);
     }
 
     /* 회원 — 내용은 읽기만, 사진은 올릴 수 있다 */
-    function buildMemberBody(m, body) {
+    function buildMemberBody(m, body, syncHead) {
+      var saveSoon = function () { SG.save('history'); syncHead(); };
       body.appendChild(h('div.grid.g2', { style: 'margin-top:14px' },
         info('날짜', whenText(m)),
         info('구분', m.season || '-'),
         info('장소', m.place || '-'),
-        info('모임 총 지출', m.spend ? UI.money(m.spend) : '-')
+        info('모임 총 지출', m.spend ? UI.money(m.spend) : '-'),
+        info('회장', officerName(m.chairmanId)),
+        info('총무', officerName(m.treasurerId))
       ));
       var att = (m.attendees || []).map(name);
       body.appendChild(h('div', { style: 'margin-top:12px' },
@@ -198,6 +211,11 @@
       body.appendChild(h('div.row', { style: 'margin-top:16px' },
         h('button.btn.sm', { text: '요약 복사', onclick: function () { UI.copy(summaryText(m)); } })));
     }
+    function officerSelect(cur, onchange) {
+      return UI.select([{ value: '', label: '선택 안 함' }]
+        .concat(members.map(function (x) { return { value: x.id, label: x.name }; })),
+        cur || '', onchange);
+    }
     function info(label, value) {
       return h('div', h('label.f', { text: label }), h('div.small', { text: value }));
     }
@@ -207,7 +225,8 @@
     }
 
     /* 운영진 — 전부 고칠 수 있다 */
-    function buildAdminBody(m, body) {
+    function buildAdminBody(m, body, syncHead) {
+      var saveSoon = function () { SG.save('history'); syncHead(); };
       var years = yearList();
       var yearS = UI.select(years, yearOf(m) || years[0], function (v) { m.year = +v; saveSoon(); });
       var dateI = h('input', {
@@ -221,13 +240,18 @@
       var seasonS = UI.select(SEASONS, m.season, function (v) { m.season = v; saveSoon(); });
       var placeI = h('input', { value: m.place || '', placeholder: '예: 강릉 안목해변 펜션', oninput: function () { m.place = placeI.value; saveSoon(); } });
       var spendI = h('input', { type: 'number', value: m.spend || '', placeholder: '0', oninput: function () { m.spend = UI.parseNum(spendI.value); saveSoon(); } });
+      var chairS = officerSelect(m.chairmanId, function (v) { m.chairmanId = v; saveSoon(); });
+      var treaS = officerSelect(m.treasurerId, function (v) { m.treasurerId = v; saveSoon(); });
 
       body.appendChild(h('div.grid.g2', { style: 'margin-top:14px' },
         UI.field('날짜', dateI, '달력에서 고르거나 숫자로 바로 입력'),
         UI.field('연도', yearS, '날짜를 모를 때만 쓰세요'),
         UI.field('구분', seasonS),
         UI.field('장소', placeI),
-        UI.field('모임 총 지출 (원)', spendI)
+        UI.field('모임 총 지출 (원)', spendI),
+        h('div'),
+        UI.field('회장', chairS, '그때 회장이 누구였는지'),
+        UI.field('총무', treaS, '그때 총무가 누구였는지')
       ));
 
       /* 참석자 */
@@ -351,6 +375,8 @@
       var L = ['[사구회 ' + (m.season || '모임') + ' — ' + whenText(m) + ']'];
       L.push('장소: ' + (m.place || '-'));
       L.push('참석(' + (m.attendees || []).length + '명): ' + (m.attendees || []).map(name).join(', '));
+      if (m.chairmanId || m.treasurerId)
+        L.push('회장: ' + officerName(m.chairmanId) + ' · 총무: ' + officerName(m.treasurerId));
       if (m.spend) L.push('총 지출: ' + UI.money(m.spend));
       if ((m.photos || []).length) L.push('사진·영상: ' + m.photos.length + '개');
       if (m.memo) L.push('', m.memo);
@@ -392,6 +418,10 @@
         function (v) { pick.season = v; });
       pick.season = seasonS.value;
       var placeI = h('input', { placeholder: '예: 강릉 안목해변 펜션' });
+      pick.chairmanId = idByName(SG.db.settings.chairman);
+      pick.treasurerId = idByName(SG.db.settings.treasurer);
+      var chairS = officerSelect(pick.chairmanId, function (v) { pick.chairmanId = v; });
+      var treaS = officerSelect(pick.treasurerId, function (v) { pick.treasurerId = v; });
       var memoT = h('textarea', { style: 'min-height:70px', placeholder: '그날 있었던 일, 결정 사항 등 (나중에 적어도 됩니다)' });
       var spendI = h('input', { type: 'number', placeholder: '0' });
 
@@ -421,7 +451,9 @@
             UI.field('연도', yearS, '날짜를 모를 때만 쓰세요'),
             UI.field('구분', seasonS),
             UI.field('장소', placeI),
-            UI.field('모임 총 지출 (원)', spendI)
+            UI.field('모임 총 지출 (원)', spendI),
+            UI.field('회장', chairS, '설정의 현재 운영진으로 채워 둡니다'),
+            UI.field('총무', treaS)
           ),
           h('div', { style: 'margin-top:12px' }, h('label.f', { text: '참석자' }), chips),
           h('div', { style: 'margin-top:12px' }, UI.field('메모', memoT))
@@ -435,6 +467,8 @@
               season: pick.season,
               place: placeI.value.trim(),
               attendees: pick.attendees.slice(),
+              chairmanId: pick.chairmanId || '',
+              treasurerId: pick.treasurerId || '',
               memo: memoT.value,
               spend: UI.parseNum(spendI.value),
               photos: [], agendas: []
