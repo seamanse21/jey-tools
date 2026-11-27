@@ -66,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $p1   = isset($_POST['p1']) ? $_POST['p1'] : '';
         $p2   = isset($_POST['p2']) ? $_POST['p2'] : '';
         if ($id === '' || !preg_match('/^[A-Za-z0-9._-]{2,20}$/', $id)) {
-            $msg = '아이디는 영문·숫자로 2~20자로 적어 주세요.'; $msgType = 'no';
-        } elseif (strlen($p1) < 6) {
-            $msg = '비밀번호는 6자 이상으로 해주세요.'; $msgType = 'no';
+            $msg = '아이디는 숫자나 영문으로 2자 이상 적어 주세요.'; $msgType = 'no';
+        } elseif (strlen($p1) < 4) {
+            $msg = '비밀번호는 4자 이상으로 해주세요.'; $msgType = 'no';
         } elseif ($p1 !== $p2) {
             $msg = '비밀번호 두 칸이 서로 다릅니다.'; $msgType = 'no';
         } else {
@@ -102,7 +102,7 @@ if (is_file($htpasswd)) {
 <main class="view" style="max-width:620px">
   <h1 style="font-size:20px">사구회 접속 잠금</h1>
   <p class="small muted">아이디와 비밀번호를 하나 정해 9명에게 알려주면, 그 둘을 아는 사람만 사이트에 들어올 수 있습니다.
-     회비 기록·영수증 파일까지 전부 같이 잠깁니다.</p>
+     회비 기록·영수증 파일까지 전부 같이 잠깁니다. <b>둘 다 숫자로만 정해도 됩니다.</b></p>
 
   <?php if ($msg !== ''): ?>
     <div class="card" style="border-color:var(--<?php echo $msgType === 'ok' ? 'ok' : ($msgType === 'no' ? 'no' : 'warn'); ?>)">
@@ -126,9 +126,9 @@ if (is_file($htpasswd)) {
   <form method="post" class="card">
     <h2 style="font-size:16px"><?php echo $on ? '비밀번호 바꾸기' : '비밀번호 걸기'; ?></h2>
     <div class="grid" style="margin-top:10px">
-      <div><label class="f">아이디 (영문·숫자)</label>
-        <input name="id" value="<?php echo h($curId !== '' ? $curId : 'sagoohoe'); ?>" autocomplete="username"></div>
-      <div><label class="f">비밀번호 (6자 이상)</label>
+      <div><label class="f">아이디 — 숫자만 써도 됩니다 (2자 이상)</label>
+        <input name="id" value="<?php echo h($curId !== '' ? $curId : '49'); ?>" autocomplete="username"></div>
+      <div><label class="f">비밀번호 — 숫자만 써도 됩니다 (4자 이상)</label>
         <input type="password" name="p1" autocomplete="new-password"></div>
       <div><label class="f">비밀번호 다시 입력</label>
         <input type="password" name="p2" autocomplete="new-password"></div>
@@ -136,7 +136,9 @@ if (is_file($htpasswd)) {
     <div class="row end" style="margin-top:14px">
       <button class="btn pri" type="submit">저장</button>
     </div>
-    <p class="tiny muted" style="margin-top:10px">비밀번호는 암호화(bcrypt)해서 보관합니다. 이 화면에도, 파일에도 원문은 남지 않습니다.</p>
+    <p class="tiny muted" style="margin-top:10px">비밀번호는 암호화(bcrypt)해서 보관합니다. 이 화면에도, 파일에도 원문은 남지 않습니다.<br>
+       아이디 숫자 2자리 + 비밀번호 숫자 4자리면 충분히 간단합니다 (예: 아이디 <code>49</code>, 비밀번호 <code>1234</code>).
+       더 단단히 하고 싶으면 자릿수를 늘리면 됩니다.</p>
   </form>
 
   <?php if ($on): ?>
