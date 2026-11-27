@@ -177,7 +177,7 @@
           return;
         }
 
-        photoWrap.appendChild(UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '내가 찍은 사진 올리기',
+        photoWrap.appendChild(UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '내가 찍은 사진',
           { by: who, canDelete: function (f) { return !f.by || f.by === who; } }));
       }
 

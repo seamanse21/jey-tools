@@ -139,13 +139,15 @@ window.UI = (function () {
     });
     var btn = h('button.btn', {
       type: 'button',
-      text: isPhoto ? '📷 사진 고르기' : '🧾 파일 고르기',
+      text: isPhoto ? '📷 사진 올리기' : '🧾 파일 올리기',
       onclick: function () { input.click(); }
     });
     var shelf = h('div');
     box.appendChild(h('label.f', { text: label || '파일 첨부' }));
     box.appendChild(h('div.pickrow', btn, status,
-      h('span.tiny.muted', { text: isPhoto ? '여러 장 한 번에 고르면 바로 올라갑니다' : '사진 또는 PDF' })));
+      h('span.tiny.muted', { text: isPhoto
+        ? '버튼을 누르고 사진을 고르면 바로 올라갑니다 (여러 장 한 번에)'
+        : '버튼을 누르고 고르면 바로 올라갑니다 · 사진 또는 PDF' })));
     box.appendChild(input);
     box.appendChild(shelf);
     function render() {
