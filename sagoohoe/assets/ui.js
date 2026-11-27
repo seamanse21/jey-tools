@@ -96,8 +96,11 @@ window.UI = (function () {
     return h('div.stat', h('b', { text: value }), h('span', { text: label + (note ? ' · ' + note : '') }));
   }
 
-  /* 파일 첨부 묶음: 고른 파일을 바로 올리고 목록을 보여준다 */
-  function attach(list, kind, folder, onchange, label) {
+  /* 파일 첨부 묶음: 고른 파일을 바로 올리고 목록을 보여준다
+     opts.by       — 올린 사람 이름을 같이 기록한다
+     opts.canDelete— 이 첨부를 지울 수 있는지 판단하는 함수 (없으면 전부 지울 수 있음) */
+  function attach(list, kind, folder, onchange, label, opts) {
+    opts = opts || {};
     var box = h('div');
     var input = h('input', {
       type: 'file', multiple: true,
@@ -108,7 +111,11 @@ window.UI = (function () {
         input.disabled = true;
         toast('올리는 중… (' + files.length + '장)', 6000);
         try {
-          for (var i = 0; i < files.length; i++) list.push(await SG.upload(files[i], kind, folder));
+          for (var i = 0; i < files.length; i++) {
+            var up = await SG.upload(files[i], kind, folder);
+            if (opts.by) { up.by = opts.by; up.at = today(); }
+            list.push(up);
+          }
           toast('첨부 완료');
         } catch (e) { toast(e.message, 3500); }
         input.disabled = false; input.value = '';
@@ -125,13 +132,19 @@ window.UI = (function () {
       var isImg = function (u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u); };
       var g = h('div.thumbs');
       list.forEach(function (f, i) {
+        var who = f.by ? (f.by + ' 올림') : '';
         var cell = isImg(f.url)
-          ? h('figure', h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' }))
-          : h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
-        cell.appendChild(h('button.x', {
-          text: '×', title: '첨부 지우기',
-          onclick: function () { list.splice(i, 1); render(); if (onchange) onchange(); }
-        }));
+          ? h('figure', h('a', { href: SG.src(f.url), target: '_blank', title: who || f.name },
+              h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })))
+          : h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', title: who,
+              text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
+        if (who) cell.appendChild(h('figcaption.tiny.muted', { text: f.by, style: 'text-align:center;margin-top:2px' }));
+        if (!opts.canDelete || opts.canDelete(f)) {
+          cell.appendChild(h('button.x', {
+            text: '×', title: '첨부 지우기',
+            onclick: function () { list.splice(i, 1); render(); if (onchange) onchange(); }
+          }));
+        }
         g.appendChild(cell);
       });
       shelf.appendChild(g);

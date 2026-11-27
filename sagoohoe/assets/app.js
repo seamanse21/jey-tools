@@ -63,16 +63,21 @@
     document.body.classList.toggle('member', SG.auth === 'ok' && !SG.isAdmin());
     var el = document.getElementById('role');
     if (!el) {
-      el = h('span', { id: 'role', class: 'mode', style: 'margin-left:4px' });
+      el = h('button', { id: 'role', class: 'mode', type: 'button', style: 'margin-left:4px' });
       modeEl.parentNode.insertBefore(el, modeEl.nextSibling);
     }
     if (SG.auth !== 'ok') { el.hidden = true; return; }
     el.hidden = false;
-    el.textContent = SG.isAdmin() ? '운영진' : '회원';
-    el.className = 'mode' + (SG.isAdmin() ? '' : ' local');
-    el.title = SG.isAdmin()
+    el.textContent = (SG.isAdmin() ? '운영진' : '회원') + ' ⌄';
+    el.className = 'mode role-btn' + (SG.isAdmin() ? '' : ' local');
+    el.title = (SG.isAdmin()
       ? '모든 항목을 고칠 수 있습니다.'
-      : '사진 올리기와 정산금 신청만 할 수 있습니다. 나머지는 보기 전용입니다.';
+      : '사진 올리기와 정산금 신청만 할 수 있습니다.') + ' 눌러서 계정 바꾸기';
+    el.onclick = function () {
+      UI.confirm('로그아웃하고 다른 계정으로 로그인할까요?', function () {
+        SG.logout().then(function () { location.reload(); });
+      }, '로그아웃');
+    };
   }
 
   function paintMode() {
