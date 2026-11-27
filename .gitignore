@@ -3,3 +3,10 @@ dist/
 *.spec
 __pycache__/
 .DS_Store
+
+# 사구회 사이트 — 실제 기록(회원 이름·회비·정산·사진)은 공개 저장소에 올리지 않는다
+sagoohoe/data/
+sagoohoe/photos/*
+!sagoohoe/photos/.gitkeep
+sagoohoe/receipts/*
+!sagoohoe/receipts/.gitkeep

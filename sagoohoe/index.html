@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사구회</title>
+<link rel="stylesheet" href="assets/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127881;</text></svg>">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <h1 class="brand">사구회 <span class="brand-sub">49회 친목회 · 2006~</span></h1>
+    <div class="who">
+      <label for="me">나</label>
+      <select id="me"><option value="">선택</option></select>
+      <span id="mode" class="mode" title="데이터가 저장되는 곳"></span>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <a href="#/dues">회비 현황</a>
+    <a href="#/history">히스토리</a>
+    <a href="#/expense">정산금 신청</a>
+    <a href="#/rules">회칙</a>
+    <a href="#/settings">설정</a>
+  </nav>
+</header>
+
+<main id="view" class="view"><div class="loading">불러오는 중…</div></main>
+
+<div id="toast" class="toast" hidden></div>
+<div id="modal" class="modal" hidden><div class="modal-box" id="modal-box"></div></div>
+
+<footer class="foot">
+  <span>사구회 관리 사이트</span>
+  <button class="link" id="btn-export">전체 백업 내려받기</button>
+  <button class="link" id="btn-import">백업 불러오기</button>
+</footer>
+
+<script src="assets/store.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/page-dues.js"></script>
+<script src="assets/page-history.js"></script>
+<script src="assets/page-expense.js"></script>
+<script src="assets/page-rules.js"></script>
+<script src="assets/page-settings.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

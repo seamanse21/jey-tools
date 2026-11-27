@@ -1,0 +1,98 @@
+# 사구회 관리 사이트 — 구현 메모
+
+사용 설명은 `README.md`. 이 문서는 나중에 손볼 때 읽을 구조·결정 기록이다.
+
+## 설계 결정
+
+**왜 서버 프레임워크를 안 썼나.** 나스(Synology Web Station)에 폴더째 올려 두면 끝나야 한다는 조건이
+제일 컸다. DB·빌드·패키지 설치가 들어가면 나스 사정이 바뀔 때마다 손이 간다.
+그래서 정적 HTML + `api.php` 한 장 + `data/*.json` 구조로 갔다.
+외부 라이브러리는 하나도 안 쓴다 (저장소 공통 규칙).
+
+**저장 위치를 자동으로 고른다.** `store.js` 가 켜질 때 `api.php?ping=1` 을 한 번 때려 본다.
+
+| 응답 | 모드 | 저장 위치 | 사진·영수증 |
+|---|---|---|---|
+| `{ok:true}` | server | 나스 `data/*.json` | `photos/`, `receipts/` 에 실제 파일 |
+| 그 외 (404·PHP 꺼짐·`file://`) | local | 브라우저 localStorage | 1100px 로 줄여 data URL |
+
+PHP 가 없어도 화면이 다 뜨고 눌러볼 수 있다. 미리보기·시연용으로 쓸모가 있어서 남겼다.
+
+**초기 자료는 `seed/seed.json` 하나로.** 자료가 아직 없을 때 `api.php` 가 이 파일에서 해당 부분을
+꺼내 `data/` 에 심고 돌려준다. 클라이언트에 초기화 분기를 두지 않으려고 서버 쪽에 뒀다.
+처음엔 `seed/<store>.json` 으로 쪼갰는데, 없는 파일마다 404 가 찍혀서 한 파일로 합쳤다.
+
+**공개 저장소라 실제 기록은 커밋하지 않는다.** `data/`, `photos/`, `receipts/` 는 `.gitignore` 에 있다.
+`seed/seed.json` 의 회칙 초안에도 회원 실명을 넣지 않았다 (제3조는 "9명으로 한다" 로만).
+실명이 든 `data/members.json` 과 회칙은 Jey 에게 전달한 zip 안에만 있다.
+
+## 파일
+
+```
+index.html          껍데기 (상단바 + 탭 + 모달/토스트 자리)
+assets/store.js     저장 계층. 모드 판정, 읽기/쓰기(350ms 디바운스), 업로드, 이미지 축소, 백업
+assets/ui.js        h() DOM 헬퍼, 금액·날짜 포맷, 모달, 토스트, 첨부 위젯, 복사/다운로드
+assets/app.js       해시 라우터(#/dues 등), "나" 선택, 모드 배지, 백업 버튼
+assets/page-*.js    화면 5개. 각각 window.PAGES[이름] = function(view, params) 로 등록
+api.php             ping / store 읽기·쓰기 / 파일 업로드
+seed/seed.json      첫 설치용 초기 자료 (설정 + 회칙 초안)
+```
+
+ES 모듈이 아니라 평범한 `<script>` 다. `file://` 로 열어도 돌아가야 해서 그렇게 했다.
+
+## 자료 구조
+
+```jsonc
+settings  { monthlyDue, kmPerLiter, fuelPrice, startYear, chairman, treasurer, dueYearly:{"2006":30000} }
+members   [ { id:"m1", name, active, joinedAt } ]
+rules     { articles:[{id,title,body,since}], history:[{id,at,reason,by,snapshot:[...articles]}] }
+history   { meetings:[{ id, date, season, place, attendees:[mid], memo, spend,
+                        photos:[{name,url}], agendas:[{id,title,body,proposer,votes:{mid:"찬성"},status}] }] }
+dues      { years: { "2026": { "m1": { "3": 50000 } } } }      // 금액 그대로 저장, 0 이면 키를 지움
+expenses  { seq, requests:[{ id,no,applicantId,meetingId,date,status,statusNote,memo,
+                             trips:[{mode,note,roundTrip,amount,receipts,km,toll,tollReceipts,kmPerLiter,fuelPrice}],
+                             items:[{label,amount,receipts}] }] }
+```
+
+회비는 **금액**으로 저장한다 (bool 아님). 부분 납입과 연도별 회비 변동을 담으려면 이래야 했다.
+회칙 개정 이력은 diff 가 아니라 **전문 스냅샷**이다. 9명짜리 모임 규모에서는 이게 제일 안 헷갈린다.
+
+## 계산 규칙
+
+- 자차 유류비 = `총 운행거리 ÷ 연비기준(기본 10km/L) × 유가단가`, `Math.round`
+- 안건 자동 판정 = 찬성 > 참석자 ÷ 2 면 가결, 반대 ≥ 찬성이면 부결, 나머지는 보류. 손으로 덮어쓸 수 있다
+- 회비 "미납" = **지난 달까지만** 센다. 올해면 이번 달까지, 지난해면 12개월, 내년이면 0.
+  (연말까지의 미래분을 미납으로 세면 11월에 미납이 500만원으로 찍혀서 쓸모가 없었다)
+
+## 손봤던 버그 (같은 실수 반복 방지)
+
+1. **`[hidden]` 이 안 먹던 모달.** `.modal{display:flex}` 가 `[hidden]` 의 `display:none` 을 이겨서,
+   닫힌 모달이 화면 전체에서 클릭을 가로채고 있었다. `[hidden]{display:none!important}` 로 해결.
+2. **`change` 이벤트 의존.** 입력칸을 `onchange` 로 받으면 포커스가 빠져야 값이 들어간다.
+   모바일에서 숫자 입력하고 바로 탭을 옮기면 값이 날아간다. 글자·숫자 입력은 전부 `oninput` 으로 바꿨다
+   (셀렉트·체크박스만 `change`). 저장은 어차피 350ms 디바운스라 부담 없다.
+3. **회비 칸 토글이 한 방향으로만.** 클릭 핸들러가 렌더 시점 금액을 클로저에 가둬 놓고,
+   `refresh()` 는 버튼을 새로 만들지 않아서 두 번째 클릭이 먹지 않았다. 핸들러 안에서 현재 값을 다시 읽게 고쳤다.
+4. **합계 상자 초기화 순서.** `drawTrips()` 가 아직 만들어지지 않은 `totalBox` 를 건드려 터졌다.
+   상자를 먼저 만들고 자리에만 나중에 붙인다.
+5. **한글 파일명 다운로드.** Chromium 이 비ASCII `download` 속성을 버리고 `download` 라는 이름으로
+   저장해서, 백업 파일명을 `sagoohoe-backup-YYYY-MM-DD.json` 으로 바꿨다.
+
+## 검증
+
+Playwright 로 PHP 띄운 상태(31개)·PHP 없는 상태(6개)·업로드(6개)를 돌렸고 전부 통과했다.
+확인한 것: 저장 모드 판정, 회비 칸 토글/월 일괄/금액 직접 입력/서버 파일 반영, 모임·참석자·안건 투표
+가결·부결, 자차 유류비 계산(420km → 71,400원), 영수증 없는 제출 차단, 승인→지급완료 상태 흐름,
+회칙 개정 확정과 이력 전문, 사진·영수증 업로드와 실제 파일 생성, 백업 내려받기,
+390px 폭에서 가로 넘침 0, 다크 모드.
+
+테스트 스크립트는 세션 임시 폴더에 있었고 저장소에 남기지 않았다.
+다시 돌리려면 `php -S 127.0.0.1:8777 -t .` 띄우고 Playwright 로 같은 흐름을 밟으면 된다.
+
+## 남은 것 / 다음에 할 만한 것
+
+- 회칙 초안의 경조사 금액이 `○○○,○○○원` placeholder 다. 실제 금액 확인 후 채워야 한다
+- 학교명도 `○○초등학교` 로 비어 있다
+- 지출 쪽은 정산 신청만 있다. 경조사 지출·모임 지출 장부를 넣으면 "현재 잔고"를 제대로 뽑을 수 있다
+- 로그인이 없다. 나스 폴더에 접근 가능한 사람은 누구나 고칠 수 있다.
+  필요해지면 DSM 쪽 접근 제어로 막는 게 맞다 (앱에 비밀번호를 넣는 건 평문 보관 문제가 생긴다)
