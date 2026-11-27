@@ -171,20 +171,17 @@ window.UI = (function () {
     function render() {
       shelf.textContent = '';
       if (!list.length) return;
-      var isImg = function (u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u); };
-      var isVid = function (u) { return /^data:video|\.(mp4|mov|m4v|webm|3gp)$/i.test(u); };
       var g = h('div.thumbs');
       list.forEach(function (f, i) {
         var who = f.by ? (f.by + ' 올림' + (f.at ? ' · ' + dateKo(f.at) : '')) : '';
         var cell;
-        if (isImg(f.url)) {
-          cell = h('figure', h('a', { href: SG.src(f.url), target: '_blank', title: who || f.name },
-            h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })));
-        } else if (isVid(f.url)) {
-          cell = h('figure', h('video', {
-            src: SG.src(f.url), controls: true, preload: 'metadata', playsinline: true,
-            title: who || f.name, class: 'vid'
-          }));
+        if (isImgUrl(f.url) || isVidUrl(f.url)) {
+          var media = isVidUrl(f.url)
+            ? h('video', { src: SG.src(f.url), preload: 'metadata', muted: true, playsinline: true, class: 'vid' })
+            : h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' });
+          cell = h('figure.media', { title: who || f.name,
+            onclick: function () { gallery(list, i); } }, media);
+          if (isVidUrl(f.url)) cell.appendChild(h('span.play', { text: '▶' }));
         } else {
           cell = h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', title: who,
             text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
@@ -204,19 +201,93 @@ window.UI = (function () {
     return box;
   }
 
+  /* ── 사진·영상 크게 보기 (좌우로 넘김) ──
+     items: [{url, name, by, at}] · start: 처음 보여줄 번호 */
+  function isImgUrl(u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u || ''); }
+  function isVidUrl(u) { return /^data:video|\.(mp4|mov|m4v|webm|3gp)$/i.test(u || ''); }
+
+  function gallery(items, start) {
+    items = (items || []).filter(function (f) { return isImgUrl(f.url) || isVidUrl(f.url); });
+    if (!items.length) return;
+    var i = Math.max(0, Math.min(items.length - 1, start | 0));
+
+    var stage = h('div.lb-stage');
+    var count = h('div.lb-count');
+    var cap = h('div.lb-cap');
+    var prev = h('button.lb-nav.prev', { type: 'button', text: '‹', title: '이전 (←)', onclick: function (e) { e.stopPropagation(); go(-1); } });
+    var next = h('button.lb-nav.next', { type: 'button', text: '›', title: '다음 (→)', onclick: function (e) { e.stopPropagation(); go(1); } });
+    var close = h('button.lb-close', { type: 'button', text: '×', title: '닫기 (Esc)', onclick: function (e) { e.stopPropagation(); shut(); } });
+    var wrap = h('div.lb', stage, prev, next, close,
+      h('div.lb-bar', count, cap));
+
+    function show() {
+      stage.textContent = '';
+      var f = items[i];
+      stage.appendChild(isVidUrl(f.url)
+        ? h('video.lb-media', { src: SG.src(f.url), controls: true, autoplay: true, playsinline: true })
+        : h('img.lb-media', { src: SG.src(f.url), alt: f.name || '' }));
+      count.textContent = (i + 1) + ' / ' + items.length;
+      cap.textContent = f.by ? (f.by + (f.at ? ' · ' + dateKo(f.at) : '') + ' 올림') : (f.name || '');
+      var hide = items.length < 2;
+      prev.hidden = hide; next.hidden = hide;
+      /* 다음 장을 미리 받아둬 넘길 때 끊기지 않게 */
+      var nx = items[(i + 1) % items.length];
+      if (nx && isImgUrl(nx.url)) { var im = new Image(); im.src = SG.src(nx.url); }
+    }
+    function go(d) { i = (i + d + items.length) % items.length; show(); }
+    function shut() {
+      document.removeEventListener('keydown', key);
+      document.body.style.overflow = '';
+      wrap.remove();
+    }
+    function key(e) {
+      if (e.key === 'Escape') shut();
+      else if (e.key === 'ArrowLeft') go(-1);
+      else if (e.key === 'ArrowRight') go(1);
+    }
+
+    /* 손가락으로 좌우 밀기 */
+    var sx = 0, sy = 0, moving = false;
+    wrap.addEventListener('touchstart', function (e) {
+      if (e.target.tagName === 'VIDEO') return;       // 영상 조작은 방해하지 않는다
+      if (e.touches.length !== 1) return;
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; moving = true;
+    }, { passive: true });
+    wrap.addEventListener('touchend', function (e) {
+      if (!moving) return;
+      moving = false;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+    });
+    /* 마우스로도 끌어서 넘기기 */
+    var mx = null;
+    wrap.addEventListener('mousedown', function (e) { if (e.target.tagName !== 'VIDEO') mx = e.clientX; });
+    wrap.addEventListener('mouseup', function (e) {
+      if (mx === null) return;
+      var dx = e.clientX - mx; mx = null;
+      if (Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
+    });
+
+    wrap.addEventListener('click', function (e) { if (e.target === wrap || e.target === stage) shut(); });
+    document.addEventListener('keydown', key);
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(wrap);
+    show();
+  }
+
   /* 보기 전용 첨부 목록 */
   function attachView(list) {
     if (!list || !list.length) return null;
-    var isImg = function (u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u); };
-    var isVid = function (u) { return /^data:video|\.(mp4|mov|m4v|webm|3gp)$/i.test(u); };
     var g = h('div.thumbs');
-    list.forEach(function (f) {
+    list.forEach(function (f, i) {
       var cell;
-      if (isImg(f.url)) {
-        cell = h('figure', h('a', { href: SG.src(f.url), target: '_blank' },
-          h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })));
-      } else if (isVid(f.url)) {
-        cell = h('figure', h('video', { src: SG.src(f.url), controls: true, preload: 'metadata', playsinline: true, class: 'vid' }));
+      if (isImgUrl(f.url) || isVidUrl(f.url)) {
+        var media = isVidUrl(f.url)
+          ? h('video', { src: SG.src(f.url), preload: 'metadata', muted: true, playsinline: true, class: 'vid' })
+          : h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' });
+        cell = h('figure.media', { onclick: function () { gallery(list, i); } }, media);
+        if (isVidUrl(f.url)) cell.appendChild(h('span.play', { text: '▶' }));
       } else {
         cell = h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
       }
@@ -247,6 +318,6 @@ window.UI = (function () {
   return {
     h: h, money: money, num: num, parseNum: parseNum, today: today, dateKo: dateKo,
     toast: toast, modal: modal, confirm: confirmBox, field: field, select: selectOf, stat: stat,
-    attach: attach, attachView: attachView, download: download, copy: copy
+    attach: attach, attachView: attachView, gallery: gallery, download: download, copy: copy
   };
 })();
