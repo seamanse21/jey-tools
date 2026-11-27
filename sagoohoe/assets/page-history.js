@@ -132,7 +132,6 @@
 
     /* 회원 — 내용은 읽기만, 사진은 올릴 수 있다 */
     function buildMemberBody(m, body) {
-      var me = meName();
       body.appendChild(h('div.grid.g2', { style: 'margin-top:14px' },
         info('날짜', whenText(m)),
         info('구분', m.season || '-'),
@@ -147,10 +146,40 @@
         h('label.f', { text: '메모' }), h('div.small', { style: 'white-space:pre-wrap', text: m.memo })));
 
       body.appendChild(h('div.sep'));
-      body.appendChild(h('div.spread', h('h4', { text: '사진' }),
-        h('span.tiny.muted', { text: me ? me + ' 이름으로 올립니다' : '위에서 “나”를 먼저 고르면 올린 사람이 기록됩니다' })));
-      body.appendChild(UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '내가 찍은 사진 올리기',
-        { by: me, canDelete: function (f) { return !f.by || f.by === me; } }));
+      var photoWrap = h('div');
+      body.appendChild(photoWrap);
+      drawPhotos();
+
+      function drawPhotos() {
+        photoWrap.textContent = '';
+        var who = meName();
+        photoWrap.appendChild(h('div.spread',
+          h('h4', { text: '사진' }),
+          who ? h('span.tiny.muted', { text: who + ' 이름으로 올라갑니다' }) : null));
+
+        if (!who) {
+          /* 누가 올렸는지 남겨야 하므로 이름부터 고르게 한다 */
+          var pickMe = UI.select([{ value: '', label: '이름을 고르세요' }]
+            .concat(members.map(function (x) { return { value: x.id, label: x.name }; })), '',
+            function (v) {
+              if (!v) return;
+              sessionStorage.setItem('sg.me', v);
+              try { localStorage.setItem('sg.me', v); } catch (e) { }
+              var sel = document.getElementById('me');
+              if (sel) sel.value = v;
+              drawPhotos();
+            });
+          photoWrap.appendChild(h('div.card', { style: 'margin-top:8px;border-color:var(--warn)' },
+            h('p.small', { style: 'margin:0 0 8px' }, h('b', { text: '사진을 올리기 전에 누구신지 알려 주세요.' }),
+              ' 올린 사람 이름이 사진 아래 남습니다.'),
+            pickMe));
+          if (m.photos.length) photoWrap.appendChild(h('div', { style: 'margin-top:12px' }, UI.attachView(m.photos)));
+          return;
+        }
+
+        photoWrap.appendChild(UI.attach(m.photos, 'photos', folderOf(m), saveSoon, '내가 찍은 사진 올리기',
+          { by: who, canDelete: function (f) { return !f.by || f.by === who; } }));
+      }
 
       if ((m.agendas || []).length) {
         body.appendChild(h('div.sep'));
@@ -181,19 +210,22 @@
     function buildAdminBody(m, body) {
       var years = yearList();
       var yearS = UI.select(years, yearOf(m) || years[0], function (v) { m.year = +v; saveSoon(); });
+      var dateI = h('input', {
+        type: 'date', value: m.date || '', min: years[years.length - 1] + '-01-01',
+        oninput: function () {
+          m.date = dateI.value;
+          if (m.date) { m.year = +m.date.slice(0, 4); yearS.value = String(m.year); }
+          saveSoon();
+        }
+      });
       var seasonS = UI.select(SEASONS, m.season, function (v) { m.season = v; saveSoon(); });
-      var dateI = h('input', { type: 'date', value: m.date || '', oninput: function () {
-        m.date = dateI.value;
-        if (m.date) { m.year = +m.date.slice(0, 4); yearS.value = String(m.year); }
-        saveSoon();
-      } });
       var placeI = h('input', { value: m.place || '', placeholder: '예: 강릉 안목해변 펜션', oninput: function () { m.place = placeI.value; saveSoon(); } });
       var spendI = h('input', { type: 'number', value: m.spend || '', placeholder: '0', oninput: function () { m.spend = UI.parseNum(spendI.value); saveSoon(); } });
 
       body.appendChild(h('div.grid.g2', { style: 'margin-top:14px' },
-        UI.field('연도', yearS, '옛날 모임은 연도만 넣어도 됩니다'),
+        UI.field('날짜', dateI, '달력에서 고르거나 숫자로 바로 입력'),
+        UI.field('연도', yearS, '날짜를 모를 때만 쓰세요'),
         UI.field('구분', seasonS),
-        UI.field('날짜', dateI, '정확한 날짜를 모르면 비워두세요'),
         UI.field('장소', placeI),
         UI.field('모임 총 지출 (원)', spendI)
       ));
@@ -348,14 +380,17 @@
       var years = yearList();
       var pick = { attendees: members.map(function (x) { return x.id; }) };
 
-      var yearS = UI.select(years, now.getFullYear(), function (v) { pick.year = +v; });
       pick.year = now.getFullYear();
+      var yearS = UI.select(years, now.getFullYear(), function (v) { pick.year = +v; });
+      var dateI = h('input', {
+        type: 'date', min: years[years.length - 1] + '-01-01',
+        oninput: function () {
+          if (dateI.value) { pick.year = +dateI.value.slice(0, 4); yearS.value = String(pick.year); }
+        }
+      });
       var seasonS = UI.select(SEASONS, (now.getMonth() + 1 >= 10 || now.getMonth() + 1 <= 2) ? SEASONS[1] : SEASONS[0],
         function (v) { pick.season = v; });
       pick.season = seasonS.value;
-      var dateI = h('input', { type: 'date', oninput: function () {
-        if (dateI.value) { pick.year = +dateI.value.slice(0, 4); yearS.value = String(pick.year); }
-      } });
       var placeI = h('input', { placeholder: '예: 강릉 안목해변 펜션' });
       var memoT = h('textarea', { style: 'min-height:70px', placeholder: '그날 있었던 일, 결정 사항 등 (나중에 적어도 됩니다)' });
       var spendI = h('input', { type: 'number', placeholder: '0' });
@@ -380,11 +415,11 @@
 
       UI.modal('새 모임 만들기',
         h('div',
-          h('p.small.muted', { style: 'margin:0 0 12px', text: '지난 모임도 여기서 등록합니다. 날짜가 기억나지 않으면 연도와 구분만 골라도 됩니다.' }),
+          h('p.small.muted', { style: 'margin:0 0 12px', text: '지난 모임도 여기서 등록합니다. 날짜가 기억나지 않으면 비워두고 연도만 고르세요.' }),
           h('div.grid.g2',
-            UI.field('연도', yearS),
+            UI.field('날짜', dateI, '달력에서 고르거나 숫자로 바로 입력 (예: 2008-07-05)'),
+            UI.field('연도', yearS, '날짜를 모를 때만 쓰세요'),
             UI.field('구분', seasonS),
-            UI.field('날짜 (선택)', dateI, '모르면 비워두세요'),
             UI.field('장소', placeI),
             UI.field('모임 총 지출 (원)', spendI)
           ),
@@ -395,7 +430,7 @@
           label: '만들기', cls: 'pri', run: function () {
             var m = {
               id: SG.uid('mt'),
-              year: pick.year,
+              year: dateI.value ? +dateI.value.slice(0, 4) : pick.year,
               date: dateI.value || '',
               season: pick.season,
               place: placeI.value.trim(),

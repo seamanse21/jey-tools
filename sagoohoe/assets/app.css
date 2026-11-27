@@ -4,6 +4,7 @@
   --ok:#0f8a4d; --ok-soft:#e5f6ec; --no:#c62828; --no-soft:#fdeaea;
   --warn:#9a6700; --warn-soft:#fff6e0;
   --r:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.05);
+  color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -12,6 +13,7 @@
     --ok:#4ad88a; --ok-soft:#12301f; --no:#ff8080; --no-soft:#3a1b1b;
     --warn:#e9c46a; --warn-soft:#33290f;
     --shadow:0 1px 2px rgba(0,0,0,.4);
+    color-scheme:dark;        /* 날짜 아이콘·셀렉트 화살표가 어두운 배경에서도 보이게 */
   }
 }
 *{box-sizing:border-box}
@@ -176,3 +178,18 @@ body.member .admin-only{display:none!important}
 
 .role-btn{cursor:pointer; border:0; font:inherit; font-size:11px; font-weight:700}
 .role-btn:hover{filter:brightness(.95)}
+
+/* 날짜 칸의 달력 아이콘은 어두운 화면에서 묻히기 쉬워 밝게 뒤집는다 */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) input[type=date]::-webkit-calendar-picker-indicator{
+    filter:invert(1); opacity:.8; cursor:pointer;
+  }
+}
+select{appearance:auto; -webkit-appearance:auto}
+
+/* 파일 고르기 버튼 */
+.pickrow{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.pickrow .btn{white-space:nowrap}
+.picked{font-size:12.5px; color:var(--dim)}
+.picked.err{color:var(--no)}
+.picked.go{color:var(--accent); font-weight:700}

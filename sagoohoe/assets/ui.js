@@ -102,28 +102,50 @@ window.UI = (function () {
   function attach(list, kind, folder, onchange, label, opts) {
     opts = opts || {};
     var box = h('div');
+    var isPhoto = kind === 'photos';
+    var status = h('div.picked');
     var input = h('input', {
       type: 'file', multiple: true,
-      accept: kind === 'photos' ? 'image/*' : 'image/*,.pdf',
+      accept: isPhoto ? 'image/*' : 'image/*,.pdf',
+      style: 'position:absolute;width:1px;height:1px;opacity:0',
       onchange: async function () {
         var files = Array.prototype.slice.call(input.files);
         if (!files.length) return;
-        input.disabled = true;
-        toast('올리는 중… (' + files.length + '장)', 6000);
-        try {
-          for (var i = 0; i < files.length; i++) {
+        btn.disabled = true;
+        var done = 0;
+        for (var i = 0; i < files.length; i++) {
+          status.className = 'picked go';
+          status.textContent = '올리는 중… ' + (i + 1) + ' / ' + files.length + (isPhoto ? '장' : '개');
+          try {
             var up = await SG.upload(files[i], kind, folder);
             if (opts.by) { up.by = opts.by; up.at = today(); }
             list.push(up);
+            done++;
+            render(); if (onchange) onchange();
+          } catch (e) {
+            status.className = 'picked err';
+            status.textContent = '올리지 못했습니다 — ' + e.message;
+            btn.disabled = false; input.value = '';
+            return;
           }
-          toast('첨부 완료');
-        } catch (e) { toast(e.message, 3500); }
-        input.disabled = false; input.value = '';
-        render(); if (onchange) onchange();
+        }
+        status.className = 'picked go';
+        status.textContent = done + (isPhoto ? '장' : '개') + ' 올렸습니다';
+        setTimeout(function () {
+          if (status.textContent.indexOf('올렸습니다') >= 0) { status.textContent = ''; status.className = 'picked'; }
+        }, 4000);
+        btn.disabled = false; input.value = '';
       }
+    });
+    var btn = h('button.btn', {
+      type: 'button',
+      text: isPhoto ? '📷 사진 고르기' : '🧾 파일 고르기',
+      onclick: function () { input.click(); }
     });
     var shelf = h('div');
     box.appendChild(h('label.f', { text: label || '파일 첨부' }));
+    box.appendChild(h('div.pickrow', btn, status,
+      h('span.tiny.muted', { text: isPhoto ? '여러 장 한 번에 고르면 바로 올라갑니다' : '사진 또는 PDF' })));
     box.appendChild(input);
     box.appendChild(shelf);
     function render() {
@@ -132,7 +154,7 @@ window.UI = (function () {
       var isImg = function (u) { return /^data:image|\.(jpe?g|png|webp|gif|heic|heif)$/i.test(u); };
       var g = h('div.thumbs');
       list.forEach(function (f, i) {
-        var who = f.by ? (f.by + ' 올림') : '';
+        var who = f.by ? (f.by + ' 올림' + (f.at ? ' · ' + dateKo(f.at) : '')) : '';
         var cell = isImg(f.url)
           ? h('figure', h('a', { href: SG.src(f.url), target: '_blank', title: who || f.name },
               h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })))
