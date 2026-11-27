@@ -1,20 +1,22 @@
 <?php
-/* 사구회 — 나스 저장용 작은 API
- *  GET  api.php?ping=1            → 서버 저장이 가능한지 확인
- *  GET  api.php?store=dues        → data/dues.json 읽기
- *  POST api.php?store=dues        → data/dues.json 쓰기 (본문은 JSON)
- *  POST api.php?upload=photos     → photos/ 에 파일 올리기 (multipart, 필드명 file)
- *  POST api.php?upload=receipts   → receipts/ 에 파일 올리기
+/* 사구회 — 나스 저장용 API + 로그인
+ *  GET  api.php?ping=1              → 상태 확인 (저장 가능 여부, 로그인 필요 여부)
+ *  POST api.php?login=1             → 로그인 {id, pw}
+ *  POST api.php?logout=1            → 로그아웃
+ *  GET  api.php?store=dues          → data/dues.json 읽기
+ *  POST api.php?store=dues          → data/dues.json 쓰기
+ *  POST api.php?upload=photos       → photos/ 에 파일 올리기 (multipart, 필드명 file)
+ *  GET  api.php?file=photos/a.jpg   → 올린 파일 내려주기 (로그인한 사람만)
+ *
+ * 사진·영수증·기록 파일은 폴더째 직접 접근을 막아두고(각 폴더의 .htaccess),
+ * 반드시 이 파일을 거쳐서만 나간다. 로그인 창을 사이트 안에 두는 이유는
+ * 카카오톡 같은 앱 내장 브라우저가 서버 기본 인증 창을 띄우지 못하기 때문이다.
  *
  * 나스마다 PHP 버전이 달라서 옛 버전(5.4+)에서도 돌아가게 썼다.
- * 최신 문법(타입 선언, const 배열, ?? 연산자)을 일부러 쓰지 않는다.
  */
 
 @ini_set('display_errors', '0');
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store');
 
-/* 치명적 오류가 나도 500 대신 이유가 담긴 JSON 을 돌려준다 */
 function sg_shutdown() {
     $e = error_get_last();
     if ($e && in_array($e['type'], array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR), true)) {
@@ -32,28 +34,48 @@ function sg_shutdown() {
 }
 register_shutdown_function('sg_shutdown');
 
-$STORES  = array('settings', 'members', 'rules', 'history', 'dues', 'expenses');
-$KINDS   = array('photos', 'receipts');
-$EXT_OK  = array('jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif', 'pdf');
-$MAX_FILE = 25 * 1024 * 1024;   // 파일 하나 25MB
-$MAX_BODY = 20 * 1024 * 1024;   // JSON 본문 20MB
+$base    = dirname(__FILE__);
+$dataDir = $base . '/data';
+$method  = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
 
+$STORES   = array('settings', 'members', 'rules', 'history', 'dues', 'expenses');
+$KINDS    = array('photos', 'receipts');
+$EXT_OK   = array('jpg', 'jpeg', 'png', 'webp', 'gif', 'heic', 'heif', 'pdf');
+$MAX_FILE = 25 * 1024 * 1024;
+$MAX_BODY = 20 * 1024 * 1024;
+$MIME = array(
+    'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png',
+    'webp' => 'image/webp', 'gif' => 'image/gif', 'heic' => 'image/heic',
+    'heif' => 'image/heif', 'pdf' => 'application/pdf'
+);
+
+/* ── 로그인 상태 유지 (60일) ── */
+$cookiePath = preg_replace('#[^/]*$#', '', strtok(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', '?'));
+if ($cookiePath === '') $cookiePath = '/';
+@session_name('SGSESS');
+@session_set_cookie_params(60 * 60 * 24 * 60, $cookiePath, '', false, true);
+@session_start();
+
+function jflags() {
+    $f = 0;
+    if (defined('JSON_UNESCAPED_UNICODE')) $f = $f | JSON_UNESCAPED_UNICODE;
+    if (defined('JSON_UNESCAPED_SLASHES')) $f = $f | JSON_UNESCAPED_SLASHES;
+    return $f;
+}
 function out($a, $code = 200) {
-    http_response_code($code);
-    $flags = 0;
-    if (defined('JSON_UNESCAPED_UNICODE')) $flags = $flags | JSON_UNESCAPED_UNICODE;
-    if (defined('JSON_UNESCAPED_SLASHES')) $flags = $flags | JSON_UNESCAPED_SLASHES;
-    echo json_encode($a, $flags);
+    if (!headers_sent()) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store');
+        http_response_code($code);
+    }
+    echo json_encode($a, jflags());
     exit;
 }
 function fail($msg, $code = 400) { out(array('ok' => false, 'error' => $msg), $code); }
-
 function enc($data) {
-    $flags = 0;
-    if (defined('JSON_UNESCAPED_UNICODE')) $flags = $flags | JSON_UNESCAPED_UNICODE;
-    if (defined('JSON_UNESCAPED_SLASHES')) $flags = $flags | JSON_UNESCAPED_SLASHES;
-    if (defined('JSON_PRETTY_PRINT'))      $flags = $flags | JSON_PRETTY_PRINT;
-    return json_encode($data, $flags);
+    $f = jflags();
+    if (defined('JSON_PRETTY_PRINT')) $f = $f | JSON_PRETTY_PRINT;
+    return json_encode($data, $f);
 }
 function rand_hex($n) {
     if (function_exists('random_bytes')) return bin2hex(random_bytes($n));
@@ -63,33 +85,142 @@ function rand_hex($n) {
     return $s;
 }
 
-$base    = dirname(__FILE__);
-$dataDir = $base . '/data';
-$method  = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
+/* ── 직접 접근 차단막을 폴더마다 깔아 둔다 (없으면 만든다) ── */
+function sg_guard($base) {
+    $folders = array('data', 'photos', 'receipts', 'seed');
+    foreach ($folders as $f) {
+        $d = $base . '/' . $f;
+        if (!is_dir($d)) continue;
+        $g = $d . '/.htaccess';
+        if (!is_file($g)) @file_put_contents($g, "Require all denied\n");
+    }
+}
 
-/* ── 확인 ── */
+/* ── 비밀번호 설정 읽기 ── */
+function sg_conf($dataDir) {
+    $f = $dataDir . '/auth.php';
+    if (!is_file($f)) return null;
+    $SG_AUTH = null;
+    include $f;
+    if (is_array($SG_AUTH) && isset($SG_AUTH['id']) && isset($SG_AUTH['hash'])) return $SG_AUTH;
+    return null;
+}
+function sg_ok($conf) {
+    if ($conf === null) return true;                       // 아직 잠그지 않았으면 통과
+    return !empty($_SESSION['sg_ok']);
+}
+function sg_need($conf) {
+    if (!sg_ok($conf)) out(array('ok' => false, 'error' => '로그인이 필요합니다.', 'auth' => 'required'), 401);
+}
+
+/* ── 로그인 실패 제한 (같은 주소에서 10번 틀리면 10분 쉼) ── */
+function sg_fail_file($dataDir) { return $dataDir . '/_login_fail.json'; }
+function sg_fail_load($dataDir) {
+    $f = sg_fail_file($dataDir);
+    if (!is_file($f)) return array();
+    $j = json_decode((string)@file_get_contents($f), true);
+    return is_array($j) ? $j : array();
+}
+function sg_ip() { return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '?'; }
+function sg_locked($dataDir) {
+    $all = sg_fail_load($dataDir);
+    $me = isset($all[sg_ip()]) ? $all[sg_ip()] : null;
+    if ($me && isset($me['until']) && $me['until'] > time()) return (int)ceil(($me['until'] - time()) / 60);
+    return 0;
+}
+function sg_fail_add($dataDir) {
+    $all = sg_fail_load($dataDir);
+    $ip = sg_ip();
+    $now = time();
+    foreach ($all as $k => $v) { if (!isset($v['at']) || $v['at'] < $now - 3600) unset($all[$k]); }
+    $n = (isset($all[$ip]['n']) ? (int)$all[$ip]['n'] : 0) + 1;
+    $all[$ip] = array('n' => $n, 'at' => $now, 'until' => ($n >= 10 ? $now + 600 : 0));
+    @file_put_contents(sg_fail_file($dataDir), json_encode($all));
+}
+function sg_fail_clear($dataDir) {
+    $all = sg_fail_load($dataDir);
+    unset($all[sg_ip()]);
+    @file_put_contents(sg_fail_file($dataDir), json_encode($all));
+}
+
+$conf = sg_conf($dataDir);
+
+/* ── 상태 확인 ── */
 if (isset($_GET['ping'])) {
     if (!is_dir($dataDir)) @mkdir($dataDir, 0775, true);
+    sg_guard($base);
     out(array(
-        'ok'      => is_dir($dataDir) && is_writable($dataDir),
-        'php'     => phpversion(),
-        'dataDir' => is_dir($dataDir) ? 'ok' : 'none',
-        'write'   => is_writable($dataDir) ? 'ok' : 'no'
+        'ok'    => is_dir($dataDir) && is_writable($dataDir),
+        'php'   => phpversion(),
+        'write' => is_writable($dataDir) ? 'ok' : 'no',
+        'auth'  => ($conf === null ? 'none' : (sg_ok($conf) ? 'ok' : 'required'))
     ));
+}
+
+/* ── 로그인 ── */
+if (isset($_GET['login'])) {
+    if ($method !== 'POST') fail('POST 만 받습니다.', 405);
+    if ($conf === null) out(array('ok' => true, 'auth' => 'none'));
+    $wait = sg_locked($dataDir);
+    if ($wait > 0) out(array('ok' => false, 'error' => '너무 여러 번 틀렸습니다. ' . $wait . '분 뒤에 다시 시도해 주세요.'), 429);
+
+    $raw = file_get_contents('php://input');
+    $in = json_decode((string)$raw, true);
+    if (!is_array($in)) $in = $_POST;
+    $id = isset($in['id']) ? trim((string)$in['id']) : '';
+    $pw = isset($in['pw']) ? (string)$in['pw'] : '';
+
+    $good = ($id === $conf['id']) && password_verify($pw, $conf['hash']);
+    if (!$good) {
+        sleep(1);
+        sg_fail_add($dataDir);
+        out(array('ok' => false, 'error' => '아이디나 비밀번호가 맞지 않습니다.'), 401);
+    }
+    sg_fail_clear($dataDir);
+    $_SESSION['sg_ok'] = true;
+    out(array('ok' => true, 'auth' => 'ok'));
+}
+
+/* ── 로그아웃 ── */
+if (isset($_GET['logout'])) {
+    $_SESSION = array();
+    @session_destroy();
+    out(array('ok' => true, 'auth' => 'required'));
+}
+
+/* ── 올린 파일 내려주기 ── */
+if (isset($_GET['file'])) {
+    sg_need($conf);
+    $rel = (string)$_GET['file'];
+    if (strpos($rel, "\0") !== false || strpos($rel, '..') !== false) fail('잘못된 경로입니다.');
+    $parts = explode('/', $rel);
+    if (count($parts) < 2 || !in_array($parts[0], $KINDS, true)) fail('잘못된 경로입니다.');
+    $full = realpath($base . '/' . $rel);
+    $root = realpath($base . '/' . $parts[0]);
+    if ($full === false || $root === false || strpos($full, $root) !== 0 || !is_file($full)) fail('파일이 없습니다.', 404);
+
+    $ext = strtolower(pathinfo($full, PATHINFO_EXTENSION));
+    if (!isset($MIME[$ext])) fail('내려줄 수 없는 파일입니다.');
+    header('Content-Type: ' . $MIME[$ext]);
+    header('Content-Length: ' . filesize($full));
+    header('Cache-Control: private, max-age=604800');
+    header('Content-Disposition: inline; filename="' . basename($full) . '"');
+    readfile($full);
+    exit;
 }
 
 /* ── 자료 읽기·쓰기 ── */
 if (isset($_GET['store'])) {
+    sg_need($conf);
     $name = (string)$_GET['store'];
     if (!in_array($name, $STORES, true)) fail('알 수 없는 자료 이름입니다.');
     $file = $dataDir . '/' . $name . '.json';
 
     if ($method === 'GET') {
         if (!is_file($file)) {
-            /* 아직 아무것도 저장된 적이 없으면 seed/seed.json 의 초기 자료를 심는다 */
             $seedFile = $base . '/seed/seed.json';
             if (is_file($seedFile)) {
-                $seed = json_decode(file_get_contents($seedFile), true);
+                $seed = json_decode((string)file_get_contents($seedFile), true);
                 if (is_array($seed) && array_key_exists($name, $seed)) {
                     if (!is_dir($dataDir)) @mkdir($dataDir, 0775, true);
                     @file_put_contents($file, enc($seed[$name]));
@@ -114,7 +245,6 @@ if (isset($_GET['store'])) {
 
     if (!is_dir($dataDir) && !@mkdir($dataDir, 0775, true)) fail('data 폴더를 만들 수 없습니다.', 500);
 
-    /* 직전 내용을 하루 단위로 백업해 둔다 (실수로 지웠을 때 대비) */
     if (is_file($file)) {
         $bak = $dataDir . '/_backup';
         if (!is_dir($bak)) @mkdir($bak, 0775, true);
@@ -122,7 +252,6 @@ if (isset($_GET['store'])) {
         if (!is_file($stamp)) @copy($file, $stamp);
     }
 
-    /* 같은 폴더의 임시 파일에 쓴 뒤 바꿔치기 — 쓰는 중에 끊겨도 원본이 남는다 */
     $tmp = $file . '.tmp' . getmypid();
     $pretty = enc($parsed);
     if ($pretty === false) fail('JSON 으로 바꾸지 못했습니다.', 500);
@@ -134,6 +263,7 @@ if (isset($_GET['store'])) {
 
 /* ── 파일 올리기 ── */
 if (isset($_GET['upload'])) {
+    sg_need($conf);
     if ($method !== 'POST') fail('POST 만 받습니다.', 405);
     $kind = (string)$_GET['upload'];
     if (!in_array($kind, $KINDS, true)) fail('알 수 없는 올리기 종류입니다.');
@@ -148,12 +278,12 @@ if (isset($_GET['upload'])) {
     $ext = strtolower(pathinfo((string)$f['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, $EXT_OK, true)) fail('사진 또는 PDF 만 올릴 수 있습니다.');
 
-    /* 폴더 이름은 영문·숫자·한글·하이픈만 남긴다 (경로 타고 올라가기 방지) */
     $rawFolder = isset($_POST['folder']) ? (string)$_POST['folder'] : '';
     $folder = preg_replace('/[^0-9A-Za-z가-힣ㄱ-ㅎㅏ-ㅣ_-]/u', '', $rawFolder);
     $folder = substr((string)$folder, 0, 40);
     $dir = $base . '/' . $kind . ($folder !== '' ? '/' . $folder : '');
     if (!is_dir($dir) && !@mkdir($dir, 0775, true)) fail($kind . ' 폴더를 만들 수 없습니다.', 500);
+    sg_guard($base);
 
     $safe = preg_replace('/[^0-9A-Za-z가-힣ㄱ-ㅎㅏ-ㅣ._-]/u', '_', pathinfo((string)$f['name'], PATHINFO_FILENAME));
     $safe = substr((string)$safe, 0, 40);

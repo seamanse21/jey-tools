@@ -9,6 +9,7 @@ window.SG = (function () {
   var STORES = ['settings', 'members', 'rules', 'history', 'dues', 'expenses'];
   var LSK = 'sagoohoe:';
   var mode = 'local';
+  var auth = 'none';          // 'none' 안 잠금 · 'required' 로그인 필요 · 'ok' 로그인됨
   var db = {};
   var dirty = {};
   var timer = null;
@@ -48,17 +49,48 @@ window.SG = (function () {
   /* ── 불러오기 ───────────────────────────── */
   async function ping() {
     try {
-      var r = await fetch('api.php?ping=1', { cache: 'no-store' });
+      var r = await fetch('api.php?ping=1', { cache: 'no-store', credentials: 'same-origin' });
       if (!r.ok) return false;
       var j = await r.json();
-      return !!(j && j.ok);
+      if (!j) return false;
+      if (j.auth) auth = j.auth;
+      return !!j.ok;
     } catch (e) { return false; }
+  }
+
+  /* 로그인 — 맞으면 자료를 다시 읽어 온다 */
+  async function login(id, pw) {
+    var r = await fetch('api.php?login=1', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id, pw: pw })
+    });
+    var j = await r.json().catch(function () { return null; });
+    if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || '로그인하지 못했습니다.');
+    auth = 'ok';
+    await loadAll();
+    return true;
+  }
+
+  async function logout() {
+    try { await fetch('api.php?logout=1', { method: 'POST', credentials: 'same-origin' }); } catch (e) { }
+    auth = 'required';
+  }
+
+  /* 사진·영수증 주소 — 서버 저장일 때는 api.php 를 거쳐야 보인다 */
+  function src(url) {
+    if (!url) return '';
+    if (url.indexOf('data:') === 0 || url.indexOf('http') === 0) return url;
+    return 'api.php?file=' + encodeURIComponent(url);
   }
 
   async function fetchJson(url) {
     try {
-      var r = await fetch(url, { cache: 'no-store' });
-      if (!r.ok) return null;
+      var r = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
+      if (!r.ok) {
+        if (r.status === 401) { try { return await r.json(); } catch (e2) { return null; } }
+        return null;
+      }
       return await r.json();
     } catch (e) { return null; }
   }
@@ -68,6 +100,7 @@ window.SG = (function () {
     if (mode === 'server') {
       // 자료가 없으면 api.php 가 seed/seed.json 을 대신 심어 준다
       var j = await fetchJson('api.php?store=' + name);
+      if (j && j.auth === 'required') auth = 'required';
       return merged(name, j && j.ok ? j.data : null);
     }
     var raw = null;
@@ -80,12 +113,21 @@ window.SG = (function () {
     return merged(name, seedPack[name]);
   }
 
-  async function init() {
-    mode = (await ping()) ? 'server' : 'local';
+  async function loadAll() {
     var names = STORES.slice();
     var out = [];
     for (var i = 0; i < names.length; i++) out.push(await loadOne(names[i]));
     names.forEach(function (n, k) { db[n] = out[k]; });
+  }
+
+  async function init() {
+    mode = (await ping()) ? 'server' : 'local';
+    if (mode === 'local') auth = 'none';
+    if (auth === 'required') {           // 로그인 전에는 자료를 읽지 않는다
+      STORES.forEach(function (n) { db[n] = merged(n, null); });
+      return mode;
+    }
+    await loadAll();
     return mode;
   }
 
@@ -94,7 +136,7 @@ window.SG = (function () {
     var data = db[name];
     if (mode === 'server') {
       var r = await fetch('api.php?store=' + name, {
-        method: 'POST',
+        method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
@@ -163,7 +205,7 @@ window.SG = (function () {
       var fd = new FormData();
       fd.append('file', small, small.name);
       if (folder) fd.append('folder', folder);
-      var r = await fetch('api.php?upload=' + kind, { method: 'POST', body: fd });
+      var r = await fetch('api.php?upload=' + kind, { method: 'POST', credentials: 'same-origin', body: fd });
       var j = await r.json().catch(function () { return null; });
       if (!r.ok || !j || !j.ok) throw new Error((j && j.error) || '올리기 실패');
       return { name: file.name, url: j.path };
@@ -187,9 +229,11 @@ window.SG = (function () {
   return {
     STORES: STORES, DEFAULTS: DEFAULTS,
     init: init, save: save, flush: flush, upload: upload,
+    login: login, logout: logout, src: src,
     exportAll: exportAll, importAll: importAll,
     uid: uid, clone: clone,
     get mode() { return mode; },
+    get auth() { return auth; },
     get db() { return db; },
     onsaved: null
   };

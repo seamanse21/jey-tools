@@ -126,8 +126,8 @@ window.UI = (function () {
       var g = h('div.thumbs');
       list.forEach(function (f, i) {
         var cell = isImg(f.url)
-          ? h('figure', h('img', { src: f.url, alt: f.name, loading: 'lazy' }))
-          : h('figure', h('a.btn.sm', { href: f.url, target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
+          ? h('figure', h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' }))
+          : h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' }));
         cell.appendChild(h('button.x', {
           text: '×', title: '첨부 지우기',
           onclick: function () { list.splice(i, 1); render(); if (onchange) onchange(); }
@@ -147,8 +147,8 @@ window.UI = (function () {
     var g = h('div.thumbs');
     list.forEach(function (f) {
       g.appendChild(isImg(f.url)
-        ? h('figure', h('a', { href: f.url, target: '_blank' }, h('img', { src: f.url, alt: f.name, loading: 'lazy' })))
-        : h('figure', h('a.btn.sm', { href: f.url, target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' })));
+        ? h('figure', h('a', { href: SG.src(f.url), target: '_blank' }, h('img', { src: SG.src(f.url), alt: f.name, loading: 'lazy' })))
+        : h('figure', h('a.btn.sm', { href: SG.src(f.url), target: '_blank', text: '📄 ' + (f.name || '파일'), style: 'display:block;text-align:center' })));
     });
     return g;
   }

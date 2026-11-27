@@ -160,3 +160,10 @@ tfoot td{font-weight:700; background:var(--bg); border-top:2px solid var(--line)
   body{background:#fff}
   .card{box-shadow:none; border-color:#ccc; break-inside:avoid}
 }
+
+/* ── 로그인 화면 ── */
+.login{max-width:360px;margin:8vh auto 0}
+.login .card{padding:22px}
+body.locked .tabs,
+body.locked .who,
+body.locked .foot{display:none}

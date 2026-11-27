@@ -65,7 +65,14 @@
     }
   }
 
-  SG.onsaved = function (err) { if (err) UI.toast(err.message, 4000); };
+  SG.onsaved = function (err) {
+    if (!err) return;
+    if (SG.auth === 'required' || /로그인/.test(err.message)) {
+      showLogin('로그인이 풀렸습니다. 다시 로그인해 주세요.');
+      return;
+    }
+    UI.toast(err.message, 4000);
+  };
 
   /* 백업 */
   document.getElementById('btn-export').onclick = function () {
@@ -96,9 +103,72 @@
 
   window.addEventListener('hashchange', route);
 
+  /* ── 로그인 화면 ── */
+  function showLogin(note) {
+    document.body.classList.add('locked');
+    view.textContent = '';
+    var idI = h('input', { inputmode: 'numeric', autocomplete: 'username', placeholder: '숫자 아이디' });
+    var pwI = h('input', { type: 'password', inputmode: 'numeric', autocomplete: 'current-password', placeholder: '숫자 비밀번호' });
+    var errEl = h('div.tiny', { style: 'color:var(--no);min-height:18px;margin-top:6px' , text: note || '' });
+    var btn = h('button.btn.pri', { style: 'width:100%', text: '로그인' });
+
+    async function go() {
+      errEl.textContent = '';
+      var id = idI.value.trim(), pw = pwI.value;
+      if (!id || !pw) { errEl.textContent = '아이디와 비밀번호를 넣어 주세요.'; return; }
+      btn.disabled = true; btn.textContent = '확인 중…';
+      try {
+        await SG.login(id, pw);
+        document.body.classList.remove('locked');
+        try { localStorage.setItem('sg.lastid', id); } catch (e) { }
+        paintMode(); fillMe(); paintLogout();
+        if (!location.hash) location.hash = '#/dues';
+        route();
+      } catch (e) {
+        errEl.textContent = e.message;
+        btn.disabled = false; btn.textContent = '로그인';
+        pwI.value = ''; pwI.focus();
+      }
+    }
+    btn.addEventListener('click', go);
+    [idI, pwI].forEach(function (el) {
+      el.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(); });
+    });
+    try { idI.value = localStorage.getItem('sg.lastid') || ''; } catch (e) { }
+
+    view.appendChild(h('div.login',
+      h('div.card',
+        h('h2', { style: 'font-size:18px;margin-bottom:2px', text: '사구회' }),
+        h('p.small.muted', { style: 'margin:0 0 16px', text: '회원만 들어올 수 있습니다. 아이디와 비밀번호를 넣어 주세요.' }),
+        h('div', { style: 'margin-bottom:10px' }, h('label.f', { text: '아이디' }), idI),
+        h('div', h('label.f', { text: '비밀번호' }), pwI),
+        errEl,
+        h('div', { style: 'margin-top:14px' }, btn),
+        h('p.tiny.muted', { style: 'margin-top:12px', text: '한 번 로그인하면 이 기기에서는 한동안 다시 묻지 않습니다.' })
+      )
+    ));
+    (idI.value ? pwI : idI).focus();
+  }
+
+  function paintLogout() {
+    var old = document.getElementById('btn-logout');
+    if (old) old.remove();
+    if (SG.auth !== 'ok') return;
+    var foot = document.querySelector('.foot');
+    if (!foot) return;
+    foot.appendChild(h('button.link', {
+      id: 'btn-logout', text: '로그아웃',
+      onclick: function () {
+        SG.logout().then(function () { location.reload(); });
+      }
+    }));
+  }
+
   SG.init().then(function () {
     paintMode();
+    if (SG.auth === 'required') { showLogin(); return; }
     fillMe();
+    paintLogout();
     if (!location.hash) location.hash = '#/dues';
     route();
     if (!SG.db.members.length) {

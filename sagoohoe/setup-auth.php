@@ -1,70 +1,79 @@
 <?php
 /* 사구회 — 접속 비밀번호 설정 페이지
- * 이 페이지에서 비밀번호를 걸면 .htaccess / .htpasswd 가 만들어지고,
- * 그 뒤로는 사이트 전체(자료 파일·사진·영수증 포함)가 비밀번호 없이는 열리지 않는다.
- * 비밀번호는 암호화해서 저장하므로 이 파일이나 대화에 원문이 남지 않는다.
+ * 여기서 아이디·비밀번호를 정하면 사이트에 들어올 때 로그인 화면이 먼저 뜬다.
+ * 로그인 창을 서버(기본 인증)가 아니라 사이트 안에 두는 이유는,
+ * 카카오톡 같은 앱 내장 브라우저가 서버 로그인 창을 띄우지 못하기 때문이다.
+ * 비밀번호는 암호화(bcrypt)해서 data/auth.php 에 저장한다.
  */
 
-$dir       = dirname(__FILE__);
-$htaccess  = $dir . '/.htaccess';
-$htpasswd  = $dir . '/.htpasswd';
-$msg = '';
-$msgType = '';
+$dir      = dirname(__FILE__);
+$dataDir  = $dir . '/data';
+$authFile = $dataDir . '/auth.php';
+$htaccess = $dir . '/.htaccess';
+$htpasswd = $dir . '/.htpasswd';     // 예전 방식에서 쓰던 파일 — 있으면 지운다
+$msg = ''; $msgType = '';
 
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-/* 지금 보고 있는 주소에서 사이트 경로를 뽑아낸다 (/sagoohoe/) */
 $selfPath = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 $sitePath = preg_replace('#[^/]*$#', '', strtok($selfPath, '?'));
 
-function writeAuth($dir, $htaccess, $htpasswd, $id, $pass) {
+/* 기록·사진 폴더는 주소를 직접 쳐도 안 열리게 막는다 */
+function guard($dir) {
+    $made = array();
+    foreach (array('data', 'photos', 'receipts', 'seed') as $f) {
+        $d = $dir . '/' . $f;
+        if (!is_dir($d)) continue;
+        $g = $d . '/.htaccess';
+        if (!is_file($g) || strpos((string)@file_get_contents($g), 'denied') === false) {
+            if (@file_put_contents($g, "Require all denied\n") !== false) $made[] = $f;
+        }
+    }
+    return $made;
+}
+
+function writeAuth($dataDir, $authFile, $id, $pass) {
+    if (!is_dir($dataDir) && !@mkdir($dataDir, 0775, true)) return 'data 폴더를 만들 수 없습니다.';
     $hash = password_hash($pass, PASSWORD_BCRYPT);
     if ($hash === false) return '비밀번호를 암호화하지 못했습니다.';
-    if (@file_put_contents($htpasswd, $id . ':' . $hash . "\n") === false)
-        return '.htpasswd 를 쓰지 못했습니다. 폴더 쓰기 권한을 확인해 주세요.';
-    @chmod($htpasswd, 0640);
-
-    $conf = "AuthType Basic\n"
-          . "AuthName \"Sagoohoe members only\"\n"
-          . "AuthUserFile " . $htpasswd . "\n"
-          . "Require valid-user\n\n"
-          . "<FilesMatch \"^\\.ht\">\n"
-          . "    Require all denied\n"
-          . "</FilesMatch>\n";
-    if (@file_put_contents($htaccess, $conf) === false)
-        return '.htaccess 를 쓰지 못했습니다. 폴더 쓰기 권한을 확인해 주세요.';
-    @chmod($htaccess, 0644);
+    $php = "<?php\n/* 사구회 접속 정보. 비밀번호는 암호화되어 있어 되돌려 볼 수 없습니다. */\n"
+         . "\$SG_AUTH = array(\n"
+         . "    'id'   => " . var_export($id, true) . ",\n"
+         . "    'hash' => " . var_export($hash, true) . "\n"
+         . ");\n";
+    if (@file_put_contents($authFile, $php) === false)
+        return 'data/auth.php 를 쓰지 못했습니다. 폴더 쓰기 권한을 확인해 주세요.';
+    @chmod($authFile, 0640);
     return '';
 }
 
-/* 설정이 실제로 먹었는지 서버가 스스로 확인한다 */
+/* 기록 파일이 주소로 직접 열리지 않는지 서버가 스스로 확인한다 */
 function selfCheck($sitePath) {
     $port = isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : 80;
-    $tries = array($port, 80);
     $ctx = stream_context_create(array('http' => array(
         'timeout' => 4, 'ignore_errors' => true, 'follow_location' => 0
     )));
-    foreach (array_unique($tries) as $p) {
+    foreach (array_unique(array($port, 80)) as $p) {
         if ($p === 443) continue;
         $http_response_header = array();
-        $r = @file_get_contents('http://127.0.0.1:' . $p . $sitePath, false, $ctx);
-        if ($r !== false && isset($http_response_header[0]))
-            return (strpos($http_response_header[0], '401') !== false);
+        $r = @file_get_contents('http://127.0.0.1:' . $p . $sitePath . 'data/members.json', false, $ctx);
+        if (isset($http_response_header[0])) {
+            return (strpos($http_response_header[0], '200') === false);
+        }
     }
-    return null;   // 확인 불가
+    return null;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = isset($_POST['action']) ? $_POST['action'] : '';
     if ($action === 'off') {
-        @unlink($htaccess);
-        @unlink($htpasswd);
+        @unlink($authFile);
         $msg = '잠금을 풀었습니다. 이제 주소만 알면 누구나 들어올 수 있습니다.';
         $msgType = 'warn';
     } else {
-        $id   = trim(isset($_POST['id']) ? $_POST['id'] : '');
-        $p1   = isset($_POST['p1']) ? $_POST['p1'] : '';
-        $p2   = isset($_POST['p2']) ? $_POST['p2'] : '';
+        $id = trim(isset($_POST['id']) ? $_POST['id'] : '');
+        $p1 = isset($_POST['p1']) ? $_POST['p1'] : '';
+        $p2 = isset($_POST['p2']) ? $_POST['p2'] : '';
         if ($id === '' || !preg_match('/^[A-Za-z0-9._-]{2,20}$/', $id)) {
             $msg = '아이디는 숫자나 영문으로 2자 이상 적어 주세요.'; $msgType = 'no';
         } elseif (strlen($p1) < 4) {
@@ -72,23 +81,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($p1 !== $p2) {
             $msg = '비밀번호 두 칸이 서로 다릅니다.'; $msgType = 'no';
         } else {
-            $err = writeAuth($dir, $htaccess, $htpasswd, $id, $p1);
+            $err = writeAuth($dataDir, $authFile, $id, $p1);
             if ($err !== '') { $msg = $err; $msgType = 'no'; }
             else {
+                guard($dir);
+                /* 예전 기본 인증 방식의 흔적을 걷어낸다 */
+                @unlink($htpasswd);
+                @file_put_contents($htaccess, "<FilesMatch \"^\\.ht\">\n    Require all denied\n</FilesMatch>\n");
                 $ok = selfCheck($sitePath);
-                if ($ok === true)       { $msg = '잠금이 걸렸습니다. 이제 아이디와 비밀번호를 아는 사람만 들어올 수 있습니다.'; $msgType = 'ok'; }
-                elseif ($ok === false)  { $msg = '파일은 만들었는데 아직 잠기지 않았습니다. 아래 "직접 확인하기"를 눌러 시크릿 창에서 확인해 주세요.'; $msgType = 'warn'; }
-                else                    { $msg = '파일을 만들었습니다. 서버가 스스로 확인하지는 못했으니 아래 "직접 확인하기"로 꼭 확인해 주세요.'; $msgType = 'warn'; }
+                if ($ok === true)      { $msg = '잠금이 걸렸습니다. 이제 사이트를 열면 로그인 화면이 먼저 뜹니다.'; $msgType = 'ok'; }
+                elseif ($ok === false) { $msg = '로그인은 걸렸지만, 기록 파일이 주소로 직접 열리는 상태입니다. 아래 안내를 봐주세요.'; $msgType = 'warn'; }
+                else                   { $msg = '설정했습니다. 서버가 스스로 확인하지는 못했으니 아래 "확인하기" 로 직접 봐주세요.'; $msgType = 'warn'; }
             }
         }
     }
 }
 
-$on = is_file($htaccess) && is_file($htpasswd);
+guard($dir);
+$on = is_file($authFile);
 $curId = '';
-if (is_file($htpasswd)) {
-    $line = trim((string)@file_get_contents($htpasswd));
-    if ($line !== '') { $parts = explode(':', $line); $curId = $parts[0]; }
+if ($on) {
+    $SG_AUTH = null;
+    include $authFile;
+    if (is_array($SG_AUTH) && isset($SG_AUTH['id'])) $curId = $SG_AUTH['id'];
 }
 ?><!doctype html>
 <html lang="ko">
@@ -96,13 +111,13 @@ if (is_file($htpasswd)) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>사구회 접속 잠금</title>
-<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/app.css?v=2">
 </head>
 <body>
 <main class="view" style="max-width:620px">
   <h1 style="font-size:20px">사구회 접속 잠금</h1>
-  <p class="small muted">아이디와 비밀번호를 하나 정해 9명에게 알려주면, 그 둘을 아는 사람만 사이트에 들어올 수 있습니다.
-     회비 기록·영수증 파일까지 전부 같이 잠깁니다. <b>둘 다 숫자로만 정해도 됩니다.</b></p>
+  <p class="small muted">아이디와 비밀번호를 하나 정해 9명에게 알려주면, 그 둘을 아는 사람만 들어올 수 있습니다.
+     회비 기록·사진·영수증까지 전부 같이 잠깁니다. <b>둘 다 숫자로만 정해도 됩니다.</b></p>
 
   <?php if ($msg !== ''): ?>
     <div class="card" style="border-color:var(--<?php echo $msgType === 'ok' ? 'ok' : ($msgType === 'no' ? 'no' : 'warn'); ?>)">
@@ -144,8 +159,10 @@ if (is_file($htpasswd)) {
   <?php if ($on): ?>
   <div class="card">
     <h2 style="font-size:16px">확인과 해제</h2>
-    <p class="small">제대로 잠겼는지 보려면 <b>시크릿 창</b>(⌘⇧N)으로 아래 주소를 열어 보세요. 로그인 창이 떠야 정상입니다.</p>
-    <p class="small"><code><?php echo h($sitePath); ?></code></p>
+    <p class="small">제대로 걸렸는지 보려면 <b>시크릿 창</b>으로 사이트를 열어 보세요. 로그인 화면이 떠야 정상입니다.</p>
+    <p class="small"><a href="<?php echo h($sitePath); ?>" target="_blank">사이트 열기</a> ·
+       <a href="<?php echo h($sitePath); ?>data/members.json" target="_blank">기록 파일 직접 열어보기</a>
+       (이쪽은 <b>Forbidden</b> 이 떠야 정상입니다)</p>
     <form method="post" onsubmit="return confirm('잠금을 풀면 주소만 알면 누구나 들어올 수 있습니다. 계속할까요?');">
       <input type="hidden" name="action" value="off">
       <button class="btn danger" type="submit">잠금 해제</button>
@@ -153,8 +170,8 @@ if (is_file($htpasswd)) {
   </div>
   <?php endif; ?>
 
-  <p class="tiny muted">문제가 생겨 사이트 전체가 안 열리면, File Station 에서 이 폴더의 <b>.htaccess</b> 파일을 지우면 원래대로 돌아옵니다.
-     (File Station 오른쪽 위 <b>설정 → 숨김 파일 표시</b> 를 켜야 보입니다)</p>
+  <p class="tiny muted">카카오톡 등 앱 안에서 열어도 로그인 화면이 그대로 뜹니다.
+     한 번 로그인하면 그 기기에서는 한동안 다시 묻지 않습니다.</p>
 </main>
 </body>
 </html>
