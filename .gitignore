@@ -10,3 +10,5 @@ sagoohoe/photos/*
 !sagoohoe/photos/.gitkeep
 sagoohoe/receipts/*
 !sagoohoe/receipts/.gitkeep
+sagoohoe/.htaccess
+sagoohoe/.htpasswd
